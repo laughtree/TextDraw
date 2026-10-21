@@ -16,6 +16,7 @@ import { initBrush } from './ui/brush';
 import { initCanvasSize } from './ui/canvasSize';
 import { initControls } from './ui/controls';
 import { initCopy } from './ui/copy';
+import { initEyedropper } from './ui/eyedropper';
 import { initPlatform } from './ui/platform';
 import { layoutBusy } from './ui/reveal';
 
@@ -23,6 +24,7 @@ initDraw();
 initText();
 initControls();
 initBrush();
+initEyedropper();
 initCanvasSize();
 initPlatform();
 initCopy();

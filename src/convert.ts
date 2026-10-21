@@ -19,6 +19,8 @@ export interface ConvertResult {
   chars: string[];
   /** per-cell colour (`#rrggbb`), or null to use the theme ink */
   colors: (string | null)[];
+  /** per-cell colour it was drawn in, whatever the palette (null = theme ink) */
+  source: (string | null)[];
 }
 
 /** Turn the RGBA drawing buffer (W×H) into one character per cell. */
@@ -84,11 +86,14 @@ export function convert(px: Uint8ClampedArray, m: Metrics, opts: ConvertOptions)
   }
   const area = cw * ch,
     out = new Array<string>(n);
+  // the colour each cell was actually drawn in: ink-dominant cells are the theme ink (null),
+  // otherwise the average of the coloured ink. The eyedropper reads this whatever the palette is.
+  const source = new Array<string | null>(n);
   const gridCol = new Array<string | null>(n);
   for (let k = 0; k < n; k++) {
-    // ink-dominant cells follow the theme; otherwise average the coloured ink
-    gridCol[k] =
-      !gray && cwt[k] > ik[k] ? hex(cr[k] / cwt[k], cg[k] / cwt[k], cb[k] / cwt[k]) : null;
+    source[k] = cwt[k] > ik[k] ? hex(cr[k] / cwt[k], cg[k] / cwt[k], cb[k] / cwt[k]) : null;
+    // what is shown: grey mode draws everything in the theme ink
+    gridCol[k] = gray ? null : source[k];
   }
   if (subMode) {
     const subA = area / 8;
@@ -131,7 +136,7 @@ export function convert(px: Uint8ClampedArray, m: Metrics, opts: ConvertOptions)
         out[k] = b ? String.fromCharCode(0x2800 + b) : ' ';
       }
     }
-    return { chars: out, colors: gridCol };
+    return { chars: out, colors: gridCol, source };
   }
   if (mode === 'cjk') {
     // full-width characters take two columns; the second cell holds '' as a continuation
@@ -147,9 +152,10 @@ export function convert(px: Uint8ClampedArray, m: Metrics, opts: ConvertOptions)
         out[k] = c;
         out[k + 1] = c === ' ' ? ' ' : '';
         if (!gridCol[k]) gridCol[k] = gridCol[k + 1];
+        if (!source[k]) source[k] = source[k + 1];
         i++;
       }
-    return { chars: out, colors: gridCol };
+    return { chars: out, colors: gridCol, source };
   }
   const ramp =
       mode === 'dots'
@@ -222,5 +228,5 @@ export function convert(px: Uint8ClampedArray, m: Metrics, opts: ConvertOptions)
     }
   // '·' is not ASCII; fold it back
   for (let k = 0; k < n; k++) if (out[k] === '·') out[k] = '.';
-  return { chars: out, colors: gridCol };
+  return { chars: out, colors: gridCol, source };
 }

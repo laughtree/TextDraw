@@ -252,3 +252,16 @@ button:disabled {
   stroke: #fff;
   stroke-width: 0.75;
 }
+
+/* eyedropper: a swatch-sized button beside the colours */
+.colorrow > .sw {
+  flex: none;
+}
+.eyedropper svg {
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

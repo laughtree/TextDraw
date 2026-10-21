@@ -60,6 +60,7 @@ function abortDrag(): void {
 export function initDraw(): void {
   view.addEventListener('pointerdown', (e) => {
     e.preventDefault();
+    if (state.tool === 'pick') return; // the eyedropper only reads
     if (state.tool === 'text') {
       textDown = true; // the editor opens on release, so the click cannot steal its focus
       return;

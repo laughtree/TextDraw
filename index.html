@@ -17,6 +17,9 @@
         <div id="paper">
           <canvas id="view" aria-label="繪圖區"></canvas>
           <div id="brush" class="brush" hidden aria-hidden="true"></div>
+          <div id="pickFrame" class="pick-frame" hidden aria-hidden="true">
+            <i class="chip"></i>
+          </div>
           <input
             id="textEdit"
             class="text-edit"
@@ -94,6 +97,17 @@
               <input id="colorPick" type="color" value="#ee5396" />
             </label>
           </div>
+          <button
+            class="sw eyedropper"
+            data-tool="pick"
+            aria-pressed="false"
+            aria-label="滴管"
+            title="滴管（點到字元就吸色）"
+          >
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+              <path d="M16.5 3.5l4 4-2.5 2.5-4-4 2.5-2.5zM13.5 8l-9 9L4 20l3-.5 9-9" />
+            </svg>
+          </button>
           <div class="seg" role="group" aria-label="工具">
             <button id="tPen" data-tool="pen" aria-pressed="true">繪製</button>
             <button id="tErase" data-tool="erase" aria-pressed="false">擦除</button>

@@ -61,6 +61,9 @@ body::before {
 #stage[data-active-tool='text'] #view {
   cursor: text;
 }
+#stage[data-active-tool='pick'] #view {
+  cursor: crosshair;
+}
 /* a fixed-size grid is letterboxed inside the stage */
 #stage.fixed {
   background: var(--layer);

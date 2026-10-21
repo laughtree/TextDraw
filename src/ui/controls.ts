@@ -4,6 +4,7 @@ import { state } from '../state';
 import { bctx } from '../surface';
 import { refreshText } from '../text';
 import type { Mode, Palette, Tool } from '../types';
+import { initColors } from './colors';
 import { reveal } from './reveal';
 import { setTool } from './tools';
 import { toast } from './toast';
@@ -58,29 +59,6 @@ function initModes(): void {
     (e.currentTarget as HTMLElement).setAttribute('aria-pressed', String(state.under));
     state.dirty = true;
   };
-}
-
-function initColors(): void {
-  const swBtns = [...document.querySelectorAll<HTMLElement>('.sw[data-color]')],
-    pick = $<HTMLInputElement>('colorPick'),
-    pickLbl = pick.parentElement as HTMLElement;
-  function choose(color: string, fromPicker: boolean): void {
-    state.penColor = color;
-    if (state.tool === 'erase') setTool('pen');
-    swBtns.forEach((b) =>
-      b.setAttribute('aria-pressed', String(!fromPicker && b.dataset.color === color)),
-    );
-    pickLbl.classList.toggle('on', fromPicker);
-    refreshText(); // a text being typed takes the new colour
-  }
-  swBtns.forEach((b) => (b.onclick = () => choose(b.dataset.color ?? '#000000', false)));
-  pick.oninput = (e) => {
-    const value = (e.target as HTMLInputElement).value;
-    pickLbl.style.setProperty('--pick', value);
-    // pure black is reserved for "theme ink", so nudge a picked black off it
-    choose(value === '#000000' ? '#010101' : value, true);
-  };
-  pick.onclick = () => choose(pick.value, true);
 }
 
 function initHistory(): void {

@@ -5,6 +5,8 @@ import type { Mode, Palette, Tool } from './types';
 export const state = {
   // tools and options
   tool: 'pen' as Tool,
+  /** the tool to return to after the eyedropper */
+  prevTool: 'pen' as Tool,
   mode: 'braille' as Mode,
   palette: 'color' as Palette,
   under: false,
@@ -45,4 +47,6 @@ export const state = {
   // result of the last conversion
   grid: [] as string[],
   gridCol: [] as (string | null)[],
+  /** per cell, the colour it was drawn in (the eyedropper reads this; null = theme ink) */
+  gridSrc: [] as (string | null)[],
 };

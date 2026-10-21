@@ -35,9 +35,10 @@ function drag(a: number, b: number, c: number, d: number, steps = 8) {
 const filled = (l: string) => [...l].filter((c) => c !== BLANK).length;
 
 describe('tool bar', () => {
-  it('has one pressed tool across pen, eraser and the shape and text tools', () => {
-    const btns = [...app.doc.querySelectorAll<HTMLElement>('[data-tool]')];
+  it('has one pressed tool across eyedropper, pen, eraser and the shape and text tools', () => {
+    const btns = [...app.doc.querySelectorAll<HTMLElement>('button[data-tool]')];
     expect(btns.map((b) => b.dataset.tool)).toEqual([
+      'pick',
       'pen',
       'erase',
       'line',
@@ -47,6 +48,7 @@ describe('tool bar', () => {
     ]);
     tool('rect');
     expect(btns.map((b) => b.getAttribute('aria-pressed'))).toEqual([
+      'false',
       'false',
       'false',
       'false',

@@ -109,6 +109,21 @@ describe('convert', () => {
     expect(run(px, 'block', 'gray').colors[0]).toBeNull();
   });
 
+  it('remembers the colour a cell was drawn in even where grey mode shows none', () => {
+    const px = paint((ctx) => {
+      ctx.fillStyle = '#ff0000';
+      ctx.fillRect(0, 0, 16, 32);
+    });
+    for (const palette of ['color', 'gray'] as Palette[]) {
+      const { source } = run(px, 'block', palette);
+      expect(source[0], palette).toBe('#ff0000');
+      expect(source[5], `${palette}: an untouched cell`).toBeNull();
+    }
+    // theme ink has no colour of its own, in either palette
+    const ink = paint((ctx) => ctx.fillRect(0, 0, 16, 32));
+    expect(run(ink, 'block', 'gray').source[0]).toBeNull();
+  });
+
   it('treats near-black ink as theme ink (no colour)', () => {
     const px = paint((ctx) => ctx.fillRect(0, 0, 16, 32));
     expect(run(px, 'block', 'color').colors[0]).toBeNull();

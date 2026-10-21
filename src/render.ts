@@ -20,9 +20,10 @@ function convertBuffer() {
 export function render(): void {
   if (!state.dirty) return;
   state.dirty = false;
-  const { chars, colors } = convertBuffer();
+  const { chars, colors, source } = convertBuffer();
   state.grid = chars;
   state.gridCol = colors;
+  state.gridSrc = source;
   document.dispatchEvent(new Event('rendered')); // budget readout etc. follow the new text
   const { W, H, cw, ch, cols, rows, mode, under } = state;
   const grid = chars;

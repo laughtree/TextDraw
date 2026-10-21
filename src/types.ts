@@ -1,4 +1,4 @@
-export type Tool = 'pen' | 'erase' | 'line' | 'circle' | 'rect' | 'text';
+export type Tool = 'pen' | 'erase' | 'line' | 'circle' | 'rect' | 'text' | 'pick';
 export type Mode = 'braille' | 'mix' | 'block' | 'shade' | 'dots' | 'cjk' | 'line' | 'custom';
 export type Palette = 'color' | 'gray';
 export type ExportKind = 'text' | 'html' | 'ansi';
