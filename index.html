@@ -1,671 +1,160 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>字元畫板</title>
-<meta name="claude:viewport-fit-sides" content="cover">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&family=Noto+Sans+TC:wght@400;600&display=swap">
-<style>
-/* Layout: Carbon UI shell — 48px header bar, canvas as the main layer, tool panel docked below on layer-01. 8px spacing grid, square corners. */
-:root{
-  /* Carbon White theme */
-  --bg:#ffffff; --layer:#f4f4f4; --layer-hover:#e8e8e8; --layer-selected:#e0e0e0;
-  --border-subtle:#e0e0e0; --border-strong:#8d8d8d;
-  --text:#161616; --text-2:#525252; --text-inv:#ffffff; --sel-inv:#161616;
-  --interactive:#0f62fe; --btn-primary:#0f62fe; --btn-primary-hover:#0050e6;
-  --btn-secondary:#393939; --btn-secondary-hover:#474747; --focus:#0f62fe;
-  --grid:#e8e8e8; --ink:#161616; --faint:#a8a8a8; --success:#24a148;
-  /* shell header is Gray 100 in both themes */
-  --shell:#161616; --shell-border:#393939; --shell-text:#f4f4f4; --shell-text-2:#c6c6c6;
-  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
-  --f-body:"IBM Plex Sans","Noto Sans TC",system-ui,-apple-system,"PingFang TC",sans-serif;
-}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#161616; --layer:#262626; --layer-hover:#333333; --layer-selected:#393939;
-  --border-subtle:#393939; --border-strong:#6f6f6f;
-  --text:#f4f4f4; --text-2:#c6c6c6; --text-inv:#161616; --sel-inv:#f4f4f4;
-  --interactive:#4589ff; --btn-primary:#0f62fe; --btn-primary-hover:#0050e6;
-  --btn-secondary:#6f6f6f; --btn-secondary-hover:#606060; --focus:#ffffff;
-  --grid:#262626; --ink:#f4f4f4; --faint:#525252; --success:#42be65;
-  --shell:#161616; --shell-border:#393939; --shell-text:#f4f4f4; --shell-text-2:#c6c6c6;
-  color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#161616; --layer:#262626; --layer-hover:#333333; --layer-selected:#393939;
-  --border-subtle:#393939; --border-strong:#6f6f6f;
-  --text:#f4f4f4; --text-2:#c6c6c6; --text-inv:#161616; --sel-inv:#f4f4f4;
-  --interactive:#4589ff; --btn-primary:#0f62fe; --btn-primary-hover:#0050e6;
-  --btn-secondary:#6f6f6f; --btn-secondary-hover:#606060; --focus:#ffffff;
-  --grid:#262626; --ink:#f4f4f4; --faint:#525252; --success:#42be65;
-  --shell:#161616; --shell-border:#393939; --shell-text:#f4f4f4; --shell-text-2:#c6c6c6;
-  color-scheme:dark}
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <meta name="claude:viewport-fit-sides" content="cover" />
+    <title>字元畫板</title>
+  </head>
+  <body>
+    <header class="shell">
+      <h1 class="brand">字元 <b>畫板</b></h1>
+      <span class="meta" id="meta">0 × 0 cells</span>
+    </header>
 
-html,body{height:100%}
-*{box-sizing:border-box}
-body{background:var(--bg);color:var(--text);font-family:var(--f-body);font-size:14px;line-height:18px;letter-spacing:.16px;
-  display:flex;flex-direction:column;overflow:hidden}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--shell)}
+    <main class="work">
+      <div id="stage"><canvas id="view" aria-label="繪圖區"></canvas></div>
 
-/* UI shell header */
-.shell{height:48px;flex:none;display:flex;align-items:center;gap:16px;background:var(--shell);border-bottom:1px solid var(--shell-border);
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.brand{margin:0;font-size:14px;line-height:18px;font-weight:400;color:var(--shell-text);letter-spacing:.1px;white-space:nowrap}
-.brand b{font-weight:600}
-.shell .meta{margin-left:auto;font:12px/16px var(--f-mono);color:var(--shell-text-2);letter-spacing:.32px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-
-/* canvas area */
-.work{flex:1;min-height:0;display:flex;flex-direction:column}
-#stage{flex:1;min-height:0;position:relative;background:var(--bg);overflow:hidden;
-  background-image:linear-gradient(var(--grid) 1px,transparent 1px);background-size:100% var(--cellh,16px)}
-#view{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair;display:block}
-
-/* tool panel */
-.tray{flex:none;display:flex;flex-direction:column;gap:8px;background:var(--layer);border-top:1px solid var(--border-subtle);
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 16px}
-.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.label{font-size:12px;line-height:16px;letter-spacing:.32px;color:var(--text-2)}
-.spacer{flex:1}
-
-/* buttons */
-button{font:400 14px/18px var(--f-body);letter-spacing:.16px;color:var(--text);background:transparent;border:0;border-radius:0;
-  height:40px;padding:0 16px;cursor:pointer;white-space:nowrap}
-button:focus-visible,input:focus-visible,.sw.pick:focus-within{outline:2px solid var(--focus);outline-offset:-2px}
-.btn-primary{background:var(--btn-primary);color:#fff}
-.btn-primary:hover{background:var(--btn-primary-hover)}
-.btn-secondary{background:var(--btn-secondary);color:#fff}
-.btn-secondary:hover{background:var(--btn-secondary-hover)}
-.btn-tertiary{color:var(--text);border:1px solid var(--sel-inv);padding:0 15px}
-.btn-tertiary:hover:not(:disabled){background:var(--sel-inv);color:var(--text-inv)}
-button:disabled{color:var(--faint);border-color:var(--border-subtle);cursor:not-allowed}
-.actions{gap:8px}
-.btn-ghost{color:var(--text)}
-.btn-ghost:hover{background:var(--layer-hover)}
-
-/* content switcher */
-.seg{display:inline-flex;border:1px solid var(--sel-inv)}
-.seg button{color:var(--text-2);border-left:1px solid var(--border-strong)}
-.seg button:first-child{border-left:0}
-.seg button:hover{background:var(--layer-hover);color:var(--text)}
-.seg button[aria-pressed="true"]{background:var(--sel-inv);color:var(--text-inv);border-color:var(--sel-inv)}
-.seg button[aria-pressed="true"]+button{border-left-color:var(--sel-inv)}
-.modes{width:100%;display:flex}
-.modes button{flex:1;padding:0 4px;min-width:0}
-.seg.sm button{height:32px;padding:0 12px;font-size:12px;letter-spacing:.32px}
-
-/* toggle switches */
-.toggle{display:inline-flex;align-items:center;gap:8px;padding:0 8px;color:var(--text)}
-.toggle:hover{background:var(--layer-hover)}
-.toggle .track{width:32px;height:16px;border-radius:8px;background:var(--border-strong);position:relative;flex:none;transition:background 70ms}
-.toggle .track::after{content:"";position:absolute;top:3px;left:3px;width:10px;height:10px;border-radius:50%;background:#fff;transition:transform 70ms}
-.toggle[aria-pressed="true"] .track{background:var(--success)}
-.toggle[aria-pressed="true"] .track::after{transform:translateX(16px)}
-
-/* slider + fields */
-.field{display:flex;align-items:center;gap:12px;flex:1;min-width:160px}
-.field input[type=range]{flex:1;accent-color:var(--text);height:2px}
-.out{font:14px/18px var(--f-mono);font-variant-numeric:tabular-nums;min-width:4ch;text-align:center;background:var(--bg);border-bottom:1px solid var(--border-strong);padding:7px 4px}
-#customChars{flex:1;min-width:0;height:40px;font:14px var(--f-mono);color:var(--text);background:var(--bg);border:0;border-bottom:1px solid var(--border-strong);padding:0 16px;white-space:pre;border-radius:0}
-
-/* swatches: square tiles on the 8px grid */
-
-.sw{width:32px;height:32px;padding:0;display:inline-grid;place-items:center;background:transparent;border:1px solid var(--border-subtle);cursor:pointer;position:relative}
-.sw i{width:22px;height:22px;display:block}
-.sw i.ink{background:var(--ink)}
-.sw[aria-pressed="true"],.sw.pick.on{border:2px solid var(--sel-inv)}
-.sw.pick{overflow:hidden}
-.sw.pick input{width:48px;height:48px;border:0;padding:0;background:none;cursor:pointer}
-
-/* toast: Carbon low-contrast notification, inverse */
-#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));
-  background:var(--sel-inv);color:var(--text-inv);border-left:3px solid var(--success);padding:14px 16px;font-size:14px;z-index:20;max-width:calc(100% - 32px)}
-#copyPanel{position:fixed;inset:0;background:var(--bg);z-index:30;display:flex;flex-direction:column;gap:16px;
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px}
-#copyPanel textarea{flex:1;font:12px/1.25 var(--f-mono);background:var(--layer);color:var(--text);border:0;border-bottom:1px solid var(--border-strong);padding:16px;white-space:pre;overflow:auto;border-radius:0}
-.label{white-space:nowrap}
-.tray .seg>button{padding:0 12px}
-.tray .modes>button{padding:0 2px}
-.field{flex:none;width:100%;min-width:0}
-.actions{flex-wrap:nowrap}
-.actions #bCopy{flex:none}
-#copyMenu{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--border-subtle);padding-top:8px}
-#copyMenu[hidden]{display:none}
-.copyrow{flex-wrap:nowrap}
-.copyrow button{flex:1;min-width:0;padding:0 8px}
-.sw.pick{display:inline-grid}
-.sw.pick input{opacity:0;position:absolute;inset:-10px;width:calc(100% + 20px);height:calc(100% + 20px)}
-.has-tip{position:relative}
-.tip-label{display:inline-flex;align-items:center;gap:2px}
-.info{height:24px;width:24px;padding:0;display:inline-grid;place-items:center;color:var(--text-2)}
-.info:hover,.info[aria-expanded="true"]{color:var(--text)}
-.tip{position:absolute;left:0;bottom:calc(100% + 8px);z-index:25;width:min(288px,100%);background:var(--sel-inv);color:var(--text-inv);
-  padding:8px 16px;font-size:12px;line-height:16px;letter-spacing:.32px;box-shadow:0 2px 6px rgba(0,0,0,.3)}
-.tip p{margin:8px 0}
-.tip b{display:block;font-weight:600}
-.toprow,.colorrow{flex-wrap:nowrap}
-.toprow .toggle{padding:0 4px}
-.colorrow .swatches{display:flex;gap:4px;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none;padding-block:2px}
-.colorrow .swatches::-webkit-scrollbar{display:none}
-.colorrow .sw{flex:none}
-.colorrow .seg{flex:none}
-/* undo/redo and pen/eraser share one right-hand column so their edges line up */
-.hist,.colorrow .seg{width:136px;flex:none}
-.hist{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.hist button{height:42px;padding:0}
-.colorrow .seg button{flex:1 1 0;padding:0 4px}
-@media (prefers-reduced-motion:reduce){.toggle .track,.toggle .track::after{transition:none}}
-</style>
-
-<header class="shell">
-  <h1 class="brand">字元 <b>畫板</b></h1>
-  <span class="meta" id="meta">0 × 0 cells</span>
-</header>
-
-<main class="work">
-  <div id="stage"><canvas id="view" aria-label="繪圖區"></canvas></div>
-
-  <div class="tray">
-    <div class="row toprow">
-      <div class="seg" role="group" aria-label="色彩模式">
-        <button data-palette="color" aria-pressed="true">色彩</button>
-        <button data-palette="gray" aria-pressed="false">灰階</button>
-      </div>
-      <button id="bUnder" class="toggle" aria-pressed="false"><span class="track"></span>筆跡</button>
-      <span class="spacer"></span>
-      <div class="hist">
-        <button id="bUndo" class="btn-tertiary" title="復原（Ctrl+Z）" disabled>復原</button>
-        <button id="bRedo" class="btn-tertiary" title="重做（Ctrl+Y）" disabled>重做</button>
-      </div>
-
-    </div>
-    <div class="row colorrow">
-    <div class="swatches" role="group" aria-label="筆的顏色">
-      <button class="sw" data-color="#000000" aria-pressed="true" aria-label="墨色（跟隨主題）"><i class="ink"></i></button>
-      <button class="sw" data-color="#da1e28" aria-pressed="false" aria-label="紅"><i style="background:#da1e28"></i></button>
-      <button class="sw" data-color="#ff832b" aria-pressed="false" aria-label="橙"><i style="background:#ff832b"></i></button>
-      <button class="sw" data-color="#f1c21b" aria-pressed="false" aria-label="黃"><i style="background:#f1c21b"></i></button>
-      <button class="sw" data-color="#24a148" aria-pressed="false" aria-label="綠"><i style="background:#24a148"></i></button>
-      <button class="sw" data-color="#009d9a" aria-pressed="false" aria-label="青"><i style="background:#009d9a"></i></button>
-      <button class="sw" data-color="#0f62fe" aria-pressed="false" aria-label="藍"><i style="background:#0f62fe"></i></button>
-      <button class="sw" data-color="#8a3ffc" aria-pressed="false" aria-label="紫"><i style="background:#8a3ffc"></i></button>
-      <label class="sw pick" for="colorPick" aria-label="自選顏色"><i id="pickSwatch" style="background:#ee5396"></i><input id="colorPick" type="color" value="#ee5396"></label>
-    </div>
-      <div class="seg" role="group" aria-label="工具">
-        <button id="tPen" aria-pressed="true">繪製</button>
-        <button id="tErase" aria-pressed="false">擦除</button>
-      </div>
-    </div>
-    <div class="row">
-      <div class="seg modes" role="group" aria-label="轉換樣式">
-        <button data-mode="mix" aria-pressed="true">混合</button>
-        <button data-mode="braille" aria-pressed="false">點字</button>
-        <button data-mode="block" aria-pressed="false">方塊</button>
-        <button data-mode="shade" aria-pressed="false">濃淡</button>
-        <button data-mode="dots" aria-pressed="false">圓點</button>
-        <button data-mode="cjk" aria-pressed="false">中文</button>
-        <button data-mode="line" aria-pressed="false">線段</button>
-        <button data-mode="custom" aria-pressed="false">自訂</button>
-      </div>
-    </div>
-    <div class="row" id="customRow" hidden>
-      <label class="label" for="customChars">字元</label>
-      <input id="customChars" type="text" value=" .oO@" spellcheck="false" autocomplete="off">
-    </div>
-    <div class="field"><label class="label" for="size">粗細</label><input id="size" type="range" min="2" max="40" value="5"><span class="out" id="sizeOut">5</span></div>
-    <div class="row actions">
-      <button id="bClear" class="btn-tertiary">清空</button>
-      <span class="spacer"></span>
-      <button id="bCopy" class="btn-secondary" aria-expanded="false">複製</button>
-    </div>
-    <div id="copyMenu" hidden>
-      <div class="row has-tip">
-        <span class="label tip-label">空白替代<button id="tipBtn" class="info" aria-label="空白替代說明" aria-expanded="false" aria-controls="spaceTip"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor"/><rect x="7.4" y="7" width="1.2" height="4.5" fill="currentColor"/><circle cx="8" cy="5" r=".8" fill="currentColor"/></svg></button></span>
-        <div id="spaceTip" class="tip" role="tooltip" hidden>
-          <p><b>標準</b>標準的空白字元，適用於程式碼、終端機、編輯器。<br>多數聊天軟體與社群平台會吃掉開頭或連續的空白，不建議使用。</p>
-          <p><b>不斷行</b>特殊的空白字元，顯示上寬度和標準空白相同，比較少被裁切掉，但部分主流平台會將其轉換為一般空白，使用上請自行確認。</p>
-          <p><b>點字</b>盲文字元中的空白字元，被裁切掉的可能性最低，適合用於聊天、社群平台。<br>不過比例字型下寬度可能不齊，且無法在程式碼中被當成空白。</p>
+      <div class="tray">
+        <div class="row toprow">
+          <div class="seg" role="group" aria-label="色彩模式">
+            <button data-palette="color" aria-pressed="true">色彩</button>
+            <button data-palette="gray" aria-pressed="false">灰階</button>
+          </div>
+          <button id="bUnder" class="toggle" aria-pressed="false">
+            <span class="track"></span>筆跡
+          </button>
+          <span class="spacer"></span>
+          <div class="hist">
+            <button id="bUndo" class="btn-tertiary" title="復原（Ctrl+Z）" disabled>復原</button>
+            <button id="bRedo" class="btn-tertiary" title="重做（Ctrl+Y）" disabled>重做</button>
+          </div>
         </div>
-        <div class="seg sm" role="group" aria-label="空白字元">
-          <button data-space=" " aria-pressed="false">標準</button>
-          <button data-space="&#xA0;" aria-pressed="false">不斷行</button>
-          <button data-space="&#x2800;" aria-pressed="true">點字</button>
+        <div class="row colorrow">
+          <div class="swatches" role="group" aria-label="筆的顏色">
+            <button
+              class="sw"
+              data-color="#000000"
+              aria-pressed="true"
+              aria-label="墨色（跟隨主題）"
+            >
+              <i class="ink"></i>
+            </button>
+            <button class="sw" data-color="#da1e28" aria-pressed="false" aria-label="紅">
+              <i style="background: #da1e28"></i>
+            </button>
+            <button class="sw" data-color="#ff832b" aria-pressed="false" aria-label="橙">
+              <i style="background: #ff832b"></i>
+            </button>
+            <button class="sw" data-color="#f1c21b" aria-pressed="false" aria-label="黃">
+              <i style="background: #f1c21b"></i>
+            </button>
+            <button class="sw" data-color="#24a148" aria-pressed="false" aria-label="綠">
+              <i style="background: #24a148"></i>
+            </button>
+            <button class="sw" data-color="#009d9a" aria-pressed="false" aria-label="青">
+              <i style="background: #009d9a"></i>
+            </button>
+            <button class="sw" data-color="#0f62fe" aria-pressed="false" aria-label="藍">
+              <i style="background: #0f62fe"></i>
+            </button>
+            <button class="sw" data-color="#8a3ffc" aria-pressed="false" aria-label="紫">
+              <i style="background: #8a3ffc"></i>
+            </button>
+            <label class="sw pick" for="colorPick" aria-label="自選顏色">
+              <i id="pickSwatch" style="background: #ee5396"></i>
+              <input id="colorPick" type="color" value="#ee5396" />
+            </label>
+          </div>
+          <div class="seg" role="group" aria-label="工具">
+            <button id="tPen" aria-pressed="true">繪製</button>
+            <button id="tErase" aria-pressed="false">擦除</button>
+          </div>
         </div>
-        <button id="bFence" class="toggle" aria-pressed="false"><span class="track"></span>``` 區塊</button>
+        <div class="row">
+          <div class="seg modes" role="group" aria-label="轉換樣式">
+            <button data-mode="mix" aria-pressed="true">混合</button>
+            <button data-mode="braille" aria-pressed="false">點字</button>
+            <button data-mode="block" aria-pressed="false">方塊</button>
+            <button data-mode="shade" aria-pressed="false">濃淡</button>
+            <button data-mode="dots" aria-pressed="false">圓點</button>
+            <button data-mode="cjk" aria-pressed="false">中文</button>
+            <button data-mode="line" aria-pressed="false">線段</button>
+            <button data-mode="custom" aria-pressed="false">自訂</button>
+          </div>
+        </div>
+        <div class="row" id="customRow" hidden>
+          <label class="label" for="customChars">字元</label>
+          <input id="customChars" type="text" value=" .oO@" spellcheck="false" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label class="label" for="size">粗細</label>
+          <input id="size" type="range" min="2" max="40" value="5" />
+          <span class="out" id="sizeOut">5</span>
+        </div>
+        <div class="row actions">
+          <button id="bClear" class="btn-tertiary">清空</button>
+          <span class="spacer"></span>
+          <button id="bCopy" class="btn-secondary" aria-expanded="false">複製</button>
+        </div>
+        <div id="copyMenu" hidden>
+          <div class="row has-tip">
+            <span class="label tip-label"
+              >空白替代<button
+                id="tipBtn"
+                class="info"
+                aria-label="空白替代說明"
+                aria-expanded="false"
+                aria-controls="spaceTip"
+              >
+                <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+                  <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" />
+                  <rect x="7.4" y="7" width="1.2" height="4.5" fill="currentColor" />
+                  <circle cx="8" cy="5" r=".8" fill="currentColor" />
+                </svg>
+              </button>
+            </span>
+            <div id="spaceTip" class="tip" role="tooltip" hidden>
+              <p>
+                <b>標準</b
+                >標準的空白字元，適用於程式碼、終端機、編輯器。<br />多數聊天軟體與社群平台會吃掉開頭或連續的空白，不建議使用。
+              </p>
+              <p>
+                <b>不斷行</b
+                >特殊的空白字元，顯示上寬度和標準空白相同，比較少被裁切掉，但部分主流平台會將其轉換為一般空白，使用上請自行確認。
+              </p>
+              <p>
+                <b>點字</b
+                >盲文字元中的空白字元，被裁切掉的可能性最低，適合用於聊天、社群平台。<br />不過比例字型下寬度可能不齊，且無法在程式碼中被當成空白。
+              </p>
+            </div>
+            <div class="seg sm" role="group" aria-label="空白字元">
+              <button data-space=" " aria-pressed="false">標準</button>
+              <button data-space="&#xA0;" aria-pressed="false">不斷行</button>
+              <button data-space="&#x2800;" aria-pressed="true">點字</button>
+            </div>
+            <button id="bFence" class="toggle" aria-pressed="false">
+              <span class="track"></span>``` 區塊
+            </button>
+          </div>
+          <div class="row copyrow">
+            <button data-copy="text" class="btn-secondary">純文字</button>
+            <button data-copy="html" class="btn-secondary">彩色 HTML</button>
+            <button data-copy="ansi" class="btn-secondary">ANSI</button>
+          </div>
+        </div>
       </div>
-      <div class="row copyrow">
-        <button data-copy="text" class="btn-secondary">純文字</button>
-        <button data-copy="html" class="btn-secondary">彩色 HTML</button>
-        <button data-copy="ansi" class="btn-secondary">ANSI</button>
+    </main>
+
+    <div id="toast" hidden></div>
+    <div id="copyPanel" hidden>
+      <div class="row">
+        <span class="label">剪貼簿被擋住了，長按下方文字全選複製</span><span class="spacer"></span>
+        <button id="bClosePanel" class="btn-secondary">關閉</button>
       </div>
+      <textarea id="copyText" readonly></textarea>
     </div>
-  </div>
-</main>
 
-<div id="toast" hidden></div>
-<div id="copyPanel" hidden>
-  <div class="row"><span class="label">剪貼簿被擋住了，長按下方文字全選複製</span><span class="spacer"></span><button id="bClosePanel" class="btn-secondary">關閉</button></div>
-  <textarea id="copyText" readonly></textarea>
-</div>
-
-<script>
-(()=>{
-const $=id=>document.getElementById(id);
-const stage=$('stage'), view=$('view'), vctx=view.getContext('2d');
-const buf=document.createElement('canvas'), bctx=buf.getContext('2d',{willReadFrequently:true});
-const tint=document.createElement('canvas'), tctx=tint.getContext('2d');
-let W=0,H=0,cw=8,ch=16,cols=0,rows=0,dpr=1,fontPx=13;
-let tool='pen', mode='mix', under=false, size=5, dirty=true, drawing=false, last=null;
-const undo=[], redo=[];
-
-const SHADE=" .:-=+*#%@";
-const FILL=":+*#%@";
-const SHADEBLK=['░','▒','▓','█'];
-// halftone dots: radius as a fraction of cell width; coverage is the dot's area
-const DOTS=[[' ',0],['·',.15],['•',.3],['●',.48]];
-const DOTS_R={c:DOTS.map(d=>d[0]), v:DOTS.map(d=>(d[1]/.48)**2)};
-const CJK=Array.from('丶一二三工王田目回国國圖龍鬱龘');
-const QUAD=[' ','▘','▝','▀','▖','▌','▞','▛','▗','▚','▐','▜','▄','▙','▟','█'];
-let customRamp=Array.from(" .oO@");
-let penColor='#000000', palette='color', gridCol=[];
-const BAYER8=[0,4,6,2,1,5,7,3].map(v=>(v+0.5)/8), BAYER4=[0,2,3,1].map(v=>(v+0.5)/4);
-// grey mode works in linear luminance Y: matching Y means matching CIELAB L*
-const lin=c=>{c/=255;return c<=.04045?c/12.92:((c+.055)/1.055)**2.4};
-const lumCache=new Map();
-function lum(r,g,b){const k=(r<<16)|(g<<8)|b; let v=lumCache.get(k); if(v===undefined){v=.2126*lin(r)+.7152*lin(g)+.0722*lin(b);lumCache.set(k,v)} return v}
-function lumOfToken(n){const m=css(n).match(/[0-9a-f]{2}/gi)||['00','00','00']; const[r,g,b]=m.slice(0,3).map(h=>parseInt(h,16)); return lum(r,g,b)}
-
-// glyph calibration: measure how much of its cell each character actually inks
-let glyphCache=new Map(), rampCache=new Map();
-const gcan=document.createElement('canvas'), gctx=gcan.getContext('2d',{willReadFrequently:true});
-function glyphCov(c,wide){
-  if(c===' '||c==='\u00A0') return 0;
-  const key=wide?c+'\u0001':c;
-  let v=glyphCache.get(key); if(v!==undefined) return v;
-  const S=4, w=Math.ceil(cw*S*(wide?2:1)), h=Math.ceil(ch*S);
-  gcan.width=w; gcan.height=h;
-  gctx.font=`${fontPx*S}px ${css('--f-mono')}`; gctx.textBaseline='middle'; gctx.fillStyle='#000';
-  c.charCodeAt(0)>126?gctx.fillText(c,0,h/2+S/2,w):gctx.fillText(c,0,h/2+S/2);
-  const d=gctx.getImageData(0,0,w,h).data; let sum=0;
-  for(let i=3;i<d.length;i+=4) sum+=d[i];
-  v=sum/255/(w*h); glyphCache.set(key,v); return v;
-}
-// sort a character set by measured ink and normalise to 0..1 so the darkest glyph = full tone
-function calibrated(chars,wide){
-  const key=chars.join('')+(wide?'\u0001':''); let r=rampCache.get(key); if(r) return r;
-  const uniq=[...new Set([' ',...chars])].map(c=>[c,glyphCov(c,wide)]).sort((p,q)=>p[1]-q[1]);
-  const max=uniq[uniq.length-1][1]||1;
-  r={c:uniq.map(u=>u[0]), v:uniq.map(u=>u[1]/max)}; rampCache.set(key,r); return r;
-}
-// 2×4 ink layout of a glyph, normalised so the densest glyph in the set reads as full tone
-let mixCache=null;
-const MIXCHARS=Array.from(' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~░▒▓█▀▄▌▐▖▗▘▝▚▞▙▛▜▟');
-function glyphVec(c){
-  const S=4, w=Math.ceil(cw*S), h=Math.ceil(ch*S);
-  gcan.width=w; gcan.height=h;
-  gctx.font=`${fontPx*S}px ${css('--f-mono')}`; gctx.textBaseline='middle'; gctx.fillStyle='#000';
-  if(c!==' ') c.charCodeAt(0)>126?gctx.fillText(c,0,h/2+S/2,w):gctx.fillText(c,0,h/2+S/2);
-  const d=gctx.getImageData(0,0,w,h).data, v=new Array(8).fill(0), cnt=new Array(8).fill(0);
-  for(let y=0;y<h;y++)for(let x=0;x<w;x++){const q=Math.min(3,(y*4/h)|0)*2+(x*2<w?0:1); v[q]+=d[(y*w+x)*4+3]/255; cnt[q]++}
-  return v.map((s,q)=>s/(cnt[q]||1));
-}
-function mixSet(){
-  if(mixCache) return mixCache;
-  const raw=MIXCHARS.map(c=>({c,v:glyphVec(c)}));
-  const maxM=Math.max(...raw.map(g=>g.v.reduce((a,b)=>a+b,0)/8))||1;
-  mixCache=raw.map(g=>{const v=g.v.map(x=>x/maxM); return {c:g.c,v,m:v.reduce((a,b)=>a+b,0)/8}});
-  return mixCache;
-}
-function pickGlyph(r,t){let best=0,bd=Infinity; for(let i=0;i<r.v.length;i++){const d=Math.abs(r.v[i]-t); if(d<bd){bd=d;best=i}} return r.c[best]}
-function isDarkBg(){const m=css('--bg').match(/[0-9a-f]{2}/gi); if(!m) return false; const[r,g,b]=m.slice(0,3).map(h=>parseInt(h,16)); return (r+g+b)/3<128}
-const hex=(r,g,b)=>'#'+[r,g,b].map(v=>Math.round(v).toString(16).padStart(2,'0')).join('');
-let grid=[]; // current chars
-
-function css(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
-
-function measure(){
-  vctx.font=`${fontPx}px ${css('--f-mono')}`;
-  cw=vctx.measureText('M').width; ch=Math.round(cw*2.05);
-  stage.style.setProperty('--cellh',ch+'px');
-  glyphCache.clear(); rampCache.clear(); mixCache=null;
-}
-
-function resize(){
-  const r=stage.getBoundingClientRect();
-  const nW=Math.max(1,Math.floor(r.width)), nH=Math.max(1,Math.floor(r.height));
-  dpr=Math.min(window.devicePixelRatio||1,3);
-  view.width=nW*dpr; view.height=nH*dpr;
-  if(nW!==W||nH!==H){
-    const old=document.createElement('canvas'); old.width=W||1; old.height=H||1;
-    if(W&&H) old.getContext('2d').drawImage(buf,0,0);
-    buf.width=tint.width=nW; buf.height=tint.height=nH;
-    if(W&&H) bctx.drawImage(old,0,0);
-    W=nW;H=nH;
-  }
-  measure();
-  cols=Math.floor(W/cw); rows=Math.floor(H/ch);
-  $('meta').textContent=`${cols} × ${rows} cells`;
-  dirty=true;
-}
-
-/* ---------- conversion ---------- */
-function convert(){
-  const n=cols*rows;
-  const s=new Float64Array(n),sx=new Float64Array(n),sy=new Float64Array(n),
-        sxx=new Float64Array(n),syy=new Float64Array(n),sxy=new Float64Array(n);
-  const d=bctx.getImageData(0,0,W,H).data;
-  const maxX=cols*cw, maxY=rows*ch;
-  const subMode=mode==='braille'||mode==='block'||mode==='mix';
-  const sub=subMode?new Float64Array(n*8):null; // 2 cols × 4 rows per cell
-  const cr=new Float64Array(n),cg=new Float64Array(n),cb=new Float64Array(n),cwt=new Float64Array(n),ik=new Float64Array(n);
-  // grey mode: each pixel counts by its tone (how close it is to full ink on this background)
-  // grey mode: tone = how far a pixel pulls the cell from paper toward ink, in linear luminance
-  const gray=palette==='gray', st=new Float64Array(n), Ybg=lumOfToken('--bg'), Yink=lumOfToken('--ink'), dY=(Yink-Ybg)||1e-6;
-  for(let y=0;y<H&&y<maxY;y++){
-    const cj=(y/ch)|0, rowOff=cj*cols, sr=Math.min(3,(((y-cj*ch)/ch)*4)|0);
-    for(let x=0;x<W&&x<maxX;x++){
-      const a=d[(y*W+x)*4+3]; if(!a) continue;
-      const ci=(x/cw)|0, w=a/255, i=rowOff+ci, p=(y*W+x)*4;
-      const r=d[p],g=d[p+1],bl=d[p+2];
-      let tone=1;
-      if(r<10&&g<10&&bl<10) ik[i]+=w; else {cr[i]+=w*r;cg[i]+=w*g;cb[i]+=w*bl;cwt[i]+=w;
-        if(gray) tone=Math.min(1,Math.max(0,(lum(r,g,bl)-Ybg)/dY));}
-      const wt=gray?w*tone:w; st[i]+=wt;
-      s[i]+=w; sx[i]+=w*x; sy[i]+=w*y; sxx[i]+=w*x*x; syy[i]+=w*y*y; sxy[i]+=w*x*y;
-      if(subMode){const sc=(x-ci*cw)*2<cw?0:1; sub[i*8+sr*2+sc]+=wt}
-    }
-  }
-  const area=cw*ch, out=new Array(n);
-  gridCol=new Array(n);
-  for(let k=0;k<n;k++){
-    // ink-dominant cells follow the theme; otherwise average the coloured ink
-    gridCol[k]= !gray&&cwt[k]>ik[k] ? hex(cr[k]/cwt[k],cg[k]/cwt[k],cb[k]/cwt[k]) : null;
-  }
-  if(subMode){
-    const subA=area/8;
-    const MV=mode==='mix'?mixSet():null;
-    for(let k=0;k<n;k++){
-      const o=k*8, on=q=>sub[o+q]/subA;
-      if(mode==='mix'){
-        // match the cell's 2×4 ink layout against every glyph's measured layout
-        let tm=0; const t=new Array(8); for(let q=0;q<8;q++){t[q]=Math.min(1,on(q)); tm+=t[q]} tm/=8;
-        if(tm<0.02){out[k]=' ';continue}
-        let best=' ', bd=Infinity;
-        for(const g of MV){
-          let e=0; for(let q=0;q<8;q++){const d=g.v[q]-t[q]; e+=d*d}
-          const dm=g.m-tm; e+=12*dm*dm;
-          if(e<bd){bd=e;best=g.c}
-        }
-        out[k]=best; continue;
-      }
-      if(mode==='braille'){
-        // braille dot bits: col0 rows0-2 → 1,2,4 ; col1 rows0-2 → 8,16,32 ; row3 → 64,128
-        // grey mode dithers with a 2×4 Bayer matrix so mid tones light up only some dots
-        const T=q=>gray?BAYER8[q]:0.28; let b=0;
-        if(on(0)>T(0))b|=1; if(on(2)>T(2))b|=2; if(on(4)>T(4))b|=4; if(on(6)>T(6))b|=64;
-        if(on(1)>T(1))b|=8; if(on(3)>T(3))b|=16; if(on(5)>T(5))b|=32; if(on(7)>T(7))b|=128;
-        out[k]=b?String.fromCharCode(0x2800+b):' ';
-      }else{
-        // even cells get a shade block (░▒▓█) by tone; cells with an edge get a quadrant shape
-        const qv=[(sub[o]+sub[o+2]),(sub[o+1]+sub[o+3]),(sub[o+4]+sub[o+6]),(sub[o+5]+sub[o+7])].map(v=>v/(subA*2));
-        const mx=Math.max(...qv), mn=Math.min(...qv), avg=(qv[0]+qv[1]+qv[2]+qv[3])/4;
-        if(avg<0.06) out[k]=' ';
-        else if(mx-mn<0.3) out[k]=SHADEBLK[Math.max(0,Math.min(3,Math.round(avg*4)-1))];
-        else out[k]=QUAD[(qv[0]>0.35?1:0)|(qv[1]>0.35?2:0)|(qv[2]>0.35?4:0)|(qv[3]>0.35?8:0)];
-      }
-    }
-    return out;
-  }
-  if(mode==='cjk'){
-    // full-width characters take two columns; the second cell holds '' as a continuation
-    const r=calibrated(CJK,true);
-    for(let j=0;j<rows;j++)for(let i=0;i<cols;i++){
-      const k=j*cols+i;
-      if(i+1>=cols){out[k]=' ';continue}
-      const c=pickGlyph(r,Math.min(1,(st[k]+st[k+1])/(2*area)));
-      out[k]=c; out[k+1]=c===' '?' ':''; if(!gridCol[k]) gridCol[k]=gridCol[k+1]; i++;
-    }
-    return out;
-  }
-  const ramp=mode==='dots'?DOTS_R:calibrated(mode==='custom'?(customRamp.length?customRamp:['@']):Array.from(SHADE)), fillR=calibrated(Array.from(FILL));
-  for(let j=0;j<rows;j++)for(let i=0;i<cols;i++){
-    const k=j*cols+i, cov=st[k]/area;
-    if(mode==='shade'||mode==='custom'||mode==='dots'){
-      out[k]=pickGlyph(ramp,Math.min(1,cov)); continue;
-    }
-    if(cov<0.03){out[k]=' ';continue}
-    if(cov>0.6){out[k]=pickGlyph(fillR,Math.min(1,cov));continue}
-    // aggregate 3x3 neighbourhood moments (centre weighted)
-    let A=0,X=0,Y=0,XX=0,YY=0,XY=0;
-    for(let dj=-1;dj<=1;dj++)for(let di=-1;di<=1;di++){
-      const ii=i+di,jj=j+dj; if(ii<0||jj<0||ii>=cols||jj>=rows) continue;
-      const q=jj*cols+ii, w=(di||dj)?0.55:1;
-      A+=w*s[q];X+=w*sx[q];Y+=w*sy[q];XX+=w*sxx[q];YY+=w*syy[q];XY+=w*sxy[q];
-    }
-    const mx=X/A,my=Y/A, cxx=XX/A-mx*mx, cyy=YY/A-my*my, cxy=XY/A-mx*my;
-    const tr=cxx+cyy, det=cxx*cyy-cxy*cxy, disc=Math.sqrt(Math.max(0,tr*tr/4-det));
-    const l1=tr/2+disc, l2=tr/2-disc, elong=l1>0?1-l2/l1:0;
-    const ocy=(sy[k]/s[k]-j*ch)/ch; // own centroid within cell, 0 top … 1 bottom
-    if(elong>0.55){
-      let th=0.5*Math.atan2(2*cxy,cxx-cyy)*180/Math.PI; if(th<0) th+=180;
-      if(th<22||th>158) out[k]= ocy>0.68?'_':(ocy<0.3?'`':'-');
-      else if(th>68&&th<112) out[k]='|';
-      else out[k]= th<90?'\\':'/';
-    }else{
-      if(cov<0.12) out[k]= ocy>0.6?'.':(ocy<0.35?"'":'·');
-      else out[k]= cov<0.3?'+':(cov<0.45?'o':'O');
-    }
-  }
-  // '·' is not ASCII; fold it back
-  for(let k=0;k<n;k++) if(out[k]==='·') out[k]='.';
-  return out;
-}
-
-function render(){
-  if(!dirty) return; dirty=false;
-  grid=convert();
-  const ink=css('--ink'), colorAt=k=>gridCol[k]||ink;
-  vctx.setTransform(dpr,0,0,dpr,0,0);
-  vctx.clearRect(0,0,W,H);
-  if(under){
-    tctx.globalCompositeOperation='source-over'; tctx.clearRect(0,0,W,H); tctx.drawImage(buf,0,0);
-    tctx.globalCompositeOperation='source-in'; tctx.fillStyle=css('--faint'); tctx.fillRect(0,0,W,H);
-    vctx.globalAlpha=.35; vctx.drawImage(tint,0,0); vctx.globalAlpha=1;
-  }
-  vctx.font=`${fontPx}px ${css('--f-mono')}`; vctx.textBaseline='middle'; vctx.fillStyle=css('--ink');
-  if(mode==='braille'){
-    // draw dots ourselves so they look even regardless of font coverage
-    const r=Math.max(1,cw*0.16), BIT=[[1,0,0],[2,0,1],[4,0,2],[64,0,3],[8,1,0],[16,1,1],[32,1,2],[128,1,3]];
-    for(let k=0;k<grid.length;k++){
-      const c=grid[k]; if(c===' ') continue;
-      const b=c.charCodeAt(0)-0x2800, x0=(k%cols)*cw, y0=((k/cols)|0)*ch;
-      vctx.fillStyle=colorAt(k); vctx.beginPath();
-      for(const [bit,sc,sr] of BIT) if(b&bit){
-        const x=x0+cw*(0.28+sc*0.44), y=y0+ch*(0.14+sr*0.24);
-        vctx.moveTo(x+r,y); vctx.arc(x,y,r,0,Math.PI*2);
-      }
-      vctx.fill();
-    }
-    return;
-  }
-  if(mode==='block'){
-    const hw=cw/2, hh=ch/2;
-    for(let k=0;k<grid.length;k++){
-      const x0=(k%cols)*cw, y0=((k/cols)|0)*ch, sh=SHADEBLK.indexOf(grid[k]);
-      if(sh>=0){vctx.fillStyle=colorAt(k); vctx.globalAlpha=(sh+1)/4; vctx.fillRect(x0,y0,cw+.5,ch+.5); vctx.globalAlpha=1; continue}
-      const bits=QUAD.indexOf(grid[k]); if(bits<=0) continue;
-      vctx.fillStyle=colorAt(k);
-      if(bits&1) vctx.fillRect(x0,y0,hw+.5,hh+.5);
-      if(bits&2) vctx.fillRect(x0+hw,y0,hw+.5,hh+.5);
-      if(bits&4) vctx.fillRect(x0,y0+hh,hw+.5,hh+.5);
-      if(bits&8) vctx.fillRect(x0+hw,y0+hh,hw+.5,hh+.5);
-    }
-    return;
-  }
-  if(mode==='dots'){
-    for(let k=0;k<grid.length;k++){
-      const d=DOTS.find(e=>e[0]===grid[k]); if(!d||!d[1]) continue;
-      vctx.fillStyle=colorAt(k); vctx.beginPath();
-      vctx.arc((k%cols)*cw+cw/2,((k/cols)|0)*ch+ch/2,d[1]*cw,0,Math.PI*2); vctx.fill();
-    }
-    return;
-  }
-  for(let j=0;j<rows;j++){
-    const y=j*ch+ch/2+0.5;
-    for(let i=0;i<cols;i++){const k=j*cols+i, c=grid[k]; if(c===' '||c==='') continue;
-      if(mode==='cjk'){vctx.fillStyle=colorAt(k); vctx.fillText(c,i*cw,y,cw*2); continue} vctx.fillStyle=colorAt(k); c.charCodeAt(0)>126?vctx.fillText(c,i*cw,y,cw):vctx.fillText(c,i*cw,y)}
-  }
-}
-function loop(){render();requestAnimationFrame(loop)}
-
-/* ---------- drawing ---------- */
-function pos(e){const r=view.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
-function stroke(a,b){
-  bctx.save();
-  bctx.globalCompositeOperation=tool==='erase'?'destination-out':'source-over';
-  bctx.strokeStyle=penColor; bctx.fillStyle=penColor;
-  bctx.lineWidth=tool==='erase'?size*2.5:size; bctx.lineCap='round'; bctx.lineJoin='round';
-  bctx.beginPath(); bctx.moveTo(a.x,a.y); bctx.lineTo(b.x+0.01,b.y); bctx.stroke();
-  bctx.restore(); dirty=true;
-}
-function snap(){return bctx.getImageData(0,0,W,H)}
-function syncHist(){$('bUndo').disabled=!undo.length; $('bRedo').disabled=!redo.length}
-function pushUndo(){try{undo.push(snap()); if(undo.length>50) undo.shift(); redo.length=0}catch(e){} syncHist()}
-function restore(img){bctx.clearRect(0,0,W,H); bctx.putImageData(img,0,0); dirty=true}
-function doUndo(){const img=undo.pop(); if(!img) return; redo.push(snap()); restore(img); syncHist()}
-function doRedo(){const img=redo.pop(); if(!img) return; undo.push(snap()); restore(img); syncHist()}
-view.addEventListener('pointerdown',e=>{
-  e.preventDefault(); view.setPointerCapture(e.pointerId);
-  pushUndo(); drawing=true; last=pos(e); stroke(last,last);
-});
-view.addEventListener('pointermove',e=>{
-  if(!drawing) return;
-  const evs=e.getCoalescedEvents?e.getCoalescedEvents():[e];
-  for(const ev of evs){const p=pos(ev); stroke(last,p); last=p}
-});
-const end=()=>{drawing=false;last=null};
-view.addEventListener('pointerup',end); view.addEventListener('pointercancel',end);
-
-/* ---------- sample ---------- */
-// IBM PC BIOS 8×8 font (code page 437), rows top→bottom, bit 0 = leftmost pixel
-const IBM8={A:[0x0C,0x1E,0x33,0x33,0x3F,0x33,0x33,0],C:[0x3C,0x66,0x03,0x03,0x03,0x66,0x3C,0],
-  E:[0x7F,0x46,0x16,0x1E,0x16,0x46,0x7F,0],I:[0x1E,0x0C,0x0C,0x0C,0x0C,0x0C,0x1E,0],
-  N:[0x63,0x67,0x6F,0x7B,0x73,0x63,0x63,0],P:[0x3F,0x66,0x66,0x3E,0x06,0x06,0x0F,0],
-  R:[0x3F,0x66,0x66,0x3E,0x36,0x66,0x67,0],S:[0x1E,0x33,0x07,0x0E,0x38,0x33,0x1E,0],
-  T:[0x3F,0x2D,0x0C,0x0C,0x0C,0x0C,0x1E,0]};
-function sample(){
-  // "ASCII / PAINTER" in the IBM PC font. One font pixel = k × (half a cell wide, half a cell tall),
-  // so every pixel sits on the cell's quadrant grid and converts cleanly. Each line takes the largest k that fits.
-  const lines=['ASCII','PAINTER'];
-  const ks=lines.map(l=>Math.max(1,Math.min(3,Math.floor(cols*2/(l.length*8)),Math.floor((rows-1)/8))));
-  const gapR=1, totalRows=ks.reduce((t,k)=>t+4*k,0)+gapR*(lines.length-1);
-  let row=Math.max(0,Math.floor((rows-totalRows)/2));
-  bctx.save(); bctx.fillStyle='#000';
-  lines.forEach((line,li)=>{
-    const k=ks[li], pw=cw/2*k, ph=ch/2*k; // 1:2 pixels, like the VGA 8×16 text font
-    const c0=Math.floor((cols-line.length*8*k/2)/2), x0=c0*cw, y0=row*ch;
-    [...line].forEach((chr,ci)=>IBM8[chr].forEach((bits,r)=>{
-      for(let bit=0;bit<8;bit++) if(bits>>bit&1){
-        // snap edges the same way the converter assigns pixels to cells (floor(x/cw)), so nothing leaks
-        const xa=Math.ceil(x0+(ci*8+bit)*pw-1e-6), xb=Math.ceil(x0+(ci*8+bit+1)*pw-1e-6), ya=Math.ceil(y0+r*ph-1e-6), yb=Math.ceil(y0+(r+1)*ph-1e-6);
-        bctx.fillRect(xa,ya,xb-xa,yb-ya);
-      }
-    }));
-    row+=4*k+gapR;
-  });
-  bctx.restore(); dirty=true;
-}
-
-/* ---------- UI ---------- */
-function setPressed(a,b,on){$(a).setAttribute('aria-pressed',on);$(b).setAttribute('aria-pressed',!on)}
-$('tPen').onclick=()=>{tool='pen';setPressed('tPen','tErase',true)};
-$('tErase').onclick=()=>{tool='erase';setPressed('tPen','tErase',false)};
-document.querySelectorAll('[data-mode]').forEach(btn=>btn.onclick=()=>{
-  mode=btn.dataset.mode;
-  document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',b===btn));
-  $('customRow').hidden=mode!=='custom'; dirty=true;
-});
-const setRamp=v=>{customRamp=Array.from(v); dirty=true};
-$('customChars').oninput=e=>setRamp(e.target.value);
-$('bUnder').onclick=e=>{under=!under;e.currentTarget.setAttribute('aria-pressed',under);dirty=true};
-$('size').oninput=e=>{size=+e.target.value;$('sizeOut').textContent=size};
-$('bUndo').onclick=doUndo; $('bRedo').onclick=doRedo;
-document.addEventListener('keydown',e=>{
-  if(!(e.ctrlKey||e.metaKey)||e.altKey) return;
-  const t=e.target; if(t&&(t.tagName==='INPUT'&&t.type==='text'||t.tagName==='TEXTAREA')) return; // keep native text undo
-  const k=e.key.toLowerCase();
-  if(k==='z'&&!e.shiftKey){e.preventDefault(); doUndo()}
-  else if(k==='y'||(k==='z'&&e.shiftKey)){e.preventDefault(); doRedo()}
-});
-$('bClear').onclick=()=>{pushUndo();bctx.clearRect(0,0,W,H);dirty=true;toast('已清空，按復原可救回')};
-// bounding box of non-empty cells, so exports carry no blank margins
-function bounds(){
-  let t=rows,b=-1,l=cols,r=-1;
-  for(let j=0;j<rows;j++)for(let i=0;i<cols;i++) if(grid[j*cols+i]!==' '){t=Math.min(t,j);b=Math.max(b,j);l=Math.min(l,i);r=Math.max(r,i)}
-  return b<0?null:{t,b,l,r};
-}
-const esc=c=>c==='<'?'&lt;':c==='>'?'&gt;':c==='&'?'&amp;':c;
-function exportAs(kind){
-  const bx=bounds(); if(!bx) return '';
-  const lines=[];
-  for(let j=bx.t;j<=bx.b;j++){
-    let end=bx.r; while(end>=bx.l&&grid[j*cols+end]===' ') end--;
-    let line='', cur;
-    for(let i=bx.l;i<=end;i++){
-      const k=j*cols+i, c=grid[k], col=c===' '?cur:(gridCol[k]||null);
-      if(kind!=='text'&&col!==cur){
-        if(kind==='html') line+=(cur!==undefined&&cur?'</span>':'')+(col?`<span style="color:${col}">`:'');
-        else line+=col?`\x1b[38;2;${parseInt(col.slice(1,3),16)};${parseInt(col.slice(3,5),16)};${parseInt(col.slice(5,7),16)}m`:'\x1b[39m';
-        cur=col;
-      }
-      line+=kind==='html'?esc(c):(c===' '?spaceChar:c);
-    }
-    if(kind==='html'&&cur) line+='</span>';
-    if(kind==='ansi'&&cur) line+='\x1b[0m';
-    lines.push(line);
-  }
-  const body=lines.join('\n');
-  if(kind==='html') return `<pre style="font-family:ui-monospace,Menlo,Consolas,monospace;line-height:1.15">${body}</pre>`;
-  return fence?'```\n'+body+'\n```':body;
-}
-const tipBtn=$('tipBtn'), tip=$('spaceTip');
-function setTip(open){tip.hidden=!open; tipBtn.setAttribute('aria-expanded',open)}
-tipBtn.onclick=e=>{e.stopPropagation(); setTip(tip.hidden)};
-document.addEventListener('click',e=>{if(!tip.hidden&&!tip.contains(e.target)) setTip(false)});
-document.addEventListener('keydown',e=>{if(e.key==='Escape') setTip(false)});
-let spaceChar='\u2800', fence=false;
-const spBtns=[...document.querySelectorAll('[data-space]')];
-function setSpace(ch){spaceChar=ch; spBtns.forEach(b=>b.setAttribute('aria-pressed',b.dataset.space===ch))}
-spBtns.forEach(b=>b.onclick=()=>setSpace(b.dataset.space));
-$('bFence').onclick=e=>{fence=!fence;e.currentTarget.setAttribute('aria-pressed',fence)};
-$('bCopy').onclick=e=>{
-  const m=$('copyMenu'); m.hidden=!m.hidden; e.currentTarget.setAttribute('aria-expanded',!m.hidden);
-};
-document.querySelectorAll('[data-copy]').forEach(btn=>btn.onclick=()=>{
-  const kind=btn.dataset.copy, t=exportAs(kind);
-  if(!t){toast('畫布是空的');return}
-  const label={text:'純文字',html:'彩色 HTML',ansi:'ANSI 文字'}[kind];
-  const fallback=()=>{$('copyText').value=t;$('copyPanel').hidden=false;$('copyText').select()};
-  try{navigator.clipboard.writeText(t).then(()=>{toast('已複製'+label);$('copyMenu').hidden=true;$('bCopy').setAttribute('aria-expanded','false')},fallback)}catch(err){fallback()}
-});
-const swBtns=[...document.querySelectorAll('.sw[data-color]')], pick=$('colorPick'), pickLbl=pick.parentElement;
-function choose(color,fromPicker){
-  penColor=color; if(tool==='erase'){tool='pen';setPressed('tPen','tErase',true)}
-  swBtns.forEach(b=>b.setAttribute('aria-pressed',!fromPicker&&b.dataset.color===color));
-  pickLbl.classList.toggle('on',!!fromPicker);
-}
-swBtns.forEach(b=>b.onclick=()=>choose(b.dataset.color,false));
-pick.oninput=e=>{$('pickSwatch').style.background=e.target.value; choose(e.target.value==='#000000'?'#010101':e.target.value,true)};
-pick.onclick=()=>choose(pick.value,true);
-document.querySelectorAll('[data-palette]').forEach(btn=>btn.onclick=()=>{
-  palette=btn.dataset.palette;
-  document.querySelectorAll('[data-palette]').forEach(b=>b.setAttribute('aria-pressed',b===btn)); dirty=true;
-});
-$('bClosePanel').onclick=()=>{$('copyPanel').hidden=true};
-let tt; function toast(m){const el=$('toast');el.textContent=m;el.hidden=false;clearTimeout(tt);tt=setTimeout(()=>el.hidden=true,1800)}
-
-const mq=matchMedia('(prefers-color-scheme: dark)'); mq.addEventListener&&mq.addEventListener('change',()=>dirty=true);
-new MutationObserver(()=>dirty=true).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
-new ResizeObserver(()=>resize()).observe(stage);
-
-const start=()=>{resize(); sample(); loop()};
-(document.fonts&&document.fonts.load)?document.fonts.load('13px "IBM Plex Mono"').then(start,start):start();
-})();
-</script>
-
-</body></html>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

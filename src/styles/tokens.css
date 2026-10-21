@@ -1,0 +1,87 @@
+/* Carbon White theme by default; dark values are declared twice (OS preference and explicit
+   [data-theme=dark]) because CSS cannot share one block between a media query and a selector. */
+:root {
+  --bg: #ffffff;
+  --layer: #f4f4f4;
+  --layer-hover: #e8e8e8;
+  --layer-selected: #e0e0e0;
+  --border-subtle: #e0e0e0;
+  --border-strong: #8d8d8d;
+  --text: #161616;
+  --text-2: #525252;
+  --text-inv: #ffffff;
+  --sel-inv: #161616;
+  --interactive: #0f62fe;
+  --btn-primary: #0f62fe;
+  --btn-primary-hover: #0050e6;
+  --btn-secondary: #393939;
+  --btn-secondary-hover: #474747;
+  --focus: #0f62fe;
+  --grid: #e8e8e8;
+  --ink: #161616;
+  --faint: #a8a8a8;
+  --success: #24a148;
+  /* shell header is Gray 100 in both themes */
+  --shell: #161616;
+  --shell-border: #393939;
+  --shell-text: #f4f4f4;
+  --shell-text-2: #c6c6c6;
+  --f-mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+  --f-body: 'IBM Plex Sans', 'Noto Sans TC', system-ui, -apple-system, 'PingFang TC', sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #161616;
+    --layer: #262626;
+    --layer-hover: #333333;
+    --layer-selected: #393939;
+    --border-subtle: #393939;
+    --border-strong: #6f6f6f;
+    --text: #f4f4f4;
+    --text-2: #c6c6c6;
+    --text-inv: #161616;
+    --sel-inv: #f4f4f4;
+    --interactive: #4589ff;
+    --btn-primary: #0f62fe;
+    --btn-primary-hover: #0050e6;
+    --btn-secondary: #6f6f6f;
+    --btn-secondary-hover: #606060;
+    --focus: #ffffff;
+    --grid: #262626;
+    --ink: #f4f4f4;
+    --faint: #525252;
+    --success: #42be65;
+    --shell: #161616;
+    --shell-border: #393939;
+    --shell-text: #f4f4f4;
+    --shell-text-2: #c6c6c6;
+    color-scheme: dark;
+  }
+}
+:root[data-theme='dark'] {
+  --bg: #161616;
+  --layer: #262626;
+  --layer-hover: #333333;
+  --layer-selected: #393939;
+  --border-subtle: #393939;
+  --border-strong: #6f6f6f;
+  --text: #f4f4f4;
+  --text-2: #c6c6c6;
+  --text-inv: #161616;
+  --sel-inv: #f4f4f4;
+  --interactive: #4589ff;
+  --btn-primary: #0f62fe;
+  --btn-primary-hover: #0050e6;
+  --btn-secondary: #6f6f6f;
+  --btn-secondary-hover: #606060;
+  --focus: #ffffff;
+  --grid: #262626;
+  --ink: #f4f4f4;
+  --faint: #525252;
+  --success: #42be65;
+  --shell: #161616;
+  --shell-border: #393939;
+  --shell-text: #f4f4f4;
+  --shell-text-2: #c6c6c6;
+  color-scheme: dark;
+}

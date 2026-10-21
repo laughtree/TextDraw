@@ -1,0 +1,7 @@
+/* same self-hosted font files as the Vite app, so both versions measure identical glyphs */
+@import url('/node_modules/@fontsource/ibm-plex-mono/400.css');
+@import url('/node_modules/@fontsource/ibm-plex-mono/600.css');
+@import url('/node_modules/@fontsource/ibm-plex-sans/400.css');
+@import url('/node_modules/@fontsource/ibm-plex-sans/600.css');
+@import url('/node_modules/@fontsource/noto-sans-tc/400.css');
+@import url('/node_modules/@fontsource/noto-sans-tc/600.css');

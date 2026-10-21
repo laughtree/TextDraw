@@ -1,0 +1,97 @@
+/* tool panel */
+.tray {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--layer);
+  border-top: 1px solid var(--border-subtle);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 12px 16px;
+}
+.row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.label {
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.32px;
+  color: var(--text-2);
+  white-space: nowrap;
+}
+.spacer {
+  flex: 1;
+}
+
+.actions {
+  flex-wrap: nowrap;
+}
+.actions #bCopy {
+  flex: none;
+}
+.toprow,
+.colorrow,
+.copyrow {
+  flex-wrap: nowrap;
+}
+.copyrow button {
+  flex: 1;
+  min-width: 0;
+  padding: 0 8px;
+}
+#copyMenu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 8px;
+}
+
+/* segmented-control padding per context; later rules win ties, so keep this order */
+.tray .seg > button {
+  padding: 0 12px;
+}
+.tray .modes > button {
+  padding: 0 2px;
+}
+.toprow .toggle {
+  padding: 0 4px;
+}
+.colorrow .swatches {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-block: 2px;
+}
+.colorrow .swatches::-webkit-scrollbar {
+  display: none;
+}
+.colorrow .sw {
+  flex: none;
+}
+/* undo/redo and pen/eraser share one right-hand column so their edges line up */
+.hist,
+.colorrow .seg {
+  width: 136px;
+  flex: none;
+}
+.hist {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.hist button {
+  height: 42px;
+  padding: 0;
+}
+.colorrow .seg button {
+  flex: 1 1 0;
+  padding: 0 4px;
+}

@@ -1,0 +1,81 @@
+/* toast: Carbon low-contrast notification, inverse */
+#toast {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  background: var(--sel-inv);
+  color: var(--text-inv);
+  border-left: 3px solid var(--success);
+  padding: 14px 16px;
+  font-size: 14px;
+  z-index: 20;
+  max-width: calc(100% - 32px);
+}
+#copyPanel {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 24px;
+}
+#copyPanel textarea {
+  flex: 1;
+  font: 12px/1.25 var(--f-mono);
+  background: var(--layer);
+  color: var(--text);
+  border: 0;
+  border-bottom: 1px solid var(--border-strong);
+  padding: 16px;
+  white-space: pre;
+  overflow: auto;
+  border-radius: 0;
+}
+
+/* "whitespace substitute" help tooltip */
+.has-tip {
+  position: relative;
+}
+.tip-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.info {
+  height: 24px;
+  width: 24px;
+  padding: 0;
+  display: inline-grid;
+  place-items: center;
+  color: var(--text-2);
+}
+.info:hover,
+.info[aria-expanded='true'] {
+  color: var(--text);
+}
+.tip {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 8px);
+  z-index: 25;
+  width: min(288px, 100%);
+  background: var(--sel-inv);
+  color: var(--text-inv);
+  padding: 8px 16px;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.32px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+.tip p {
+  margin: 8px 0;
+}
+.tip b {
+  display: block;
+  font-weight: 600;
+}

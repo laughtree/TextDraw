@@ -1,0 +1,33 @@
+/* UI shell header */
+.shell {
+  height: 48px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--shell);
+  border-bottom: 1px solid var(--shell-border);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.brand {
+  margin: 0;
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 400;
+  color: var(--shell-text);
+  letter-spacing: 0.1px;
+  white-space: nowrap;
+}
+.brand b {
+  font-weight: 600;
+}
+.shell .meta {
+  margin-left: auto;
+  font: 12px/16px var(--f-mono);
+  color: var(--shell-text-2);
+  letter-spacing: 0.32px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
