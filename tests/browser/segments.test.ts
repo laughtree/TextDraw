@@ -1,6 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { openApp, type App } from './harness';
 
+/** edges snap to whole device pixels, so positions agree with the unsnapped ones to within 1px */
+const PX = -0.3;
+
 let app: App;
 beforeEach(async () => {
   app = await openApp('/index.html');
@@ -58,8 +61,8 @@ describe('selection layer in each button group', () => {
       expect(g.classList.contains('slides')).toBe(true);
       const [btn] = pressed(g);
       const { x, w } = slot(g, btn);
-      expect(parseFloat(css(g, '--x')), g.ariaLabel ?? '').toBeCloseTo(x, 0);
-      expect(parseFloat(css(g, '--w')), g.ariaLabel ?? '').toBeCloseTo(w, 0);
+      expect(parseFloat(css(g, '--x')), g.ariaLabel ?? '').toBeCloseTo(x, PX);
+      expect(parseFloat(css(g, '--w')), g.ariaLabel ?? '').toBeCloseTo(w, PX);
       expect(css(g, '--o')).toBe('1');
     }
   });
@@ -74,9 +77,9 @@ describe('selection layer in each button group', () => {
     expect(pressed(g)[0]).toBe(app.q(sel));
     await app.settle();
     const { x, w } = slot(g, app.q(sel));
-    expect(layerX(g)).toBeCloseTo(x, 0);
-    expect(parseFloat(css(g, '--w'))).toBeCloseTo(w, 0);
-    expect(layerX(g)).not.toBeCloseTo(before, 0);
+    expect(layerX(g)).toBeCloseTo(x, PX);
+    expect(parseFloat(css(g, '--w'))).toBeCloseTo(w, PX);
+    expect(layerX(g)).not.toBeCloseTo(before, PX);
   });
 
   it('slides back to the first choice again', async () => {
@@ -90,7 +93,7 @@ describe('selection layer in each button group', () => {
     await app.frames(1);
     expect(sliding()).toBe(true);
     await app.settle();
-    expect(layerX(g)).toBeCloseTo(start, 0);
+    expect(layerX(g)).toBeCloseTo(start, PX);
   });
 });
 
@@ -109,7 +112,7 @@ describe('eyedropper and the shape group', () => {
     await app.settle();
     expect(css(shapes, '--o')).toBe('1');
     expect(getComputedStyle(shapes, '::before').opacity).toBe('1');
-    expect(layerX(shapes)).toBeCloseTo(circleX, 0);
+    expect(layerX(shapes)).toBeCloseTo(circleX, PX);
     expect(getComputedStyle(app.q('.eyedropper')).boxShadow).toBe('none');
   });
 });
@@ -124,9 +127,9 @@ describe('colour frame', () => {
 
   it('starts on the ink swatch, with the size of the button', () => {
     const want = frameOn(app.q('[data-color="#000000"]'));
-    expect(parseFloat(css(row(), '--rx'))).toBeCloseTo(want.x, 0);
-    expect(parseFloat(css(row(), '--rw'))).toBeCloseTo(want.w, 0);
-    expect(parseFloat(css(row(), '--rh'))).toBeCloseTo(want.h, 0);
+    expect(parseFloat(css(row(), '--rx'))).toBeCloseTo(want.x, PX);
+    expect(parseFloat(css(row(), '--rw'))).toBeCloseTo(want.w, PX);
+    expect(parseFloat(css(row(), '--rh'))).toBeCloseTo(want.h, PX);
     expect(css(row(), '--ro')).toBe('1');
   });
 
@@ -136,13 +139,13 @@ describe('colour frame', () => {
     expect(sliding('::after')).toBe(true);
     await app.settle();
     let want = frameOn(app.q('[data-color="#da1e28"]'));
-    expect(parseFloat(css(row(), '--rx'))).toBeCloseTo(want.x, 0);
+    expect(parseFloat(css(row(), '--rx'))).toBeCloseTo(want.x, PX);
 
     app.setValue('#colorPick', '#336699');
     await app.settle();
     want = frameOn(app.q('.sw.pick'));
-    expect(parseFloat(css(row(), '--rx'))).toBeCloseTo(want.x, 0);
-    expect(parseFloat(css(row(), '--rw'))).toBeCloseTo(want.w, 0);
+    expect(parseFloat(css(row(), '--rx'))).toBeCloseTo(want.x, PX);
+    expect(parseFloat(css(row(), '--rw'))).toBeCloseTo(want.w, PX);
     expect(app.q('.sw.pick').closest('.swatches')).toBeNull(); // a different container
     expect(css(row(), '--ro')).toBe('1');
   });
@@ -167,17 +170,17 @@ describe('groups that are not on screen yet, and layout changes', () => {
     await app.settle();
     for (const g of [format, space]) {
       const { x, w } = slot(g, pressed(g)[0]);
-      expect(parseFloat(css(g, '--x'))).toBeCloseTo(x, 0);
-      expect(parseFloat(css(g, '--w'))).toBeCloseTo(w, 0);
+      expect(parseFloat(css(g, '--x'))).toBeCloseTo(x, PX);
+      expect(parseFloat(css(g, '--w'))).toBeCloseTo(w, PX);
     }
     app.click('[data-format="html"]');
     await app.frames(1);
     expect(sliding()).toBe(true);
     await app.settle();
-    expect(layerX(format)).toBeCloseTo(slot(format, app.q('[data-format="html"]')).x, 0);
+    expect(layerX(format)).toBeCloseTo(slot(format, app.q('[data-format="html"]')).x, PX);
     app.click('[data-space=" "]');
     await app.settle();
-    expect(layerX(space)).toBeCloseTo(slot(space, app.q('[data-space=" "]')).x, 0);
+    expect(layerX(space)).toBeCloseTo(slot(space, app.q('[data-space=" "]')).x, PX);
   });
 
   it('measure again, without sliding, when the window changes size', async () => {
@@ -187,8 +190,48 @@ describe('groups that are not on screen yet, and layout changes', () => {
     app.iframe.style.width = '360px';
     await app.frames(4);
     const { x, w } = slot(g, app.q('[data-mode="shade"]'));
-    expect(parseFloat(css(g, '--x'))).toBeCloseTo(x, 0);
-    expect(parseFloat(css(g, '--w'))).toBeCloseTo(w, 0);
+    expect(parseFloat(css(g, '--x'))).toBeCloseTo(x, PX);
+    expect(parseFloat(css(g, '--w'))).toBeCloseTo(w, PX);
     expect(sliding()).toBe(false);
+  });
+});
+
+describe('layers meet the buttons exactly', () => {
+  /** device-pixel edges (left, right) of an element, rounded the way layout snaps them */
+  const edges = (r: { left: number; right: number }) => {
+    const dpr = app.win.devicePixelRatio || 1;
+    return [Math.round(r.left * dpr), Math.round(r.right * dpr)];
+  };
+
+  it('puts the layer behind every conversion-mode button, "mix" included, edge to edge', async () => {
+    const g = app.q('.seg[aria-label="轉換樣式"]');
+    for (const btn of [...g.querySelectorAll<HTMLElement>('button')]) {
+      btn.click();
+      await app.settle();
+      const gr = g.getBoundingClientRect(),
+        origin = gr.left + g.clientLeft,
+        x = parseFloat(css(g, '--x')),
+        w = parseFloat(css(g, '--w'));
+      const layer = edges({ left: origin + x, right: origin + x + w });
+      expect(layer, btn.dataset.mode ?? '').toEqual(edges(btn.getBoundingClientRect()));
+    }
+  });
+
+  it('gives the layers and the colour frame a border-box, so a bordered frame is its stated size', () => {
+    expect(getComputedStyle(app.q('.colorrow'), '::after').boxSizing).toBe('border-box');
+    expect(getComputedStyle(app.q('.seg'), '::before').boxSizing).toBe('border-box');
+  });
+
+  it('draws the colour frame as big as the swatch it surrounds, border included', async () => {
+    const row = app.q('.colorrow');
+    for (const c of ['#da1e28', '#0f62fe']) {
+      app.click(`[data-color="${c}"]`);
+      await app.settle();
+      const sw = app.q(`[data-color="${c}"]`).getBoundingClientRect();
+      const frame = getComputedStyle(row, '::after');
+      expect(parseFloat(frame.width)).toBeCloseTo(sw.width, PX);
+      expect(parseFloat(frame.height)).toBeCloseTo(sw.height, PX);
+      expect(parseFloat(css(row, '--rw'))).toBeCloseTo(sw.width, PX);
+    }
   });
 });

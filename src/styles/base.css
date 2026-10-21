@@ -18,7 +18,10 @@ html,
 body {
   height: 100%;
 }
-* {
+/* pseudo-elements too: the sliding layers size themselves to a button's border box */
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 body {

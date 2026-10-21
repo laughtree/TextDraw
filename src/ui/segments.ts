@@ -5,17 +5,19 @@
  * button and move the layer there with a CSS transition. Without this module the buttons keep
  * their own selected style, which is the fallback.
  */
+import { snapSpan } from '../snap';
 
-/** Where the selected button sits inside `box`, in px, ignoring the box's border. */
+/**
+ * Where `el` sits inside `box`, ignoring the box's border, with its edges snapped to whole device
+ * pixels the way layout snaps them (see snapSpan), so a layer drawn there meets the button exactly.
+ */
 function relativeRect(el: Element, box: HTMLElement) {
   const r = el.getBoundingClientRect(),
-    b = box.getBoundingClientRect();
-  return {
-    x: r.left - b.left - box.clientLeft,
-    y: r.top - b.top - box.clientTop,
-    w: r.width,
-    h: r.height,
-  };
+    b = box.getBoundingClientRect(),
+    dpr = window.devicePixelRatio || 1;
+  const h = snapSpan(r.left, r.right, b.left + box.clientLeft, dpr),
+    v = snapSpan(r.top, r.bottom, b.top + box.clientTop, dpr);
+  return { x: h.pos, y: v.pos, w: h.size, h: v.size };
 }
 
 const shown = (el: HTMLElement): boolean => el.getClientRects().length > 0;
@@ -53,6 +55,8 @@ function bindGroup(group: HTMLElement): void {
     attributeFilter: ['aria-pressed'],
   });
   new ResizeObserver(() => place(false)).observe(group);
+  // zooming the page or moving to another screen changes the device pixel ratio, not the layout size
+  window.addEventListener('resize', () => place(false));
 }
 
 /** The colour choice: a frame that slides over the swatches and into the palette button. */
