@@ -32,7 +32,14 @@
         </div>
       </div>
 
-      <div class="tray">
+      <div id="tray" class="tray">
+        <button
+          id="sheetHandle"
+          class="sheet-handle"
+          aria-expanded="false"
+          aria-controls="tray"
+          aria-label="展開工具列"
+        ></button>
         <div class="row toprow">
           <div class="seg" role="group" aria-label="色彩模式">
             <button data-palette="color" aria-pressed="true">色彩</button>

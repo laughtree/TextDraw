@@ -21,6 +21,7 @@ import { initImport } from './ui/importMenu';
 import { initPlatform } from './ui/platform';
 import { layoutBusy } from './ui/reveal';
 import { initSegments } from './ui/segments';
+import { initSheet } from './ui/sheet';
 
 initDraw();
 initText();
@@ -31,6 +32,7 @@ initCanvasSize();
 initPlatform();
 initCopy();
 initImport();
+initSheet();
 initSegments(); // last: the groups it watches are all in place
 
 // any theme change (OS preference or explicit data-theme) needs a repaint in the new ink colours

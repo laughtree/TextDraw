@@ -9,8 +9,13 @@ const panels = new Set<HTMLElement>();
 /** Register a panel whose height eats into the stage while it is open. */
 export const trackPanel = (el: HTMLElement): void => void panels.add(el);
 
+/** On short screens the tray is a bottom sheet over the canvas: panels scroll inside it. */
+export const SHEET_QUERY = '(max-height: 699px)';
+export const inSheetMode = (): boolean => matchMedia(SHEET_QUERY).matches;
+
 /** Height currently taken from the stage by open (or opening, or closing) panels, in CSS px. */
 export function panelExtra(): number {
+  if (inSheetMode()) return 0; // the sheet floats over the canvas, it never pushes it
   let sum = 0;
   for (const el of panels) {
     if (el.getClientRects().length === 0) continue; // not displayed, itself or through a parent

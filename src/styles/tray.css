@@ -258,3 +258,104 @@
 .importpane .label {
   white-space: normal;
 }
+
+/* narrow phones (320–389 px): the two rows that never wrap give up some width instead of overflowing */
+@media (max-width: 389px) {
+  .tray {
+    --hist-w: 112px;
+    --hist-gap: 4px;
+  }
+  .toprow {
+    gap: 6px;
+  }
+  .tray .toprow .seg > button {
+    padding: 0 8px;
+  }
+  .toprow .toggle {
+    gap: 6px;
+    padding: 0 2px;
+  }
+  .tools {
+    gap: 6px;
+  }
+  .tools .iconseg {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .tray .iconseg > button {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+  }
+}
+@media (max-width: 339px) {
+  .tray .toprow .seg > button {
+    padding: 0 6px;
+  }
+}
+
+/*
+ * Short screens (under 700 px tall, e.g. phones on their side): the tray becomes a bottom sheet.
+ * Collapsed it shows the handle and the two most-used rows; expanded it covers the canvas (sheet.ts).
+ */
+.sheet-handle {
+  display: none;
+}
+@media (max-height: 699px) {
+  .work {
+    padding-bottom: var(--peek, 140px);
+  }
+  .tray {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 8;
+    max-height: var(--peek, 140px);
+    overflow: hidden;
+    overscroll-behavior: contain;
+    padding-top: 0;
+    padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.18);
+  }
+  .tray[data-sheet='open'] {
+    max-height: 85dvh;
+    overflow-y: auto;
+  }
+  .tray > * {
+    order: 3;
+    flex: none;
+  }
+  /* what the collapsed sheet does not show is also out of reach for keyboard and screen reader;
+     it hides after the closing motion, and shows at once when opening */
+  .tray:not([data-sheet='open']) > :not(.sheet-handle, .toprow, .tools) {
+    visibility: hidden;
+    transition: visibility 0s linear 150ms;
+  }
+  .tray > .sheet-handle {
+    order: 0;
+  }
+  .tray > .toprow {
+    order: 1;
+  }
+  .tray > .tools {
+    order: 2;
+  }
+  .sheet-handle {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 24px;
+    padding: 0;
+    margin-bottom: -4px;
+    background: transparent;
+    touch-action: none;
+  }
+  .sheet-handle::before {
+    content: '';
+    width: 40px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border-strong);
+  }
+}

@@ -10,9 +10,9 @@ import { resize, view } from '../surface';
  */
 export type RevealKind = 'collapse' | 'drop' | 'rise' | 'fade';
 
-const SHOW_MS = 200;
-const HIDE_MS = 150;
-const EASE = 'cubic-bezier(0.2, 0, 0.38, 0.9)';
+export const SHOW_MS = 200;
+export const HIDE_MS = 150;
+export const EASE = 'cubic-bezier(0.2, 0, 0.38, 0.9)';
 const SLIDE: Record<RevealKind, number> = { collapse: 0, drop: -8, rise: 4, fade: 0 };
 const BOX = [
   'height',
