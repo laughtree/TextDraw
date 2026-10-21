@@ -1,0 +1,40 @@
+/* Brush footprint: a ring as wide as the stroke it will paint. Fixed black/white so it reads on
+   any paper, ink or theme. JS sets --d (diameter) and transform (top-left corner). */
+.brush {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--d, 6px);
+  height: var(--d, 6px);
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  outline: 1px solid rgba(0, 0, 0, 0.75);
+  pointer-events: none;
+  will-change: transform;
+}
+/* eraser: same ring, dashed */
+.brush.erase {
+  border-style: dashed;
+  outline-style: dashed;
+}
+/* centre dot marks the exact point the stroke follows */
+.brush::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2px;
+  height: 2px;
+  margin: -1px 0 0 -1px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.75);
+}
+.brush.fading {
+  opacity: 0;
+  transition: opacity 200ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  .brush.fading {
+    transition: none;
+  }
+}

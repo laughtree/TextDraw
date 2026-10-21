@@ -1,5 +1,6 @@
 @import './tokens.css';
 @import './base.css';
+@import './brush.css';
 @import './shell.css';
 @import './controls.css';
 @import './tray.css';

@@ -40,11 +40,12 @@ src/
   surface.ts        畫布 / 暫存層、格寬量測、視窗縮放
   render.ts         將轉換結果畫到螢幕（點字、方塊、圓點、文字）
   draw.ts           指標事件與筆跡
+  brush.ts          筆寬計算（筆跡與預覽圓圈共用，純函式）
   history.ts        復原 / 重做
   sample.ts         起始畫面（IBM PC 8×8 點陣字）
   export.ts         純文字 / HTML / ANSI 輸出（純函式）
-  ui/               工具列、複製選單、提示訊息
-  styles/           tokens（主題色）/ base / shell / controls / tray / overlays
+  ui/               工具列、複製選單、提示訊息、筆刷範圍圓圈（brush.ts）
+  styles/           tokens（主題色）/ base / brush / shell / controls / tray / overlays
 tests/
   unit/             Node 環境：export、color
   browser/          真實 Chromium：convert、parity

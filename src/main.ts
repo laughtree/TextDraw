@@ -11,11 +11,13 @@ import { loop } from './render';
 import { sample } from './sample';
 import { state } from './state';
 import { resize, stage } from './surface';
+import { initBrush } from './ui/brush';
 import { initControls } from './ui/controls';
 import { initCopy } from './ui/copy';
 
 initDraw();
 initControls();
+initBrush();
 initCopy();
 
 // any theme change (OS preference or explicit data-theme) needs a repaint in the new ink colours

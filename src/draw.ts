@@ -1,3 +1,4 @@
+import { strokeWidth } from './brush';
 import { pushUndo } from './history';
 import { state } from './state';
 import { bctx, view } from './surface';
@@ -17,7 +18,7 @@ function stroke(a: Point, b: Point): void {
   bctx.globalCompositeOperation = state.tool === 'erase' ? 'destination-out' : 'source-over';
   bctx.strokeStyle = state.penColor;
   bctx.fillStyle = state.penColor;
-  bctx.lineWidth = state.tool === 'erase' ? state.size * 2.5 : state.size;
+  bctx.lineWidth = strokeWidth(state.tool, state.size);
   bctx.lineCap = 'round';
   bctx.lineJoin = 'round';
   bctx.beginPath();
