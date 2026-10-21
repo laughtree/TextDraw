@@ -4,9 +4,9 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/laughtree/text-draw.git"
+    "url": "git+https://github.com/laughtree/TextDraw.git"
   },
-  "homepage": "https://laughtree.github.io/text-draw/",
+  "homepage": "https://laughtree.github.io/TextDraw/",
   "version": "0.1.0",
   "private": true,
   "type": "module",

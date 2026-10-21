@@ -4,7 +4,7 @@
 也能匯入圖片或現成的 ASCII art，最後複製成純文字、HTML、ANSI 或圖片，貼到各平台前先預覽效果。
 全部在瀏覽器內執行，不上傳任何資料。
 
-**線上使用：<https://laughtree.github.io/text-draw/>**
+**線上使用：<https://laughtree.github.io/TextDraw/>**
 
 ## 使用說明
 
@@ -76,23 +76,21 @@ pnpm typecheck      # tsc --noEmit
 
 ## 部署到 GitHub Pages
 
-專案已附 `.github/workflows/deploy.yml`：推送到 `main` 時，GitHub 會先跑型別檢查、lint、格式檢查與全部測試（含瀏覽器測試），全部通過才打包並發佈。`vite.config.ts` 使用相對路徑（`base: './'`），放在任何子路徑都能運作。
+專案已附 `.github/workflows/deploy.yml`：推送到 `master` 時，GitHub 會先跑型別檢查、lint、格式檢查與全部測試（含瀏覽器測試），全部通過才打包並發佈。`vite.config.ts` 使用相對路徑（`base: './'`），放在任何子路徑都能運作，改 repo 名稱也不用改設定。
 
 第一次設定：
 
-1. 在 GitHub 建立空的 repo `text-draw`（不要勾選 README、.gitignore、License）。
-2. 在專案資料夾執行：
+1. 把專案推到 GitHub（repo 為 `laughtree/TextDraw`）：
 
    ```bash
-   git remote add origin git@github.com:laughtree/text-draw.git   # 或用 https 網址
-   git branch -M main
-   git push -u origin main
+   git remote add origin https://github.com/laughtree/TextDraw.git
+   git push -u origin master
    ```
 
-3. 到 repo 的 **Settings → Pages**，把 **Source** 設為 **GitHub Actions**。
-4. 到 **Actions** 分頁看 “Deploy to GitHub Pages” 執行；成功後網站在 <https://laughtree.github.io/text-draw/>。
+2. 到 repo 的 **Settings → Pages → Build and deployment**，把 **Source** 設為 **GitHub Actions**（不是 “Deploy from a branch”，否則只會發佈未打包的原始碼，網頁無法運作）。
+3. 到 **Actions** 分頁看 “Deploy to GitHub Pages” 執行（設好 Source 後再推送一次，或在該 workflow 按 **Run workflow**）；成功後網站在 <https://laughtree.github.io/TextDraw/>。
 
-之後每次推送到 `main` 都會自動更新。也可以在 Actions 分頁手動執行（`workflow_dispatch`）。若檢查失敗就不會發佈。
+之後每次推送到 `master` 都會自動更新。若檢查失敗就不會發佈。
 
 ---
 
