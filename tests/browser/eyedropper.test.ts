@@ -44,12 +44,13 @@ async function pick(dy = 0) {
 }
 
 describe('eyedropper button', () => {
-  it('sits in the colour row between the colours and the pen / eraser, swatch-sized', () => {
+  it('sits in the colour row right beside the palette, on its left, swatch-sized', () => {
     const btn = app.q('.eyedropper').getBoundingClientRect(),
       sw = app.q('.swatches').getBoundingClientRect(),
-      seg = app.q('.colorrow .seg').getBoundingClientRect();
+      palette = app.q('.sw.pick').getBoundingClientRect();
     expect(btn.left).toBeGreaterThanOrEqual(sw.right - 1);
-    expect(btn.right).toBeLessThanOrEqual(seg.left + 1);
+    expect(btn.right).toBeLessThanOrEqual(palette.left + 1);
+    expect(palette.left - btn.right).toBeLessThan(12);
     expect(btn.width).toBe(32);
     expect(app.q('.eyedropper').getAttribute('aria-label')).toBe('滴管');
     tool('pick');
@@ -147,6 +148,17 @@ describe('eyedropper', () => {
     app.click('#bCopy');
     app.copy('text');
     expect(app.q('#toast').textContent).toBe('畫布是空的');
+  });
+
+  it('borrows a colour without changing between drawing and erasing', async () => {
+    await drawLine('#da1e28');
+    tool('rect');
+    app.click('#tErase');
+    tool('pick');
+    await pick();
+    expect(pressed('[data-color="#da1e28"]')).toBe('true');
+    expect(activeTool()).toBe('rect'); // back on the shape it was called from
+    expect(pressed('#tErase')).toBe('true'); // and still erasing
   });
 
   it('leaves the eyedropper when a colour is chosen by hand', () => {

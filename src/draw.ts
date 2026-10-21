@@ -14,10 +14,10 @@ function pos(e: PointerEvent): Point {
 
 function stroke(a: Point, b: Point): void {
   bctx.save();
-  bctx.globalCompositeOperation = state.tool === 'erase' ? 'destination-out' : 'source-over';
+  bctx.globalCompositeOperation = state.erase ? 'destination-out' : 'source-over';
   bctx.strokeStyle = state.penColor;
   bctx.fillStyle = state.penColor;
-  bctx.lineWidth = strokeWidth(state.tool, state.size);
+  bctx.lineWidth = strokeWidth(state.tool, state.erase, state.size);
   bctx.lineCap = 'round';
   bctx.lineJoin = 'round';
   bctx.beginPath();
@@ -45,7 +45,8 @@ function paintDrag(to: Point): void {
   if (drag.base) restoreBase(drag.base);
   drawShape(bctx, drag.kind, drag.start, to, {
     color: state.penColor,
-    width: strokeWidth(state.tool, state.size),
+    width: strokeWidth(state.tool, state.erase, state.size),
+    erase: state.erase,
   });
   state.dirty = true;
 }

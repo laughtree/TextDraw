@@ -36,7 +36,7 @@ function describe(p: Platform): HTMLParagraphElement[] {
   const title = p.limit === null ? `${p.label}\u3000通用估計` : `${p.label}\u3000上限 ${p.limit}`;
   const size =
     p.source === 'estimate'
-      ? `${cols} × ${rows}（欄 ≈ 列 × 2）`
+      ? `${cols} × ${rows}（寬度是估計值，貼出後仍會換行可再縮小）`
       : `${cols} × ${rows}（欄 ≈ 列 × 2；欄數上限 32 為估計值，非官方）`;
   return [
     paragraph(title, p.rule),

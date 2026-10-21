@@ -6,7 +6,7 @@ import { refreshText } from '../text';
 import type { Mode, Palette, Tool } from '../types';
 import { initColors } from './colors';
 import { reveal } from './reveal';
-import { setTool } from './tools';
+import { setErase, setTool } from './tools';
 import { toast } from './toast';
 
 /** Mark `active` as the pressed one among `buttons` (single-choice segmented control). */
@@ -16,8 +16,11 @@ function selectOne(buttons: HTMLElement[], active: HTMLElement): void {
 
 function initTools(): void {
   document
-    .querySelectorAll<HTMLElement>('[data-tool]')
+    .querySelectorAll<HTMLElement>('button[data-tool]')
     .forEach((b) => (b.onclick = () => setTool(b.dataset.tool as Tool)));
+  document
+    .querySelectorAll<HTMLElement>('[data-action]')
+    .forEach((b) => (b.onclick = () => setErase(b.dataset.action === 'erase')));
   $('size').oninput = (e) => {
     state.size = +(e.target as HTMLInputElement).value;
     $('sizeOut').textContent = String(state.size);

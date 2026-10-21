@@ -1,4 +1,5 @@
-export type Tool = 'pen' | 'erase' | 'line' | 'circle' | 'rect' | 'text' | 'pick';
+/** The shape being drawn (pen = freehand), or the eyedropper. Drawing or erasing is `state.erase`. */
+export type Tool = 'pen' | 'line' | 'circle' | 'rect' | 'text' | 'pick';
 export type Mode = 'braille' | 'mix' | 'block' | 'shade' | 'dots' | 'cjk' | 'line' | 'custom';
 export type Palette = 'color' | 'gray';
 export type ExportKind = 'text' | 'html' | 'ansi';

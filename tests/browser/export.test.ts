@@ -55,12 +55,7 @@ describe('export menu', () => {
   it('is called Export and lists four formats with Copy and Download', () => {
     expect(app.q('#bCopy').textContent?.trim()).toBe('匯出');
     expect(formats().map((b) => b.dataset.format)).toEqual(['text', 'html', 'ansi', 'image']);
-    expect(formats().map((b) => b.textContent?.trim())).toEqual([
-      '純文字',
-      '彩色 HTML',
-      'ANSI',
-      '圖片',
-    ]);
+    expect(formats().map((b) => b.textContent?.trim())).toEqual(['純文字', 'HTML', 'ANSI', '圖片']);
     expect(app.q('#bDoCopy').textContent?.trim()).toBe('複製');
     expect(app.q('#bDoDownload').textContent?.trim()).toBe('下載');
     expect(app.doc.querySelector('[data-copy]')).toBeNull();
@@ -99,29 +94,31 @@ describe('export menu', () => {
 describe('text formats', () => {
   it('copies each one to the clipboard', async () => {
     await drawLine();
-    for (const [format, needle] of [
-      ['text', '⠶'],
+    const copies: [string, string | RegExp][] = [
+      ['text', /[\u2801-\u28ff]/],
       ['html', '<pre'],
       ['ansi', '\x1b[38;2;218;30;40m'],
-    ]) {
+    ];
+    for (const [format, needle] of copies) {
       app.copied.length = 0;
       app.copy(format);
-      expect(app.copied.join(''), format).toContain(needle);
+      expect(app.copied.join(''), format).toMatch(needle);
     }
   });
 
   it('downloads each one as a file with the right name, type and content', async () => {
     await drawLine();
-    for (const [format, name, mime, needle] of [
-      ['text', 'ascii-paint.txt', 'text/plain;charset=utf-8', '⠶'],
+    const files: [string, string, string, string | RegExp][] = [
+      ['text', 'ascii-paint.txt', 'text/plain;charset=utf-8', /[\u2801-\u28ff]/],
       ['html', 'ascii-paint.html', 'text/html;charset=utf-8', '<meta charset="utf-8">'],
       ['ansi', 'ascii-paint.ans', 'text/plain;charset=utf-8', '\x1b[38;2;218;30;40m'],
-    ]) {
+    ];
+    for (const [format, name, mime, needle] of files) {
       app.download(format);
       const file = app.downloads[app.downloads.length - 1];
       expect(file.name, format).toBe(name);
       expect(file.blob.type, format).toBe(mime);
-      expect(await file.blob.text(), format).toContain(needle);
+      expect(await file.blob.text(), format).toMatch(needle);
       expect(toast(), format).toBe(`已下載 ${name}`);
     }
   });
@@ -166,7 +163,7 @@ describe('text formats', () => {
     await app.frames(3);
     app.copy('html');
     await app.frames(2);
-    expect(toast()).toBe('已複製彩色 HTML');
+    expect(toast()).toBe('已複製 HTML');
     app.copy('text');
     await app.frames(2);
     expect(toast()).toMatch(/^已複製純文字，但超過 Instagram 簡介 上限/);

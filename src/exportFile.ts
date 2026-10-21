@@ -16,7 +16,7 @@ export const EXPORT_FILES: Record<ExportFormat, ExportFile> = {
 
 export const EXPORT_LABELS: Record<ExportFormat, string> = {
   text: '純文字',
-  html: '彩色 HTML',
+  html: 'HTML',
   ansi: 'ANSI 文字',
   image: '圖片',
 };

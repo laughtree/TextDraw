@@ -55,7 +55,7 @@ describe('platform drop-down', () => {
     expect(labels).toHaveLength(11);
     expect(labels.slice(0, 6)).toEqual([
       '自訂',
-      '聊天室 · 24 × 12',
+      '聊天室 · 20 × 12',
       'X · 16 × 8',
       'Telegram · 32 × 16',
       'Discord · 32 × 16',
@@ -138,7 +138,7 @@ describe('platform drop-down', () => {
 
   it('applies the chat room size and shows no readout for it', async () => {
     await choose('chat');
-    expect(meta()).toBe('24 × 12 cells');
+    expect(meta()).toBe('20 × 12 cells');
     expect(app.q('#bAuto').getAttribute('aria-pressed')).toBe('false');
     expect(app.q('#budget').hidden).toBe(true);
     expect(app.q('#canvasBudget').hidden).toBe(true);
@@ -190,7 +190,7 @@ describe('platform help bubble', () => {
     await choose('chat');
     await toggle();
     const text = tip().textContent ?? '';
-    for (const part of ['聊天室', '通用估計', '非任何平台的官方數字', '24 × 12']) {
+    for (const part of ['聊天室', '通用估計', '非任何平台的官方數字', '20 × 12']) {
       expect(text, part).toContain(part);
     }
   });

@@ -31,6 +31,9 @@ function initSpaceChar(): void {
   };
 }
 
+/** Put a space between Chinese text and a label that starts with a Latin letter (已複製 HTML). */
+const spaced = (label: string): string => (/^[A-Za-z]/.test(label) ? ` ${label}` : label);
+
 /** Close the export menu once something has been copied or saved. */
 function closeMenu(): void {
   reveal($('copyMenu'), false, 'collapse');
@@ -60,7 +63,7 @@ function copyText(kind: ExportKind): void {
     navigator.clipboard.writeText(t).then(() => {
       // only the plain text is what gets posted, so only it is checked against the limit
       const over = kind === 'text' ? overLimit(t) : null;
-      const label = EXPORT_LABELS[kind];
+      const label = spaced(EXPORT_LABELS[kind]);
       toast(
         over
           ? `已複製${label}，但超過 ${over.label} 上限（${over.used} / ${over.limit}）`

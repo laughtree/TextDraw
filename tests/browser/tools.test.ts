@@ -35,50 +35,86 @@ function drag(a: number, b: number, c: number, d: number, steps = 8) {
 const filled = (l: string) => [...l].filter((c) => c !== BLANK).length;
 
 describe('tool bar', () => {
-  it('has one pressed tool across eyedropper, pen, eraser and the shape and text tools', () => {
-    const btns = [...app.doc.querySelectorAll<HTMLElement>('button[data-tool]')];
-    expect(btns.map((b) => b.dataset.tool)).toEqual([
+  const shapes = () => [...app.doc.querySelectorAll<HTMLElement>('button[data-tool]')];
+  const actions = () => [...app.doc.querySelectorAll<HTMLElement>('[data-action]')];
+  const pressed = (els: HTMLElement[]) =>
+    els
+      .filter((b) => b.getAttribute('aria-pressed') === 'true')
+      .map((b) => b.dataset.tool ?? b.dataset.action);
+
+  it('has one pressed shape across the eyedropper, the pen and the shape and text tools', () => {
+    expect(shapes().map((b) => b.dataset.tool)).toEqual([
       'pick',
       'pen',
-      'erase',
       'line',
       'circle',
       'rect',
       'text',
     ]);
+    expect(pressed(shapes())).toEqual(['pen']); // freehand is the default
     tool('rect');
-    expect(btns.map((b) => b.getAttribute('aria-pressed'))).toEqual([
-      'false',
-      'false',
-      'false',
-      'false',
-      'false',
-      'true',
-      'false',
-    ]);
-    tool('erase');
-    expect(
-      btns.filter((b) => b.getAttribute('aria-pressed') === 'true').map((b) => b.dataset.tool),
-    ).toEqual(['erase']);
+    expect(pressed(shapes())).toEqual(['rect']);
+    tool('pick');
+    expect(pressed(shapes())).toEqual(['pick']);
   });
 
-  it('puts the shape and text tools on their own row under the colours, on the left', () => {
+  it('keeps draw / erase as a mode that does not depend on the shape', () => {
+    expect(actions().map((b) => b.dataset.action)).toEqual(['draw', 'erase']);
+    expect(pressed(actions())).toEqual(['draw']);
+    app.click('#tErase');
+    expect(pressed(actions())).toEqual(['erase']);
+    expect(pressed(shapes())).toEqual(['pen']); // the shape did not change
+    tool('circle');
+    expect(pressed(actions())).toEqual(['erase']); // and the mode survived a change of shape
+    app.click('#tDraw');
+    expect(pressed(actions())).toEqual(['draw']);
+    expect(pressed(shapes())).toEqual(['circle']);
+  });
+
+  it('goes back to drawing when a colour is chosen', () => {
+    app.click('#tErase');
+    app.click('[data-color="#24a148"]');
+    expect(pressed(actions())).toEqual(['draw']);
+    app.click('#tErase');
+    app.setValue('#colorPick', '#336699');
+    expect(pressed(actions())).toEqual(['draw']);
+  });
+
+  it('puts the shapes on their own row under the colours (pen first), draw / erase at its right end', () => {
     const colors = app.q('.colorrow').getBoundingClientRect(),
       tools = app.q('.tools').getBoundingClientRect(),
-      first = app.q('[data-tool="line"]').getBoundingClientRect();
+      pen = app.q('[data-tool="pen"]').getBoundingClientRect(),
+      seg = app.q('.actionseg').getBoundingClientRect();
     expect(tools.top).toBeGreaterThanOrEqual(colors.bottom);
-    expect(first.left - tools.left).toBeLessThan(2);
-    for (const name of ['line', 'circle', 'rect', 'text']) {
+    expect(pen.left - tools.left).toBeLessThan(2); // the pen is the first button, on the left
+    expect(tools.right - seg.right).toBeLessThan(2); // draw / erase sit at the right end
+    expect(app.doc.querySelector('.colorrow .actionseg')).toBeNull();
+    for (const name of ['pen', 'line', 'circle', 'rect', 'text']) {
       expect(app.q(`[data-tool="${name}"]`).getAttribute('aria-label')).toBeTruthy();
       expect(app.q(`[data-tool="${name}"] svg`)).toBeTruthy();
     }
   });
 
-  it('shows the font-size slider only for the text tool', async () => {
+  it('lays the colour row out as the colours, the eyedropper, then the palette, with no scrolling', () => {
+    const sw = app.q('.swatches').getBoundingClientRect(),
+      eye = app.q('.eyedropper').getBoundingClientRect(),
+      pal = app.q('.sw.pick').getBoundingClientRect();
+    expect(app.doc.querySelectorAll('.swatches .sw')).toHaveLength(8);
+    expect(app.q('.swatches').scrollWidth).toBeLessThanOrEqual(app.q('.swatches').clientWidth + 1);
+    expect(eye.left).toBeGreaterThanOrEqual(sw.right - 1);
+    expect(pal.left).toBeGreaterThanOrEqual(eye.right - 1);
+    expect(pal.left - eye.right).toBeLessThan(12); // the eyedropper is right beside the palette
+    expect(app.q('.sw.pick').closest('.swatches')).toBeNull();
+  });
+
+  it('shows the font-size row, under the shapes, only for the text tool', async () => {
     expect(app.q('#textOpts').hidden).toBe(true);
     tool('text');
     expect(app.q('#textOpts').hidden).toBe(false);
     await app.settle();
+    expect(app.q('#textOpts').getBoundingClientRect().top).toBeGreaterThanOrEqual(
+      app.q('.tools').getBoundingClientRect().bottom,
+    );
     tool('pen');
     await app.settle();
     expect(app.q('#textOpts').hidden).toBe(true);
@@ -132,19 +168,21 @@ describe('shapes', () => {
     expect(mid[Math.floor(mid.length / 2)]).toBe(BLANK); // hollow
   });
 
-  it('draws a circle in the dragged box: empty corners, touching the middle of each side', async () => {
+  it('draws a circle in the dragged box: empty corners, touching each side, hollow', async () => {
     tool('circle');
     drag(0.3, 0.2, 0.7, 0.8);
     const rows = await copyText();
+    const n = rows.length;
     const first = [...rows[0]],
-      last = [...rows[rows.length - 1]];
-    expect(first[0]).toBe(BLANK); // the corner of the box is empty
+      last = [...rows[n - 1]];
+    expect(first[0]).toBe(BLANK); // the corners of the box are empty
     expect(last[0]).toBe(BLANK);
-    expect(first[Math.floor(first.length / 2)]).not.toBe(BLANK); // top of the circle
-    const mid = [...rows[Math.floor(rows.length / 2)]];
-    expect(mid[0]).not.toBe(BLANK); // left and right extremes
-    expect(mid[mid.length - 1]).not.toBe(BLANK);
-    expect(mid[Math.floor(mid.length / 2)]).toBe(BLANK); // hollow
+    const third = (r: string[]) => r.slice(Math.floor(r.length / 3), Math.ceil((2 * r.length) / 3));
+    expect(third(first).some((c) => c !== BLANK)).toBe(true); // the top of the circle
+    expect(third(last).some((c) => c !== BLANK)).toBe(true); // and its bottom
+    const middle = rows.slice(Math.floor(n / 2) - 1, Math.floor(n / 2) + 2).map((r) => [...r]);
+    expect(middle.some((r) => r[0] !== BLANK)).toBe(true); // the left extreme
+    for (const r of middle) expect(r[Math.floor(r.length / 2)]).toBe(BLANK); // hollow
   });
 
   it('gives the same shape whichever corner the drag starts from', async () => {
@@ -300,5 +338,102 @@ describe('text', () => {
     app.copied.length = 0;
     app.copy('html');
     expect(app.copied.join('')).toContain('color:#0f62fe');
+  });
+});
+
+describe('erase mode applies to every shape', () => {
+  const input = () => app.q<HTMLInputElement>('#textEdit');
+  // braille mode, and ink counted in dots: fine enough to notice a thin cut
+  const dots = (n: number): number => n.toString(2).replaceAll('0', '').length;
+  async function ink(): Promise<number> {
+    await app.frames(3);
+    app.copied.length = 0;
+    app.copy('text');
+    let n = 0;
+    for (const c of app.copied.join('')) {
+      const code = c.charCodeAt(0) - 0x2800;
+      if (code > 0 && code < 256) n += dots(code);
+    }
+    return n;
+  }
+  beforeEach(() => app.click('[data-mode="braille"]'));
+  /** a thick horizontal band across the middle of the canvas, drawn with the pen */
+  async function band(): Promise<number> {
+    app.setValue('#size', '30');
+    const v = size();
+    app.stroke(line(v.width * 0.1, v.height * 0.5, v.width * 0.9, v.height * 0.5, 12));
+    return ink();
+  }
+
+  it('erases freehand with the 2.5× eraser', async () => {
+    const before = await band();
+    app.click('#tErase');
+    app.setValue('#size', '12');
+    const v = size();
+    app.stroke(line(v.width * 0.5, v.height * 0.2, v.width * 0.5, v.height * 0.8, 8));
+    expect(await ink()).toBeLessThan(before);
+  });
+
+  it('erases along a line with the width it draws with, which cancels a line drawn at that width', async () => {
+    tool('line');
+    app.setValue('#size', '30');
+    const v = size();
+    app.stroke(line(v.width * 0.1, v.height * 0.5, v.width * 0.9, v.height * 0.5, 12));
+    const before = await ink();
+    expect(before).toBeGreaterThan(40);
+    app.click('#tErase');
+    app.stroke(line(v.width * 0.1, v.height * 0.5, v.width * 0.9, v.height * 0.5, 12));
+    expect(await ink()).toBeLessThan(before * 0.25);
+  });
+
+  it.each(['rect', 'circle'])('cuts the outline of a %s out of the ink under it', async (shape) => {
+    const before = await band();
+    tool(shape);
+    app.click('#tErase');
+    app.setValue('#size', '8');
+    drag(0.3, 0.3, 0.7, 0.7);
+    const after = await ink();
+    expect(after).toBeLessThan(before);
+    expect(after).toBeGreaterThan(0); // the inside and the rest of the band are still there
+  });
+
+  it('cuts out the shape of typed text, and undo puts the ink back', async () => {
+    const before = await band();
+    tool('text');
+    app.click('#tErase');
+    app.setValue('#textSize', '100');
+    const v = size();
+    app.fire('pointerdown', v.width * 0.25, v.height * 0.3);
+    app.fire('pointerup', v.width * 0.25, v.height * 0.3);
+    input().value = 'HI';
+    input().dispatchEvent(new app.win.Event('input', { bubbles: true }));
+    await app.sleep(200);
+    expect(await ink()).toBeLessThan(before); // the live preview already shows the cut-out
+    input().dispatchEvent(new app.win.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    const cut = await ink();
+    expect(cut).toBeLessThan(before);
+    app.click('#bUndo');
+    expect(await ink()).toBe(before);
+    expect(cut).toBeLessThan(before);
+  });
+
+  it('shows the dashed ring for erasing with every shape, as wide as the line it erases', () => {
+    app.click('#tErase');
+    app.setValue('#size', '20');
+    for (const [name, width] of [
+      ['pen', 50],
+      ['line', 20],
+      ['circle', 20],
+      ['rect', 20],
+    ] as const) {
+      tool(name);
+      app.fire('pointermove', 100, 80);
+      const ring = app.q('#brush');
+      expect(ring.classList.contains('erase'), name).toBe(true);
+      expect(ring.getBoundingClientRect().width, name).toBe(width);
+    }
+    tool('text');
+    app.fire('pointermove', 100, 80);
+    expect(app.q('#brush').hidden).toBe(true);
   });
 });

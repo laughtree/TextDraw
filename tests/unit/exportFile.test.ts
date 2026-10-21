@@ -16,7 +16,7 @@ describe('export files', () => {
   it('labels every format in Chinese', () => {
     expect(EXPORT_LABELS).toEqual({
       text: '純文字',
-      html: '彩色 HTML',
+      html: 'HTML',
       ansi: 'ANSI 文字',
       image: '圖片',
     });

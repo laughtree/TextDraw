@@ -22,6 +22,7 @@ export const isEditing = (): boolean => edit !== null;
 /** Paint `text` with its top-left at `at`: the tops of capital letters sit on the click point. */
 export function paintText(ctx: CanvasRenderingContext2D, text: string, at: Point): void {
   ctx.save();
+  ctx.globalCompositeOperation = state.erase ? 'destination-out' : 'source-over'; // erasing cuts out the letters
   ctx.font = textFont(state.textSize);
   ctx.fillStyle = state.penColor;
   ctx.textBaseline = 'alphabetic';

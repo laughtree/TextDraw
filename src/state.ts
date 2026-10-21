@@ -5,6 +5,8 @@ import type { ExportFormat, Mode, Palette, Tool } from './types';
 export const state = {
   // tools and options
   tool: 'pen' as Tool,
+  /** erase mode: every shape removes ink instead of adding it */
+  erase: false,
   /** the tool to return to after the eyedropper */
   prevTool: 'pen' as Tool,
   mode: 'braille' as Mode,

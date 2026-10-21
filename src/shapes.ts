@@ -8,6 +8,8 @@ export type ShapeKind = 'line' | 'circle' | 'rect';
 export interface ShapeStyle {
   color: string;
   width: number;
+  /** remove ink along the shape instead of painting it */
+  erase?: boolean;
 }
 
 /** The rectangle spanned by two corners, whichever way it was dragged. */
@@ -33,6 +35,7 @@ export function drawShape(
 ): void {
   const { x, y, w, h } = normalizeBox(a, b);
   ctx.save();
+  ctx.globalCompositeOperation = style.erase ? 'destination-out' : 'source-over';
   ctx.strokeStyle = style.color;
   ctx.lineWidth = style.width;
   ctx.lineCap = 'round';

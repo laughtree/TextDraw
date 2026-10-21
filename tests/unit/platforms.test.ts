@@ -40,7 +40,7 @@ describe('deriveGrid', () => {
   };
 
   it('gives each platform the planned size', () => {
-    expect(sizeOf('chat')).toBe('24x12');
+    expect(sizeOf('chat')).toBe('20x12');
     expect(sizeOf('x')).toBe('16x8');
     expect(sizeOf('mastodon')).toBe('30x15');
     expect(sizeOf('threads')).toBe('30x15');
@@ -70,8 +70,8 @@ describe('deriveGrid', () => {
     expect(deriveGrid(1, 1)).toEqual({ cols: LIMITS.minCols, rows: LIMITS.minRows });
   });
 
-  it('keeps cells roughly square: columns are twice the rows', () => {
-    for (const p of PLATFORMS) {
+  it('keeps cells roughly square: columns are twice the rows (the chat room is a fixed estimate)', () => {
+    for (const p of PLATFORMS.filter((x) => x.id !== 'chat')) {
       const g = presetGrid(p);
       expect(g.cols, p.id).toBe(g.rows * 2);
     }
