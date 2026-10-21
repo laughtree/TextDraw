@@ -3,7 +3,7 @@ import { playwright } from '@vitest/browser-playwright';
 
 export default defineConfig({
   // relative asset paths: works from any sub-path, e.g. https://<user>.github.io/<repo>/
-  base: './',
+  base: '/TextDraw/',
   test: {
     projects: [
       {
