@@ -4,6 +4,7 @@ import { countOf, findPlatform, PLATFORMS, presetGrid, type Platform } from '../
 import { state } from '../state';
 import { setGrid } from '../surface';
 import { exportCurrent } from './exportCurrent';
+import { reveal } from './reveal';
 import { bindTip } from './tip';
 
 const SOURCE_TEXT: Record<Platform['source'], string> = {
@@ -66,27 +67,31 @@ export function initPlatform(): void {
   let shown = '';
   const update = () => {
     const p = findPlatform(state.platform);
-    box.hidden = compact.hidden = !p || p.limit === null;
-    if (!p || p.limit === null) {
+    const limit = p?.limit ?? null;
+    if (p && limit !== null) {
+      const used = countOf(exportCurrent('text'), p.counter),
+        over = used > limit;
+      const key = `${p.id}|${used}`;
+      if (key !== shown) {
+        shown = key;
+        count.textContent = `已用 ${used} / ${limit}${over ? ' · 超出上限' : ''}`;
+        compact.textContent = ` · ${used}/${limit}`;
+        box.classList.toggle('over', over);
+        compact.classList.toggle('over', over);
+      }
+    } else {
       shown = '';
-      return;
     }
-    const used = countOf(exportCurrent('text'), p.counter),
-      over = used > p.limit;
-    const key = `${p.id}|${used}`;
-    if (key === shown) return;
-    shown = key;
-    count.textContent = `已用 ${used} / ${p.limit}${over ? ' · 超出上限' : ''}`;
-    compact.textContent = ` · ${used}/${p.limit}`;
-    box.classList.toggle('over', over);
-    compact.classList.toggle('over', over);
+    // text first, so the block animates open at its final height
+    reveal(box, limit !== null, 'collapse');
+    reveal(compact, limit !== null, 'fade');
   };
 
   select.onchange = () => {
     const p = findPlatform(select.value);
     state.platform = p?.id ?? null;
     tip.close();
-    tipBtn.hidden = !p;
+    reveal(tipBtn, !!p, 'fade');
     tipBox.replaceChildren(...(p ? describe(p) : []));
     if (p) {
       pushUndo();

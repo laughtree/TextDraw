@@ -3,6 +3,7 @@ import { state } from '../state';
 import type { ExportKind } from '../types';
 import { exportCurrent } from './exportCurrent';
 import { overLimit } from './platform';
+import { isOpen, reveal } from './reveal';
 import { bindTip } from './tip';
 import { toast } from './toast';
 
@@ -34,9 +35,9 @@ function initSpaceChar(): void {
 
 function initCopyButtons(): void {
   $('bCopy').onclick = (e) => {
-    const m = $('copyMenu');
-    m.hidden = !m.hidden;
-    (e.currentTarget as HTMLElement).setAttribute('aria-expanded', String(!m.hidden));
+    const show = !isOpen($('copyMenu'));
+    reveal($('copyMenu'), show, 'collapse');
+    (e.currentTarget as HTMLElement).setAttribute('aria-expanded', String(show));
   };
   document.querySelectorAll<HTMLElement>('[data-copy]').forEach(
     (btn) =>
@@ -51,7 +52,7 @@ function initCopyButtons(): void {
         const fallback = () => {
           const ta = $<HTMLTextAreaElement>('copyText');
           ta.value = t;
-          $('copyPanel').hidden = false;
+          reveal($('copyPanel'), true, 'fade');
           ta.select();
         };
         try {
@@ -63,7 +64,7 @@ function initCopyButtons(): void {
                 ? `已複製${LABELS[kind]}，但超過 ${over.label} 上限（${over.used} / ${over.limit}）`
                 : '已複製' + LABELS[kind],
             );
-            $('copyMenu').hidden = true;
+            reveal($('copyMenu'), false, 'collapse');
             $('bCopy').setAttribute('aria-expanded', 'false');
           }, fallback);
         } catch {
@@ -72,7 +73,7 @@ function initCopyButtons(): void {
       }),
   );
   $('bClosePanel').onclick = () => {
-    $('copyPanel').hidden = true;
+    reveal($('copyPanel'), false, 'fade');
   };
 }
 

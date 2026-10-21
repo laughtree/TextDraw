@@ -10,6 +10,10 @@ export interface App {
   q: <T extends HTMLElement>(sel: string) => T;
   frames: (n?: number) => Promise<void>;
   sleep: (ms: number) => Promise<void>;
+  /** wait until every running animation (enter/exit motion, transitions) has finished */
+  settle: () => Promise<void>;
+  /** number of animations running right now */
+  animations: () => number;
   click: (sel: string) => void;
   /** set an input's value and fire `input` (default) or `change` */
   setValue: (sel: string, value: string, event?: 'input' | 'change') => void;
@@ -39,6 +43,14 @@ export async function openApp(url: string, width = 480, height = 720): Promise<A
     for (let i = 0; i < n; i++) await new Promise((r) => win.requestAnimationFrame(r));
   };
   const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+  const animations = () => doc.getAnimations().length;
+  const settle = async () => {
+    for (let i = 0; i < 20 && animations() > 0; i++) {
+      await Promise.allSettled(doc.getAnimations().map((a) => a.finished));
+      await frames(1);
+    }
+    await frames(2);
+  };
   const click = (sel: string) => q(sel).click();
   const setValue = (sel: string, value: string, event: 'input' | 'change' = 'input') => {
     const el = q<HTMLInputElement>(sel);
@@ -87,6 +99,8 @@ export async function openApp(url: string, width = 480, height = 720): Promise<A
     q,
     frames,
     sleep,
+    settle,
+    animations,
     click,
     setValue,
     fire,

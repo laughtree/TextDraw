@@ -3,6 +3,7 @@ import { clampGrid, LIMITS, parseDim } from '../grid';
 import { pushUndo } from '../history';
 import { state } from '../state';
 import { setGrid } from '../surface';
+import { isOpen, reveal } from './reveal';
 import { toast } from './toast';
 
 /** "畫布大小" panel: auto (follow the window) or a fixed columns × rows grid. */
@@ -27,8 +28,9 @@ export function initCanvasSize(): void {
   document.addEventListener('gridchange', sync);
 
   toggle.onclick = () => {
-    panel.hidden = !panel.hidden;
-    toggle.setAttribute('aria-expanded', String(!panel.hidden));
+    const show = !isOpen(panel);
+    reveal(panel, show, 'collapse');
+    toggle.setAttribute('aria-expanded', String(show));
   };
 
   auto.onclick = () => {

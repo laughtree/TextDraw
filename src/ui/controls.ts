@@ -3,6 +3,7 @@ import { doRedo, doUndo, pushUndo } from '../history';
 import { state } from '../state';
 import { bctx } from '../surface';
 import type { Mode, Palette } from '../types';
+import { reveal } from './reveal';
 import { toast } from './toast';
 
 function setPressed(a: string, b: string, on: boolean): void {
@@ -37,7 +38,7 @@ function initModes(): void {
       (btn.onclick = () => {
         state.mode = btn.dataset.mode as Mode;
         selectOne(modeBtns, btn);
-        $('customRow').hidden = state.mode !== 'custom';
+        reveal($('customRow'), state.mode === 'custom', 'collapse');
         state.dirty = true;
       }),
   );

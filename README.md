@@ -49,13 +49,23 @@ src/
   sample.ts         起始畫面（DRAW / TEXT，IBM PC 8×8 點陣字）
   font8x8.ts        點陣字型資料與起始文字
   export.ts         純文字 / HTML / ANSI 輸出（純函式）
-  ui/               工具列、複製選單、提示訊息、筆刷範圍圓圈（brush.ts）、畫布大小（canvasSize.ts）
+  ui/               工具列、複製選單、提示訊息、筆刷範圍圓圈（brush.ts）、畫布大小（canvasSize.ts）、顯示／收起動效（reveal.ts）
   styles/           tokens（主題色）/ base / brush / shell / controls / tray / overlays
 tests/
   unit/             Node 環境：export、color
   browser/          真實 Chromium：convert、parity
 legacy/             重構前的單檔版本，僅供對照測試使用
 ```
+
+## 動效
+
+點了才出現的區域（複製選單、畫布大小面板、自訂字元列、兩個 ⓘ 提示框、toast、剪貼簿備援面板、平台讀數）都由 `src/ui/reveal.ts`
+以 Web Animations API 做進出動效：會推擠版面的區塊以高度滑動＋淡入（展開約 200 ms、收起約 150 ms），toast 由上方滑入，提示框由下方滑入，其餘淡入淡出。
+
+- 滑動期間畫布會先凍結（維持原清晰度，下緣被漸漸裁切或露出），動畫結束後才重算一次格數，所以不會每幀重新轉換。
+- 系統開啟「減少動態效果」時完全不播放，維持瞬間切換。
+- 收起時 `hidden` 屬性要等動畫結束才設定；程式碼判斷是否開啟請用 `isOpen()`，不要直接讀 `hidden`。
+- 測試以 `app.settle()`（等所有動畫結束）取代固定等待。
 
 ## 轉換模式
 

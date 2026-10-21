@@ -33,7 +33,7 @@ async function collect(
   iframeHeight = 720,
 ): Promise<{ out: Record<string, string>; stageHeight: number }> {
   const app = await openApp(url, 480, iframeHeight);
-  const { iframe, win, doc, view, copied, frames, sleep, click, setValue, stroke } = app;
+  const { iframe, win, doc, view, copied, frames, sleep, settle, click, setValue, stroke } = app;
   const stageH = () => Math.floor(app.q('#stage').getBoundingClientRect().height);
 
   // wait for fonts and the starter picture, then settle glyph calibration on the loaded fonts
@@ -50,7 +50,7 @@ async function collect(
 
   const out: Record<string, string> = {};
   const capture = async (label: string) => {
-    await frames();
+    await settle(); // the refactored page animates panels in and out; legacy has none
     for (const kind of KINDS) {
       copied.length = 0;
       click(`[data-copy="${kind}"]`);

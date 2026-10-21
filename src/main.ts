@@ -16,6 +16,7 @@ import { initCanvasSize } from './ui/canvasSize';
 import { initControls } from './ui/controls';
 import { initCopy } from './ui/copy';
 import { initPlatform } from './ui/platform';
+import { layoutBusy } from './ui/reveal';
 
 initDraw();
 initControls();
@@ -33,7 +34,10 @@ new MutationObserver(markDirty).observe(document.documentElement, {
   attributes: true,
   attributeFilter: ['data-theme'],
 });
-new ResizeObserver(() => resize()).observe(stage);
+// a collapse animation resizes the stage every frame on purpose; reveal.ts re-fits once it ends
+new ResizeObserver(() => {
+  if (!layoutBusy()) resize();
+}).observe(stage);
 
 const start = () => {
   resize();

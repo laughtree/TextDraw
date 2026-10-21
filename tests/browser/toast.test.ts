@@ -12,8 +12,9 @@ const toast = () => app.q('#toast');
 const rect = (sel: string) => app.q(sel).getBoundingClientRect();
 
 /** the toast is visible, sits under the header inside the canvas area, and is centred */
-function expectBelowHeader() {
+async function expectBelowHeader() {
   expect(toast().hidden).toBe(false);
+  await app.settle(); // measure at rest, not mid-slide
   const t = toast().getBoundingClientRect(),
     shell = rect('.shell'),
     paper = rect('#paper');
@@ -31,7 +32,7 @@ describe('toast placement', () => {
     app.click('#bCopy');
     app.click('[data-copy="text"]');
     expect(toast().textContent).toBe('畫布是空的');
-    expectBelowHeader();
+    await expectBelowHeader();
   });
 
   it('shows the copy confirmation below the header', async () => {
@@ -41,14 +42,15 @@ describe('toast placement', () => {
     app.click('[data-copy="text"]');
     await app.frames();
     expect(toast().textContent).toBe('已複製純文字');
-    expectBelowHeader();
+    await expectBelowHeader();
   });
 
   it('shows the clear confirmation below the header, then hides', async () => {
     app.click('#bClear');
     expect(toast().textContent).toBe('已清空');
-    expectBelowHeader();
-    await app.sleep(2100);
+    await expectBelowHeader();
+    await app.sleep(1700);
+    await app.settle(); // the exit motion finishes after the 1.8 s timer
     expect(toast().hidden).toBe(true);
   });
 });
