@@ -24,6 +24,7 @@ async function until(cond: () => boolean, ms = 3000) {
 async function importText(text: string) {
   app.click('#bImport');
   app.click('[data-import="text"]');
+  await app.settle();
   app.setValue('#importText', text);
   app.click('#bDoImport');
   await until(() => /已匯入文字|沒有可匯入/.test(toast() ?? ''));
@@ -95,16 +96,41 @@ describe('import panel', () => {
     expect(meta()).toBe(before);
   });
 
-  it('switches between the image and text panes', async () => {
+  it('slides between the image and text panes, both at once', async () => {
     app.click('#bImport');
     await app.settle();
+    const image = app.q('#importImagePane'),
+      text = app.q('#importTextPane');
     expect(pressed('[data-import="image"]')).toBe('true');
-    expect(app.q('#importTextPane').hidden).toBe(true);
+    expect(text.hidden).toBe(true);
     app.click('[data-import="text"]');
     expect(pressed('[data-import="text"]')).toBe('true');
     expect(pressed('[data-import="image"]')).toBe('false');
-    expect(app.q('#importImagePane').hidden).toBe(true);
-    expect(app.q('#importTextPane').hidden).toBe(false);
+    expect(text.hidden).toBe(false); // visible straight away, then grows in
+    expect(image.hidden).toBe(false); // still on its way out
+    expect(text.getAnimations().length).toBeGreaterThan(0);
+    expect(image.getAnimations().length).toBeGreaterThan(0);
+    await app.settle();
+    expect(image.hidden).toBe(true);
+    expect(text.hidden).toBe(false);
+    app.click('[data-import="image"]');
+    await app.settle();
+    expect(image.hidden).toBe(false);
+    expect(text.hidden).toBe(true);
+  });
+
+  it('survives switching back at once without sticking half way', async () => {
+    app.click('#bImport');
+    await app.settle();
+    app.click('[data-import="text"]');
+    app.click('[data-import="image"]');
+    await app.settle();
+    expect(app.q('#importImagePane').hidden).toBe(false);
+    expect(app.q('#importTextPane').hidden).toBe(true);
+    for (const id of ['#importImagePane', '#importTextPane']) {
+      expect(app.q(id).style.overflow).toBe('');
+      expect(app.q(id).style.height).toBe('');
+    }
   });
 });
 

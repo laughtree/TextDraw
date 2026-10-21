@@ -44,8 +44,8 @@ function initPanel(): void {
       (tab.onclick = () => {
         const kind = tab.dataset.import as keyof typeof panes;
         tabs.forEach((t) => t.setAttribute('aria-pressed', String(t === tab)));
-        panes.image.hidden = kind !== 'image';
-        panes.text.hidden = kind !== 'text';
+        reveal(panes.image, kind === 'image', 'collapse');
+        reveal(panes.text, kind === 'text', 'collapse');
       }),
   );
 
