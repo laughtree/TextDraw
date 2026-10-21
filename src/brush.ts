@@ -7,5 +7,6 @@ export const strokeWidth = (tool: Tool, size: number): number =>
 /** Smallest footprint ring we draw, so thin pens stay visible. */
 export const RING_MIN = 6;
 
-export const ringDiameter = (tool: Tool, size: number): number =>
-  Math.max(RING_MIN, strokeWidth(tool, size));
+/** On-screen ring diameter in CSS px: the stroke width times the display scale, but never tiny. */
+export const ringDiameter = (tool: Tool, size: number, scale = 1): number =>
+  Math.max(RING_MIN, strokeWidth(tool, size) * scale);

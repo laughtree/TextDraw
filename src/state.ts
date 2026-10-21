@@ -1,3 +1,4 @@
+import type { Grid } from './grid';
 import type { Mode, Palette, Tool } from './types';
 
 /** Mutable app state shared by the drawing, rendering and UI modules. */
@@ -17,6 +18,9 @@ export const state = {
   drawing: false,
   last: null as { x: number; y: number } | null,
 
+  /** user-chosen grid; null follows the window size (auto) */
+  fixed: null as Grid | null,
+
   // canvas geometry
   W: 0,
   H: 0,
@@ -25,6 +29,10 @@ export const state = {
   cols: 0,
   rows: 0,
   dpr: 1,
+  /** CSS px per buffer px: 1 in auto mode, below/above 1 when a fixed grid is fitted to the stage */
+  scale: 1,
+  /** screen pixels per buffer px used when painting the view (dpr × scale) */
+  renderScale: 1,
   fontPx: 13,
 
   /** repaint requested; consumed by render() */

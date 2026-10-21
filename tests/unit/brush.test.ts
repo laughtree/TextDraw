@@ -14,6 +14,12 @@ describe('ringDiameter', () => {
     expect(ringDiameter('erase', 20)).toBe(50);
   });
 
+  it('follows the display scale but keeps the minimum', () => {
+    expect(ringDiameter('pen', 20, 0.5)).toBe(10);
+    expect(ringDiameter('pen', 20, 0.1)).toBe(RING_MIN);
+    expect(ringDiameter('erase', 20, 2)).toBe(100);
+  });
+
   it('never drops below the minimum visible ring', () => {
     expect(ringDiameter('pen', 2)).toBe(RING_MIN);
     expect(ringDiameter('erase', 2)).toBe(RING_MIN); // 5 < 6

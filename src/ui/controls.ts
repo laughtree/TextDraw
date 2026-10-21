@@ -94,7 +94,7 @@ function initHistory(): void {
     const t = e.target as HTMLElement | null;
     if (
       t &&
-      ((t.tagName === 'INPUT' && (t as HTMLInputElement).type === 'text') ||
+      ((t.tagName === 'INPUT' && ['text', 'number'].includes((t as HTMLInputElement).type)) ||
         t.tagName === 'TEXTAREA')
     )
       return; // keep native text undo

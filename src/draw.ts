@@ -10,7 +10,8 @@ interface Point {
 
 function pos(e: PointerEvent): Point {
   const r = view.getBoundingClientRect();
-  return { x: e.clientX - r.left, y: e.clientY - r.top };
+  // CSS px → buffer px (state.scale is 1 unless a fixed grid is fitted to the stage)
+  return { x: (e.clientX - r.left) / state.scale, y: (e.clientY - r.top) / state.scale };
 }
 
 function stroke(a: Point, b: Point): void {

@@ -11,7 +11,8 @@ export interface App {
   frames: (n?: number) => Promise<void>;
   sleep: (ms: number) => Promise<void>;
   click: (sel: string) => void;
-  setValue: (sel: string, value: string) => void;
+  /** set an input's value and fire `input` (default) or `change` */
+  setValue: (sel: string, value: string, event?: 'input' | 'change') => void;
   /** dispatch a pointer event at (x, y) in canvas coordinates */
   fire: (type: string, x: number, y: number, init?: PointerEventInit) => void;
   stroke: (pts: [number, number][]) => void;
@@ -39,10 +40,10 @@ export async function openApp(url: string, width = 480, height = 720): Promise<A
   };
   const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
   const click = (sel: string) => q(sel).click();
-  const setValue = (sel: string, value: string) => {
+  const setValue = (sel: string, value: string, event: 'input' | 'change' = 'input') => {
     const el = q<HTMLInputElement>(sel);
     el.value = value;
-    el.dispatchEvent(new win.Event('input', { bubbles: true }));
+    el.dispatchEvent(new win.Event(event, { bubbles: true }));
   };
 
   const copied: string[] = [];

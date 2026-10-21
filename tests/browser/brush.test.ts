@@ -80,7 +80,7 @@ describe('brush ring', () => {
 
   it('previews the width at the stage centre while the slider moves, then fades away', async () => {
     app.setValue('#size', '30');
-    const s = app.q('#stage').getBoundingClientRect();
+    const s = app.q('#paper').getBoundingClientRect();
     expect(ring().hidden).toBe(false);
     expect(box().width).toBe(30);
     expect(centre().x).toBeCloseTo(s.left + s.width / 2, 0);

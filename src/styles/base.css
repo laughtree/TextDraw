@@ -56,8 +56,22 @@ body::before {
   position: relative;
   background: var(--bg);
   overflow: hidden;
+}
+/* a fixed-size grid is letterboxed inside the stage */
+#stage.fixed {
+  background: var(--layer);
+}
+/* the drawing surface: fills the stage in auto mode; JS sets an explicit size when the grid is fixed */
+#paper {
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
   background-image: linear-gradient(var(--grid) 1px, transparent 1px);
   background-size: 100% var(--cellh, 16px);
+}
+#stage.fixed #paper {
+  margin: auto;
+  box-shadow: 0 0 0 1px var(--border-subtle);
 }
 #view {
   position: absolute;

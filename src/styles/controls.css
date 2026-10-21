@@ -206,3 +206,19 @@ button:disabled {
   width: calc(100% + 20px);
   height: calc(100% + 20px);
 }
+
+/* number fields (canvas size) */
+.num {
+  width: 72px;
+  height: 32px;
+  font: 14px var(--f-mono);
+  color: var(--text);
+  background: var(--bg);
+  border: 0;
+  border-bottom: 1px solid var(--border-strong);
+  padding: 0 8px;
+  border-radius: 0;
+}
+.num:disabled {
+  color: var(--faint);
+}

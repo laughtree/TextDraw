@@ -17,9 +17,22 @@ const hash = (s: string): string => {
   return (h >>> 0).toString(16) + ':' + s.length;
 };
 
-async function collect(url: string): Promise<Record<string, string>> {
-  const { iframe, win, doc, view, copied, frames, sleep, click, setValue, stroke } =
-    await openApp(url);
+/** Height of the canvas area (#stage) when the page is shown in an iframe of the given height. */
+async function stageHeightAt(url: string, iframeHeight: number): Promise<number> {
+  const app = await openApp(url, 480, iframeHeight);
+  const h = Math.floor(app.q('#stage').getBoundingClientRect().height);
+  app.close();
+  return h;
+}
+
+/** Drive one app through the scenario; returns every captured output and the canvas-area height. */
+async function collect(
+  url: string,
+  iframeHeight = 720,
+): Promise<{ out: Record<string, string>; stageHeight: number }> {
+  const app = await openApp(url, 480, iframeHeight);
+  const { iframe, win, doc, view, copied, frames, sleep, click, setValue, stroke } = app;
+  const stageH = () => Math.floor(app.q('#stage').getBoundingClientRect().height);
 
   // wait for fonts and the starter picture, then settle glyph calibration on the loaded fonts
   await win.document.fonts.load('13px "IBM Plex Mono"', GLYPHS);
@@ -100,18 +113,22 @@ async function collect(url: string): Promise<Record<string, string>> {
     }
   }
 
+  const result = { out, stageHeight: stageH() };
   iframe.remove();
-  return out;
+  return result;
 }
 
 describe('refactored app matches the original single-file app', () => {
   it('produces identical output for every mode, palette, theme and copy format', async () => {
-    const legacy = await collect('/legacy/index.html');
     const current = await collect('/index.html');
-    expect(Object.keys(current)).toEqual(Object.keys(legacy));
+    // the refactored page has an extra tray row; give the legacy page's canvas the same area
+    const legacyH = 720 + current.stageHeight - (await stageHeightAt('/legacy/index.html', 720));
+    const legacy = await collect('/legacy/index.html', legacyH);
+    expect(legacy.stageHeight).toBe(current.stageHeight);
+    expect(Object.keys(current.out)).toEqual(Object.keys(legacy.out));
     // sanity: the scenario really drew something
-    expect(legacy['initial/text'].length).toBeGreaterThan(50);
-    const differing = Object.keys(legacy).filter((k) => legacy[k] !== current[k]);
+    expect(legacy.out['initial/text'].length).toBeGreaterThan(50);
+    const differing = Object.keys(legacy.out).filter((k) => legacy.out[k] !== current.out[k]);
     expect(differing).toEqual([]);
   }, 180_000);
 });

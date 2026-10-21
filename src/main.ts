@@ -12,12 +12,14 @@ import { sample } from './sample';
 import { state } from './state';
 import { resize, stage } from './surface';
 import { initBrush } from './ui/brush';
+import { initCanvasSize } from './ui/canvasSize';
 import { initControls } from './ui/controls';
 import { initCopy } from './ui/copy';
 
 initDraw();
 initControls();
 initBrush();
+initCanvasSize();
 initCopy();
 
 // any theme change (OS preference or explicit data-theme) needs a repaint in the new ink colours
@@ -29,7 +31,7 @@ new MutationObserver(markDirty).observe(document.documentElement, {
   attributes: true,
   attributeFilter: ['data-theme'],
 });
-new ResizeObserver(resize).observe(stage);
+new ResizeObserver(() => resize()).observe(stage);
 
 const start = () => {
   resize();

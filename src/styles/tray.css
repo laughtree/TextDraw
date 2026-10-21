@@ -95,3 +95,28 @@
   flex: 1 1 0;
   padding: 0 4px;
 }
+
+/* collapsible "canvas size" section */
+.canvasbox {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.canvas-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 4px 0 0;
+  width: fit-content;
+}
+.canvas-summary {
+  font: 12px/16px var(--f-mono);
+  color: var(--text);
+}
+.canvas-toggle svg {
+  color: var(--text-2);
+}
+.canvas-toggle[aria-expanded='true'] svg {
+  transform: rotate(180deg);
+}

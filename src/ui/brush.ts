@@ -1,7 +1,7 @@
 import { ringDiameter } from '../brush';
 import { $ } from '../dom';
 import { state } from '../state';
-import { stage, view } from '../surface';
+import { paper, view } from '../surface';
 
 const SLIDER_HOLD_MS = 800;
 const FADE_MS = 220;
@@ -24,7 +24,7 @@ export function initBrush(): void {
   const place = (x: number, y: number, size: number) => {
     clearTimeout(timer);
     ring.classList.remove('fading');
-    const d = ringDiameter(state.tool, size);
+    const d = ringDiameter(state.tool, size, state.scale);
     ring.style.setProperty('--d', d + 'px');
     ring.style.transform = `translate(${x - d / 2}px, ${y - d / 2}px)`;
     ring.classList.toggle('erase', state.tool === 'erase');
@@ -50,7 +50,7 @@ export function initBrush(): void {
   view.addEventListener('pointercancel', hide);
 
   slider.addEventListener('input', () => {
-    place(stage.clientWidth / 2, stage.clientHeight / 2, +slider.value);
+    place(paper.clientWidth / 2, paper.clientHeight / 2, +slider.value);
     timer = setTimeout(() => {
       ring.classList.add('fading');
       timer = setTimeout(hide, FADE_MS);

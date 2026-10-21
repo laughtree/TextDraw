@@ -26,7 +26,7 @@ export function render(): void {
   const grid = chars;
   const ink = css('--ink');
   const colorAt = (k: number) => colors[k] || ink;
-  vctx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
+  vctx.setTransform(state.renderScale, 0, 0, state.renderScale, 0, 0);
   vctx.clearRect(0, 0, W, H);
   if (under) {
     tctx.globalCompositeOperation = 'source-over';
