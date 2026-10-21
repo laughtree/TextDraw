@@ -203,3 +203,33 @@
   accent-color: var(--text);
   height: 2px;
 }
+
+/* the chosen colour: a frame that slides over the swatches and into the palette (segments.ts) */
+.colorrow {
+  position: relative;
+}
+.colorrow::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--rw, 0px);
+  height: var(--rh, 0px);
+  transform: translate(var(--rx, 0px), var(--ry, 0px));
+  opacity: var(--ro, 0);
+  border: 2px solid var(--sel-inv);
+  pointer-events: none;
+  transition:
+    transform 200ms var(--ease),
+    width 200ms var(--ease),
+    height 200ms var(--ease),
+    opacity 150ms var(--ease);
+}
+.colorrow.still::after {
+  transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .colorrow::after {
+    transition: none;
+  }
+}

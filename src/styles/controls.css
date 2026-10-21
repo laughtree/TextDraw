@@ -77,6 +77,43 @@ button:disabled {
 .seg button[aria-pressed='true'] + button {
   border-left-color: var(--sel-inv);
 }
+/*
+ * Sliding selection (segments.ts adds `slides` and sets --x, --w, --o): a layer behind the buttons
+ * moves from the old choice to the new one, and the chosen button only changes its text colour.
+ */
+.seg.slides {
+  position: relative;
+}
+.seg.slides::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--w, 0px);
+  transform: translateX(var(--x, 0px));
+  opacity: var(--o, 0);
+  background: var(--sel-inv);
+  pointer-events: none;
+  transition:
+    transform 200ms var(--ease),
+    width 200ms var(--ease),
+    opacity 150ms var(--ease);
+}
+.seg.slides button {
+  position: relative;
+  transition:
+    color 200ms var(--ease),
+    border-color 200ms var(--ease);
+}
+.seg.slides button[aria-pressed='true'] {
+  background: transparent;
+}
+/* first placement and re-measuring after a layout change jump, they do not slide */
+.seg.still::before,
+.seg.still button {
+  transition: none;
+}
 .modes {
   width: 100%;
   display: flex;
@@ -188,10 +225,7 @@ button:disabled {
 .sw i.ink {
   background: var(--ink);
 }
-.sw[aria-pressed='true'],
-.sw.pick.on {
-  border: 2px solid var(--sel-inv);
-}
+/* the chosen colour is marked by the sliding frame on .colorrow (see tray.css) */
 .sw.pick {
   overflow: hidden;
 }
@@ -253,7 +287,16 @@ button:disabled {
   stroke-width: 0.75;
 }
 
-/* eyedropper: sized by the .pair it sits in (see tray.css) */
+/* eyedropper: sized by the .pair it sits in (see tray.css); its frame fades in and out */
+.eyedropper {
+  transition:
+    border-color 200ms var(--ease),
+    box-shadow 200ms var(--ease);
+}
+.eyedropper[aria-pressed='true'] {
+  border-color: var(--sel-inv);
+  box-shadow: inset 0 0 0 1px var(--sel-inv); /* with the 1px border: the same 2px frame as before */
+}
 .eyedropper svg {
   display: block;
   fill: none;
@@ -261,4 +304,12 @@ button:disabled {
   stroke-width: 1.5;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seg.slides::before,
+  .seg.slides button,
+  .eyedropper {
+    transition: none;
+  }
 }

@@ -22,6 +22,8 @@
   --faint: #a8a8a8;
   --success: #24a148;
   --danger: #da1e28;
+  /* shared easing for enter/exit and sliding selections */
+  --ease: cubic-bezier(0.2, 0, 0.38, 0.9);
   /* shell header is Gray 100 in both themes */
   --shell: #161616;
   --shell-border: #393939;

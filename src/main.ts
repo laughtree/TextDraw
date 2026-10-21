@@ -19,6 +19,7 @@ import { initCopy } from './ui/copy';
 import { initEyedropper } from './ui/eyedropper';
 import { initPlatform } from './ui/platform';
 import { layoutBusy } from './ui/reveal';
+import { initSegments } from './ui/segments';
 
 initDraw();
 initText();
@@ -28,6 +29,7 @@ initEyedropper();
 initCanvasSize();
 initPlatform();
 initCopy();
+initSegments(); // last: the groups it watches are all in place
 
 // any theme change (OS preference or explicit data-theme) needs a repaint in the new ink colours
 const markDirty = () => {
