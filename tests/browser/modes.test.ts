@@ -46,6 +46,25 @@ describe('conversion mode', () => {
     expect(text.replace(/\n/g, '')).toMatch(/^[⠀-⣿]+$/);
   });
 
+  it('paints DRAW over TEXT as the starter picture: two blocks of the same width', async () => {
+    const lines = (await copyText()).split('\n');
+    // group consecutive non-empty lines; an empty line separates the two words
+    const groups: string[][] = [];
+    let cur: string[] = [];
+    for (const l of lines) {
+      if (l === '') {
+        if (cur.length) groups.push(cur);
+        cur = [];
+      } else cur.push(l);
+    }
+    if (cur.length) groups.push(cur);
+    expect(groups).toHaveLength(2);
+    const width = (g: string[]) => Math.max(...g.map((l) => [...l].length));
+    expect(Math.abs(width(groups[0]) - width(groups[1]))).toBeLessThanOrEqual(2);
+    expect(groups[0].length).toBeGreaterThan(5);
+    expect(groups[1].length).toBeGreaterThan(5);
+  });
+
   it('switches to mix on click, which also uses block characters', async () => {
     app.click('[data-mode="mix"]');
     await app.frames(2);

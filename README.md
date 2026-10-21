@@ -46,7 +46,8 @@ src/
   grid.ts           欄列數的範圍、夾限、緩衝尺寸與縮放計算（純函式）
   platforms.ts      各平台字數上限、計數規則與建議尺寸推算（純函式）
   history.ts        復原 / 重做
-  sample.ts         起始畫面（IBM PC 8×8 點陣字）
+  sample.ts         起始畫面（DRAW / TEXT，IBM PC 8×8 點陣字）
+  font8x8.ts        點陣字型資料與起始文字
   export.ts         純文字 / HTML / ANSI 輸出（純函式）
   ui/               工具列、複製選單、提示訊息、筆刷範圍圓圈（brush.ts）、畫布大小（canvasSize.ts）
   styles/           tokens（主題色）/ base / brush / shell / controls / tray / overlays
@@ -115,6 +116,7 @@ legacy/             重構前的單檔版本，僅供對照測試使用
 同時載入 `legacy/index.html` 與目前版本，餵入相同的筆跡與操作，逐項比對
 6 種模式（點字、濃淡、圓點、中文、線段、自訂）× 色彩 / 灰階 × 亮 / 暗主題 × 3 種複製格式、筆跡底圖、空白替代與程式碼區塊，
 並比對畫布像素是否一致。
+舊版的起始畫面是 ASCII / PAINTER、新版是 DRAW / TEXT（刻意不同），所以兩邊都先按「清空」再開始比對。
 「混合」與「方塊」的字集在重構後刻意重新設計，輸出與舊版不同，所以不在比對範圍內（由 `tests/unit`、`tests/browser/convert.test.ts` 直接驗證）。
 新版多了一列「畫布大小」，畫布區域較矮，所以測試會先把舊版頁面調到相同的畫布高度再比對。重構期間用來確保行為不變；之後若刻意改變行為，更新或移除 `legacy/` 即可。
 

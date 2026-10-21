@@ -59,6 +59,8 @@ async function collect(
     out[`${label}/pixels`] = hash(view.toDataURL());
   };
 
+  // the starter pictures differ on purpose (legacy paints ASCII / PAINTER), so start both from blank
+  click('#bClear');
   click('[data-mode="shade"]');
   await capture('initial');
 
@@ -130,7 +132,7 @@ describe('refactored app matches the original single-file app', () => {
     expect(legacy.stageHeight).toBe(current.stageHeight);
     expect(Object.keys(current.out)).toEqual(Object.keys(legacy.out));
     // sanity: the scenario really drew something
-    expect(legacy.out['initial/text'].length).toBeGreaterThan(50);
+    expect(legacy.out['light/color/cjk/text'].length).toBeGreaterThan(50);
     const differing = Object.keys(legacy.out).filter((k) => legacy.out[k] !== current.out[k]);
     expect(differing).toEqual([]);
   }, 180_000);

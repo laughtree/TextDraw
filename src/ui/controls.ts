@@ -111,7 +111,7 @@ function initHistory(): void {
     pushUndo();
     bctx.clearRect(0, 0, state.W, state.H);
     state.dirty = true;
-    toast('已清空，按復原可救回');
+    toast('已清空');
   };
 }
 

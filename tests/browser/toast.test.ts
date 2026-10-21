@@ -46,7 +46,7 @@ describe('toast placement', () => {
 
   it('shows the clear confirmation below the header, then hides', async () => {
     app.click('#bClear');
-    expect(toast().textContent).toBe('已清空，按復原可救回');
+    expect(toast().textContent).toBe('已清空');
     expectBelowHeader();
     await app.sleep(2100);
     expect(toast().hidden).toBe(true);
