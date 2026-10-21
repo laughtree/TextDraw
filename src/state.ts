@@ -5,7 +5,7 @@ import type { Mode, Palette, Tool } from './types';
 export const state = {
   // tools and options
   tool: 'pen' as Tool,
-  mode: 'mix' as Mode,
+  mode: 'braille' as Mode,
   palette: 'color' as Palette,
   under: false,
   size: 5,
