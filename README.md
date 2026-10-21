@@ -46,8 +46,9 @@ src/
   grid.ts           欄列數的範圍、夾限、緩衝尺寸與縮放計算（純函式）
   platforms.ts      各平台字數上限、計數規則與建議尺寸推算（純函式）
   history.ts        復原 / 重做
-  sample.ts         起始畫面（DRAW / TEXT，IBM PC 8×8 點陣字）
-  font8x8.ts        點陣字型資料與起始文字
+  sample.ts         把起始畫面（DRAW / TEXT）畫進緩衝
+  sampleLayout.ts   起始畫面的版面（純函式：置中、等寬對齊）
+  font.ts           起始畫面用的 7×7 等寬點陣字（每個字母左右欄都有墨，寬度一致）
   export.ts         純文字 / HTML / ANSI 輸出（純函式）
   ui/               工具列、複製選單、提示訊息、筆刷範圍圓圈（brush.ts）、畫布大小（canvasSize.ts）、顯示／收起動效（reveal.ts）
   styles/           tokens（主題色）/ base / brush / shell / controls / tray / overlays

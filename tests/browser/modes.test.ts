@@ -46,9 +46,8 @@ describe('conversion mode', () => {
     expect(text.replace(/\n/g, '')).toMatch(/^[⠀-⣿]+$/);
   });
 
-  it('paints DRAW over TEXT as the starter picture: two blocks of the same width', async () => {
+  it('paints DRAW over TEXT with both words on the same left and right edge', async () => {
     const lines = (await copyText()).split('\n');
-    // group consecutive non-empty lines; an empty line separates the two words
     const groups: string[][] = [];
     let cur: string[] = [];
     for (const l of lines) {
@@ -59,10 +58,17 @@ describe('conversion mode', () => {
     }
     if (cur.length) groups.push(cur);
     expect(groups).toHaveLength(2);
+    // blank cells are the braille blank, so ink is anything else
+    const blank = '\u2800';
+    const indent = (l: string) => [...l].findIndex((c) => c !== blank);
     const width = (g: string[]) => Math.max(...g.map((l) => [...l].length));
-    expect(Math.abs(width(groups[0]) - width(groups[1]))).toBeLessThanOrEqual(2);
-    expect(groups[0].length).toBeGreaterThan(5);
-    expect(groups[1].length).toBeGreaterThan(5);
+    // the export is trimmed to the ink of both words together, so equal edges mean
+    // each word touches column 0 and reaches the full width
+    expect(width(groups[0])).toBe(width(groups[1]));
+    for (const g of groups) {
+      expect(Math.min(...g.map(indent))).toBe(0);
+      expect(g.length).toBeGreaterThan(5);
+    }
   });
 
   it('switches to mix on click, which also uses block characters', async () => {
