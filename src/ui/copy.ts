@@ -1,7 +1,8 @@
 import { $ } from '../dom';
-import { exportAs } from '../export';
 import { state } from '../state';
 import type { ExportKind } from '../types';
+import { exportCurrent } from './exportCurrent';
+import { overLimit } from './platform';
 import { toast } from './toast';
 
 const LABELS: Record<ExportKind, string> = {
@@ -9,11 +10,6 @@ const LABELS: Record<ExportKind, string> = {
   html: '彩色 HTML',
   ansi: 'ANSI 文字',
 };
-
-function exportCurrent(kind: ExportKind): string {
-  const { grid, gridCol, cols, rows, spaceChar, fence } = state;
-  return exportAs(kind, { grid, colors: gridCol, cols, rows }, { spaceChar, fence });
-}
 
 function initSpaceTip(): void {
   const tipBtn = $('tipBtn'),
@@ -34,16 +30,21 @@ function initSpaceTip(): void {
   });
 }
 
+/** Space substitute and code fence change what gets copied (and how many characters it counts). */
+const exportChanged = () => document.dispatchEvent(new Event('exportchange'));
+
 function initSpaceChar(): void {
   const spBtns = [...document.querySelectorAll<HTMLElement>('[data-space]')];
   const setSpace = (ch: string) => {
     state.spaceChar = ch;
     spBtns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.space === ch)));
+    exportChanged();
   };
   spBtns.forEach((b) => (b.onclick = () => setSpace(b.dataset.space ?? ' ')));
   $('bFence').onclick = (e) => {
     state.fence = !state.fence;
     (e.currentTarget as HTMLElement).setAttribute('aria-pressed', String(state.fence));
+    exportChanged();
   };
 }
 
@@ -71,7 +72,13 @@ function initCopyButtons(): void {
         };
         try {
           navigator.clipboard.writeText(t).then(() => {
-            toast('已複製' + LABELS[kind]);
+            // only the plain text is what gets posted, so only it is checked against the limit
+            const over = kind === 'text' ? overLimit(t) : null;
+            toast(
+              over
+                ? `已複製${LABELS[kind]}，但超過 ${over.label} 上限（${over.used} / ${over.limit}）`
+                : '已複製' + LABELS[kind],
+            );
             $('copyMenu').hidden = true;
             $('bCopy').setAttribute('aria-expanded', 'false');
           }, fallback);

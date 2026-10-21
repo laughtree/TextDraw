@@ -106,36 +106,49 @@
           >
             <span class="label">畫布大小</span>
             <span class="canvas-summary" id="canvasSummary">自動 · 0 × 0</span>
+            <span class="canvas-budget" id="canvasBudget" hidden></span>
             <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
               <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" />
             </svg>
           </button>
-          <div id="canvasPanel" class="row" hidden>
-            <button id="bAuto" class="toggle" aria-pressed="true">
-              <span class="track"></span>自動
-            </button>
-            <label class="label" for="inCols">欄</label>
-            <input
-              id="inCols"
-              class="num"
-              type="number"
-              inputmode="numeric"
-              min="8"
-              max="200"
-              step="1"
-              disabled
-            />
-            <label class="label" for="inRows">列</label>
-            <input
-              id="inRows"
-              class="num"
-              type="number"
-              inputmode="numeric"
-              min="4"
-              max="100"
-              step="1"
-              disabled
-            />
+          <div id="canvasPanel" class="canvaspanel" hidden>
+            <div class="row">
+              <button id="bAuto" class="toggle" aria-pressed="true">
+                <span class="track"></span>自動
+              </button>
+              <label class="label" for="inCols">欄</label>
+              <input
+                id="inCols"
+                class="num"
+                type="number"
+                inputmode="numeric"
+                min="8"
+                max="200"
+                step="1"
+                disabled
+              />
+              <label class="label" for="inRows">列</label>
+              <input
+                id="inRows"
+                class="num"
+                type="number"
+                inputmode="numeric"
+                min="4"
+                max="100"
+                step="1"
+                disabled
+              />
+            </div>
+            <div class="row">
+              <label class="label" for="platform">平台</label>
+              <select id="platform" class="select">
+                <option value="">自訂</option>
+              </select>
+            </div>
+            <div id="budget" class="budget" hidden>
+              <div class="budget-count" id="budgetCount" role="status"></div>
+              <div class="budget-note" id="budgetNote"></div>
+            </div>
           </div>
         </div>
         <div class="row actions">

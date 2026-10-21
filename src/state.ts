@@ -13,6 +13,8 @@ export const state = {
   customRamp: Array.from(' .oO@'),
   spaceChar: '⠀',
   fence: false,
+  /** target platform id (see platforms.ts); null = none, no budget readout */
+  platform: null as string | null,
 
   // pointer
   drawing: false,

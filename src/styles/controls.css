@@ -13,6 +13,7 @@ button {
 }
 button:focus-visible,
 input:focus-visible,
+select:focus-visible,
 .sw.pick:focus-within {
   outline: 2px solid var(--focus);
   outline-offset: -2px;
@@ -221,4 +222,18 @@ button:disabled {
 }
 .num:disabled {
   color: var(--faint);
+}
+
+/* drop-down (target platform) */
+.select {
+  flex: 1;
+  min-width: 0;
+  height: 32px;
+  font: 14px var(--f-mono);
+  color: var(--text);
+  background: var(--bg);
+  border: 0;
+  border-bottom: 1px solid var(--border-strong);
+  padding: 0 8px;
+  border-radius: 0;
 }

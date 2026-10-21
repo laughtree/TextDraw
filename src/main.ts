@@ -15,11 +15,13 @@ import { initBrush } from './ui/brush';
 import { initCanvasSize } from './ui/canvasSize';
 import { initControls } from './ui/controls';
 import { initCopy } from './ui/copy';
+import { initPlatform } from './ui/platform';
 
 initDraw();
 initControls();
 initBrush();
 initCanvasSize();
+initPlatform();
 initCopy();
 
 // any theme change (OS preference or explicit data-theme) needs a repaint in the new ink colours

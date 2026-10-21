@@ -21,6 +21,7 @@
   --ink: #161616;
   --faint: #a8a8a8;
   --success: #24a148;
+  --danger: #da1e28;
   /* shell header is Gray 100 in both themes */
   --shell: #161616;
   --shell-border: #393939;
@@ -51,6 +52,7 @@
     --ink: #f4f4f4;
     --faint: #525252;
     --success: #42be65;
+    --danger: #fa4d56;
     --shell: #161616;
     --shell-border: #393939;
     --shell-text: #f4f4f4;
@@ -79,6 +81,7 @@
   --ink: #f4f4f4;
   --faint: #525252;
   --success: #42be65;
+  --danger: #fa4d56;
   --shell: #161616;
   --shell-border: #393939;
   --shell-text: #f4f4f4;

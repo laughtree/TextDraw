@@ -23,6 +23,7 @@ export function render(): void {
   const { chars, colors } = convertBuffer();
   state.grid = chars;
   state.gridCol = colors;
+  document.dispatchEvent(new Event('rendered')); // budget readout etc. follow the new text
   const { W, H, cw, ch, cols, rows, mode, under } = state;
   const grid = chars;
   const ink = css('--ink');
