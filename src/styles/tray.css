@@ -76,24 +76,38 @@
 .colorrow .sw {
   flex: none;
 }
-/* undo/redo and pen/eraser share one right-hand column so their edges line up */
-.hist,
-.colorrow .seg {
-  width: 136px;
-  flex: none;
+/*
+ * One right-hand column: undo/redo, the eyedropper + palette pair (as wide as the Redo button)
+ * and draw/erase (as wide as undo + redo) share these numbers, so their edges always line up.
+ */
+.tray {
+  --hist-w: 136px;
+  --hist-gap: 6px;
+  --redo-w: calc((var(--hist-w) - var(--hist-gap)) / 2);
 }
 .hist {
+  width: var(--hist-w);
+  flex: none;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 6px;
+  gap: var(--hist-gap);
 }
 .hist button {
   height: 42px;
   padding: 0;
 }
-.colorrow .seg button {
-  flex: 1 1 0;
-  padding: 0 4px;
+/* eyedropper and palette: two square buttons spanning exactly the Redo button's width */
+.pair {
+  width: var(--redo-w);
+  flex: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+.pair > .sw {
+  width: auto;
+  height: auto;
+  aspect-ratio: 1;
 }
 
 /* collapsible "canvas size" section */
@@ -169,7 +183,13 @@
   stroke-linejoin: round;
 }
 .tools .actionseg {
+  width: var(--hist-w);
+  flex: none;
   margin-left: auto;
+}
+.tools .actionseg > button {
+  flex: 1 1 0;
+  padding: 0 4px;
 }
 .textopts {
   display: flex;

@@ -35,12 +35,12 @@ describe('brush ring', () => {
     expect(ring().classList.contains('erase')).toBe(false);
   });
 
-  it('shows the dashed, 2.5× wider ring for the eraser', () => {
+  it('shows the dashed ring for the eraser, as wide as the pen it erases like', () => {
     app.click('#tErase');
     app.setValue('#size', '20');
     app.fire('pointermove', 100, 80);
     expect(ring().classList.contains('erase')).toBe(true);
-    expect(box().width).toBe(50);
+    expect(box().width).toBe(20);
     expect(app.win.getComputedStyle(ring()).borderTopStyle).toBe('dashed');
   });
 

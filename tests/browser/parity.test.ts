@@ -117,7 +117,9 @@ async function collect(
   setValue('#colorPick', '#000000'); // the picker nudges pure black off theme ink
   stroke(line(250, 330, 350, 345, 6));
   click('#tErase');
-  setValue('#size', '30');
+  // legacy's eraser is 2.5× the slider; the refactored one is as wide as the pen. 12 × 2.5 = 30,
+  // so both erase 30 px wide.
+  setValue('#size', legacy ? '12' : '30');
   stroke(line(200, 150, 280, 250));
   click('#bUndo');
   click('#bRedo');

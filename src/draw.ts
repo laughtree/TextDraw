@@ -1,4 +1,3 @@
-import { strokeWidth } from './brush';
 import { commitUndo, pushUndo, restoreBase, takeSnapshot, type Entry } from './history';
 import { drawShape, type Point, type ShapeKind } from './shapes';
 import { state } from './state';
@@ -17,7 +16,7 @@ function stroke(a: Point, b: Point): void {
   bctx.globalCompositeOperation = state.erase ? 'destination-out' : 'source-over';
   bctx.strokeStyle = state.penColor;
   bctx.fillStyle = state.penColor;
-  bctx.lineWidth = strokeWidth(state.tool, state.erase, state.size);
+  bctx.lineWidth = state.size;
   bctx.lineCap = 'round';
   bctx.lineJoin = 'round';
   bctx.beginPath();
@@ -45,7 +44,7 @@ function paintDrag(to: Point): void {
   if (drag.base) restoreBase(drag.base);
   drawShape(bctx, drag.kind, drag.start, to, {
     color: state.penColor,
-    width: strokeWidth(state.tool, state.erase, state.size),
+    width: state.size,
     erase: state.erase,
   });
   state.dirty = true;

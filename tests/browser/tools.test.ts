@@ -107,6 +107,32 @@ describe('tool bar', () => {
     expect(app.q('.sw.pick').closest('.swatches')).toBeNull();
   });
 
+  it('lines the eyedropper + palette pair up under the Redo button, with square buttons', () => {
+    const redo = app.q('#bRedo').getBoundingClientRect(),
+      pair = app.q('.pair').getBoundingClientRect(),
+      eye = app.q('.eyedropper').getBoundingClientRect(),
+      pal = app.q('.sw.pick').getBoundingClientRect();
+    expect(Math.abs(pair.left - redo.left)).toBeLessThan(0.5);
+    expect(Math.abs(pair.right - redo.right)).toBeLessThan(0.5);
+    // the buttons span the pair edge to edge, and are not squashed flat
+    expect(Math.abs(eye.left - pair.left)).toBeLessThan(0.5);
+    expect(Math.abs(pal.right - pair.right)).toBeLessThan(0.5);
+    for (const b of [eye, pal]) expect(Math.abs(b.width - b.height)).toBeLessThan(1);
+    expect(eye.width).toBeGreaterThan(28);
+    expect(pal.width).toBeGreaterThan(28);
+  });
+
+  it('makes draw / erase exactly as wide as undo + redo, with the same right edge', () => {
+    const hist = app.q('.hist').getBoundingClientRect(),
+      seg = app.q('.actionseg').getBoundingClientRect();
+    expect(Math.abs(seg.width - hist.width)).toBeLessThan(0.5);
+    expect(Math.abs(seg.right - hist.right)).toBeLessThan(0.5);
+    expect(Math.abs(seg.left - hist.left)).toBeLessThan(0.5);
+    const draw = app.q('#tDraw').getBoundingClientRect(),
+      erase = app.q('#tErase').getBoundingClientRect();
+    expect(Math.abs(draw.width - erase.width)).toBeLessThanOrEqual(1.5); // two halves (the second has a 1px divider)
+  });
+
   it('shows the font-size row, under the shapes, only for the text tool', async () => {
     expect(app.q('#textOpts').hidden).toBe(true);
     tool('text');
@@ -365,13 +391,25 @@ describe('erase mode applies to every shape', () => {
     return ink();
   }
 
-  it('erases freehand with the 2.5× eraser', async () => {
+  it('erases freehand', async () => {
     const before = await band();
     app.click('#tErase');
     app.setValue('#size', '12');
     const v = size();
     app.stroke(line(v.width * 0.5, v.height * 0.2, v.width * 0.5, v.height * 0.8, 8));
     expect(await ink()).toBeLessThan(before);
+  });
+
+  it('erases freehand as wide as it draws: the same stroke drawn then erased leaves almost nothing', async () => {
+    const v = size();
+    const path = line(v.width * 0.1, v.height * 0.5, v.width * 0.9, v.height * 0.5, 12);
+    app.setValue('#size', '30');
+    app.stroke(path);
+    const before = await ink();
+    expect(before).toBeGreaterThan(40);
+    app.click('#tErase');
+    app.stroke(path); // the same width: a wider eraser would be needed to clear a fringe
+    expect(await ink()).toBeLessThan(before * 0.25);
   });
 
   it('erases along a line with the width it draws with, which cancels a line drawn at that width', async () => {
@@ -420,12 +458,8 @@ describe('erase mode applies to every shape', () => {
   it('shows the dashed ring for erasing with every shape, as wide as the line it erases', () => {
     app.click('#tErase');
     app.setValue('#size', '20');
-    for (const [name, width] of [
-      ['pen', 50],
-      ['line', 20],
-      ['circle', 20],
-      ['rect', 20],
-    ] as const) {
+    for (const name of ['pen', 'line', 'circle', 'rect'] as const) {
+      const width = 20; // erasing is as wide as drawing, for every shape
       tool(name);
       app.fire('pointermove', 100, 80);
       const ring = app.q('#brush');

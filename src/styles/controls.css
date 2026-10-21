@@ -253,10 +253,7 @@ button:disabled {
   stroke-width: 0.75;
 }
 
-/* eyedropper: a swatch-sized button beside the colours */
-.colorrow > .sw {
-  flex: none;
-}
+/* eyedropper: sized by the .pair it sits in (see tray.css) */
 .eyedropper svg {
   display: block;
   fill: none;

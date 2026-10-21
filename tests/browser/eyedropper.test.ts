@@ -51,7 +51,9 @@ describe('eyedropper button', () => {
     expect(btn.left).toBeGreaterThanOrEqual(sw.right - 1);
     expect(btn.right).toBeLessThanOrEqual(palette.left + 1);
     expect(palette.left - btn.right).toBeLessThan(12);
-    expect(btn.width).toBe(32);
+    expect(Math.abs(btn.width - btn.height)).toBeLessThan(1); // a square, not squashed
+    expect(btn.width).toBeGreaterThan(28);
+    expect(Math.abs(btn.width - palette.width)).toBeLessThan(1); // as big as the palette
     expect(app.q('.eyedropper').getAttribute('aria-label')).toBe('滴管');
     tool('pick');
     expect(pressed('.eyedropper')).toBe('true');

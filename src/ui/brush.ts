@@ -25,7 +25,7 @@ export function initBrush(): void {
     if (state.tool === 'text' || state.tool === 'pick') return hide(); // other cursors stand in
     clearTimeout(timer);
     ring.classList.remove('fading');
-    const d = ringDiameter(state.tool, state.erase, size, state.scale);
+    const d = ringDiameter(size, state.scale);
     ring.style.setProperty('--d', d + 'px');
     ring.style.transform = `translate(${x - d / 2}px, ${y - d / 2}px)`;
     ring.classList.toggle('erase', state.erase);
