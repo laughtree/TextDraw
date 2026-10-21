@@ -2,6 +2,8 @@ export type Tool = 'pen' | 'erase' | 'line' | 'circle' | 'rect' | 'text' | 'pick
 export type Mode = 'braille' | 'mix' | 'block' | 'shade' | 'dots' | 'cjk' | 'line' | 'custom';
 export type Palette = 'color' | 'gray';
 export type ExportKind = 'text' | 'html' | 'ansi';
+/** What the export menu can produce: the three text formats, or a PNG of the rendered picture. */
+export type ExportFormat = ExportKind | 'image';
 
 /** Canvas geometry shared by conversion, calibration and rendering. */
 export interface Metrics {

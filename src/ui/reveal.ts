@@ -1,3 +1,4 @@
+import { trackPanel } from '../panels';
 import { resize, view } from '../surface';
 
 /**
@@ -53,7 +54,7 @@ function unfreeze(): void {
   if (--busy > 0) return;
   view.style.width = '';
   view.style.height = '';
-  resize();
+  resize(undefined, false); // a no-op unless the stage really changed size
 }
 
 function end(el: HTMLElement, entry: Entry): void {
@@ -108,6 +109,7 @@ export function reveal(el: HTMLElement, show: boolean, kind: RevealKind): void {
   }
 
   const collapse = kind === 'collapse';
+  if (collapse) trackPanel(el);
   // reversing mid-flight starts from where the element visually is
   const opacityNow = prev ? parseFloat(getComputedStyle(el).opacity) : null;
   const boxNow = prev && collapse ? boxOf(el) : null;

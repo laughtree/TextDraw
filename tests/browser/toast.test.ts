@@ -30,7 +30,7 @@ describe('toast placement', () => {
     app.click('#bClear');
     await app.frames(); // the converted grid refreshes on the next frame
     app.click('#bCopy');
-    app.click('[data-copy="text"]');
+    app.copy('text');
     expect(toast().textContent).toBe('畫布是空的');
     await expectBelowHeader();
   });
@@ -39,7 +39,7 @@ describe('toast placement', () => {
     const v = app.view.getBoundingClientRect();
     app.stroke(line(20, v.height / 2, v.width - 20, v.height / 2, 10));
     app.click('#bCopy');
-    app.click('[data-copy="text"]');
+    app.copy('text');
     await app.frames();
     expect(toast().textContent).toBe('已複製純文字');
     await expectBelowHeader();

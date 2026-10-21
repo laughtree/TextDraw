@@ -11,6 +11,11 @@ afterEach(() => app.close());
 const anims = (sel: string) => app.q(sel).getAnimations().length;
 const rowsOf = () => Number(/× (\d+) cells/.exec(app.q('#meta').textContent ?? '')?.[1]);
 
+async function until(cond: () => boolean, ms = 3000) {
+  for (let t = 0; t < ms && !cond(); t += 25) await app.sleep(25);
+  expect(cond(), 'condition met in time').toBe(true);
+}
+
 function choose(id: string): void {
   const select = app.q<HTMLSelectElement>('#platform');
   select.value = id;
@@ -57,27 +62,48 @@ describe('enter/exit motion', () => {
     expect(app.q('#copyMenu').getBoundingClientRect().height).toBeGreaterThan(50);
   });
 
-  it('freezes the canvas while a panel pushes the stage, then re-fits once', async () => {
+  it('keeps the canvas, its grid and the painting when a panel opens over it', async () => {
+    app.click('#bClear');
+    app.click('[data-mode="block"]');
+    app.setValue('#size', '10');
+    const v = app.view.getBoundingClientRect();
+    // a stroke near the bottom, where an opening panel would otherwise crop it away
+    app.stroke(line(v.width * 0.1, v.height * 0.92, v.width * 0.9, v.height * 0.92, 12));
+    await app.settle();
     const before = app.view.getBoundingClientRect(),
       stageBefore = app.q('#stage').getBoundingClientRect().height,
       rowsBefore = rowsOf();
+    const text = () => {
+      app.copied.length = 0;
+      app.copy('text');
+      return app.copied.join('');
+    };
+    const drawn = text();
+    expect(drawn.length).toBeGreaterThan(10);
+    await app.settle(); // the copy has finished (it closes the menu, which is not open yet)
     let rendered = 0;
     app.doc.addEventListener('rendered', () => rendered++);
 
     app.click('#bCopy');
-    await app.frames(2); // part way through the 200 ms slide
-    expect(app.q('#stage').getBoundingClientRect().height).toBeLessThan(stageBefore);
+    await app.frames(2); // part way through the slide
     const mid = app.view.getBoundingClientRect();
+    expect(app.q('#stage').getBoundingClientRect().height).toBeLessThan(stageBefore);
     expect(mid.width).toBeCloseTo(before.width, 0);
-    expect(mid.height).toBeCloseTo(before.height, 0); // clipped, not squashed
-    expect(rendered).toBe(0); // no per-frame re-conversion
+    expect(mid.height).toBeCloseTo(before.height, 0); // clipped by the panel, not squashed
 
     await app.settle();
+    expect(app.q('#copyMenu').hidden).toBe(false);
+    expect(app.q('#stage').getBoundingClientRect().height).toBeLessThan(stageBefore - 50);
+    expect(app.view.getBoundingClientRect().height).toBeCloseTo(before.height, 0);
+    expect(rowsOf()).toBe(rowsBefore); // same grid: nothing was cropped or re-fitted
+    expect(rendered).toBe(0); // and nothing was converted again
     expect(app.view.style.width).toBe('');
-    expect(app.view.style.height).toBe('');
-    expect(rendered).toBeGreaterThanOrEqual(1);
-    expect(rendered).toBeLessThanOrEqual(2);
-    expect(rowsOf()).toBeLessThan(rowsBefore);
+
+    // exporting with the panel open still has the stroke that is under it; the copy then shuts it
+    expect(text()).toBe(drawn);
+    await until(() => app.q('#copyMenu').hidden === true);
+    expect(rowsOf()).toBe(rowsBefore);
+    expect(text()).toBe(drawn);
   });
 
   it('drops the toast in from above and fades it back out', async () => {
@@ -164,7 +190,7 @@ describe('enter/exit motion', () => {
     });
     const v = app.view.getBoundingClientRect();
     app.stroke(line(20, v.height / 2, v.width - 20, v.height / 2, 10));
-    app.click('[data-copy="text"]');
+    app.copy('text');
     await app.frames(2);
     const panel = app.q('#copyPanel');
     expect(panel.hidden).toBe(false);

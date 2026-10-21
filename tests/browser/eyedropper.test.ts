@@ -145,7 +145,7 @@ describe('eyedropper', () => {
     tool('pick');
     await pick();
     app.click('#bCopy');
-    app.click('[data-copy="text"]');
+    app.copy('text');
     expect(app.q('#toast').textContent).toBe('畫布是空的');
   });
 

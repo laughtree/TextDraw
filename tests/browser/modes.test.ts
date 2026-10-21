@@ -16,7 +16,7 @@ const buttons = () => [...app.doc.querySelectorAll<HTMLElement>('[data-mode]')];
 async function copyText() {
   app.copied.length = 0;
   app.click('#bCopy');
-  app.click('[data-copy="text"]');
+  app.copy('text');
   await app.frames();
   return app.copied.join('');
 }

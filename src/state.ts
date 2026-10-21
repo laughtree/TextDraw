@@ -1,5 +1,5 @@
 import type { Grid } from './grid';
-import type { Mode, Palette, Tool } from './types';
+import type { ExportFormat, Mode, Palette, Tool } from './types';
 
 /** Mutable app state shared by the drawing, rendering and UI modules. */
 export const state = {
@@ -17,6 +17,8 @@ export const state = {
   customRamp: Array.from(' .oO@'),
   spaceChar: '⠀',
   fence: false,
+  /** format chosen in the export menu */
+  exportFormat: 'text' as ExportFormat,
   /** target platform id (see platforms.ts); null = none, no budget readout */
   platform: null as string | null,
 

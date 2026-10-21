@@ -7,6 +7,14 @@ export interface App {
   view: HTMLCanvasElement;
   /** text handed to navigator.clipboard.writeText since the array was last emptied */
   copied: string[];
+  /** images handed to navigator.clipboard.write */
+  images: Blob[];
+  /** files offered for download (<a download> clicks), in order */
+  downloads: { name: string; blob: Blob }[];
+  /** pick an export format in the menu, then press Copy */
+  copy: (format: string) => void;
+  /** pick an export format in the menu, then press Download */
+  download: (format: string) => void;
   q: <T extends HTMLElement>(sel: string) => T;
   frames: (n?: number) => Promise<void>;
   sleep: (ms: number) => Promise<void>;
@@ -59,6 +67,7 @@ export async function openApp(url: string, width = 480, height = 720): Promise<A
   };
 
   const copied: string[] = [];
+  const images: Blob[] = [];
   Object.defineProperty(win.navigator, 'clipboard', {
     configurable: true,
     value: {
@@ -66,8 +75,35 @@ export async function openApp(url: string, width = 480, height = 720): Promise<A
         copied.push(t);
         return Promise.resolve();
       },
+      write: async (items: ClipboardItem[]) => {
+        for (const item of items) {
+          for (const type of item.types) images.push(await item.getType(type));
+        }
+      },
     },
   });
+
+  // downloads: remember each blob behind an object URL, and record the <a download> click
+  // instead of letting the browser save a file
+  const downloads: { name: string; blob: Blob }[] = [];
+  const blobs = new Map<string, Blob>();
+  const createObjectURL = win.URL.createObjectURL.bind(win.URL);
+  win.URL.createObjectURL = (obj: Blob | MediaSource) => {
+    const url = createObjectURL(obj);
+    if (obj instanceof win.Blob) blobs.set(url, obj);
+    return url;
+  };
+  // eslint-disable-next-line @typescript-eslint/unbound-method -- called back with the anchor as `this`
+  const anchorClick = win.HTMLAnchorElement.prototype.click;
+  win.HTMLAnchorElement.prototype.click = function (this: HTMLAnchorElement) {
+    const blob = blobs.get(this.href);
+    if (this.download && blob) downloads.push({ name: this.download, blob });
+    else anchorClick.call(this);
+  };
+  const withFormat = (format: string, button: string) => {
+    q(`[data-format="${format}"]`).click();
+    q(button).click();
+  };
 
   const view = q<HTMLCanvasElement>('#view');
   view.setPointerCapture = () => {}; // synthetic pointers are not "active"
@@ -96,6 +132,10 @@ export async function openApp(url: string, width = 480, height = 720): Promise<A
     doc,
     view,
     copied,
+    images,
+    downloads,
+    copy: (format: string) => withFormat(format, '#bDoCopy'),
+    download: (format: string) => withFormat(format, '#bDoDownload'),
     q,
     frames,
     sleep,

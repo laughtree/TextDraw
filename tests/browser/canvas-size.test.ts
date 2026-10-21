@@ -23,7 +23,7 @@ async function fix(cols: number, rows: number) {
 async function copyText() {
   await app.frames();
   app.copied.length = 0;
-  app.click('[data-copy="text"]');
+  app.copy('text');
   return app.copied.join('');
 }
 

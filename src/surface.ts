@@ -1,6 +1,7 @@
 import { $, ctx2d } from './dom';
 import { bufferSize, fitScale, type Grid } from './grid';
 import { clearGlyphCaches } from './glyphs';
+import { panelExtra } from './panels';
 import { state } from './state';
 import { css } from './theme';
 import type { Metrics } from './types';
@@ -34,9 +35,12 @@ export function metrics(): Metrics {
 
 function measure(): void {
   vctx.font = monoFont();
-  state.cw = vctx.measureText('M').width;
-  state.ch = Math.round(state.cw * 2.05);
-  clearGlyphCaches();
+  const cw = vctx.measureText('M').width,
+    ch = Math.round(cw * 2.05);
+  // the calibration depends on the cell size; opening a panel measures again with the same result
+  if (cw !== state.cw || ch !== state.ch) clearGlyphCaches();
+  state.cw = cw;
+  state.ch = ch;
 }
 
 function applyBuffer(nW: number, nH: number, content: ContentMode): void {
@@ -65,8 +69,9 @@ function applyBuffer(nW: number, nH: number, content: ContentMode): void {
  * Size the canvases and recompute the cell grid.
  * Auto mode follows the stage and keeps the painting where it was; a fixed grid keeps its cell count,
  * is fitted into the stage, and stretches the painting when its buffer size changes.
+ * With `force` false (stage observers, panels settling) nothing happens when nothing changed.
  */
-export function resize(content?: ContentMode): void {
+export function resize(content?: ContentMode, force = true): void {
   const fixed = state.fixed;
   state.dpr = Math.min(window.devicePixelRatio || 1, 3);
   measure();
@@ -80,22 +85,33 @@ export function resize(content?: ContentMode): void {
       Math.max(1, stage.clientWidth - 2 * STAGE_PAD),
       Math.max(1, stage.clientHeight - 2 * STAGE_PAD),
     );
-    view.width = Math.max(1, Math.round(nW * state.dpr * s));
+    const vw = Math.max(1, Math.round(nW * state.dpr * s)),
+      vh = Math.max(1, Math.round(nH * (vw / nW)));
+    if (!force && vw === view.width && vh === view.height && nW === state.W && nH === state.H)
+      return;
+    view.width = vw;
     state.renderScale = view.width / nW;
-    view.height = Math.max(1, Math.round(nH * state.renderScale));
+    view.height = vh;
     state.scale = state.renderScale / state.dpr;
     paper.style.width = view.width / state.dpr + 'px';
     paper.style.height = view.height / state.dpr + 'px';
   } else {
     const r = stage.getBoundingClientRect();
     nW = Math.max(1, Math.floor(r.width));
-    nH = Math.max(1, Math.floor(r.height));
+    // the stage as it is with every panel shut, so opening one never changes the canvas
+    const extra = panelExtra();
+    nH = Math.max(1, Math.floor(r.height + extra));
+    if (!force && nW === state.W && nH === state.H && Math.floor(nW * state.dpr) === view.width) {
+      paper.style.height = extra > 0.5 ? nH + 'px' : '';
+      return;
+    }
     state.scale = 1;
     state.renderScale = state.dpr;
     view.width = nW * state.dpr;
     view.height = nH * state.dpr;
     paper.style.width = '';
-    paper.style.height = '';
+    // panels cover the lower edge of the canvas instead of shrinking it
+    paper.style.height = extra > 0.5 ? nH + 'px' : '';
   }
   applyBuffer(nW, nH, content ?? (fixed ? 'scale' : 'keep'));
   state.cols = fixed ? fixed.cols : Math.floor(state.W / state.cw);

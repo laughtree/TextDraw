@@ -239,7 +239,7 @@
         <div class="row actions">
           <button id="bClear" class="btn-tertiary">清空</button>
           <span class="spacer"></span>
-          <button id="bCopy" class="btn-secondary" aria-expanded="false">複製</button>
+          <button id="bCopy" class="btn-secondary" aria-expanded="false">匯出</button>
         </div>
         <div id="copyMenu" hidden>
           <div class="row has-tip">
@@ -281,10 +281,15 @@
               <span class="track"></span>``` 區塊
             </button>
           </div>
+          <div class="seg modes" role="group" aria-label="匯出格式">
+            <button data-format="text" aria-pressed="true">純文字</button>
+            <button data-format="html" aria-pressed="false">彩色 HTML</button>
+            <button data-format="ansi" aria-pressed="false">ANSI</button>
+            <button data-format="image" aria-pressed="false">圖片</button>
+          </div>
           <div class="row copyrow">
-            <button data-copy="text" class="btn-secondary">純文字</button>
-            <button data-copy="html" class="btn-secondary">彩色 HTML</button>
-            <button data-copy="ansi" class="btn-secondary">ANSI</button>
+            <button id="bDoCopy" class="btn-secondary">複製</button>
+            <button id="bDoDownload" class="btn-secondary">下載</button>
           </div>
         </div>
       </div>

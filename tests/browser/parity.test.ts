@@ -33,8 +33,36 @@ async function collect(
   iframeHeight = 720,
 ): Promise<{ out: Record<string, string>; stageHeight: number }> {
   const app = await openApp(url, 480, iframeHeight);
+  const legacy = url.includes('/legacy/');
   const { iframe, win, doc, view, copied, frames, sleep, settle, click, setValue, stroke } = app;
   const stageH = () => Math.floor(app.q('#stage').getBoundingClientRect().height);
+
+  // The refactored page keeps the canvas as it is when a panel opens over it; the legacy page
+  // shrinks its stage (cropping the painting for good) when the custom-characters row appears.
+  // So legacy gets a taller window while that row is showing, which keeps its canvas the same size.
+  const CUSTOM_ROW = 48; // the row's 40 px plus the 8 px gap
+  let customOpen = false;
+  const resizeBy = async (dy: number) => {
+    iframe.style.height = `${parseFloat(iframe.style.height) + dy}px`;
+    await frames(3);
+  };
+  const selectMode = async (mode: string) => {
+    if (legacy && mode === 'custom' && !customOpen) {
+      const before = stageH();
+      await resizeBy(CUSTOM_ROW); // grow first, so the extra rows are blank and nothing is lost
+      click('[data-mode="custom"]');
+      await frames(3);
+      if (stageH() !== before) throw new Error('legacy canvas changed size with the custom row');
+      customOpen = true;
+      return;
+    }
+    click(`[data-mode="${mode}"]`);
+    if (legacy && mode !== 'custom' && customOpen) {
+      await frames(3);
+      await resizeBy(-CUSTOM_ROW);
+      customOpen = false;
+    }
+  };
 
   // wait for fonts and the starter picture, then settle glyph calibration on the loaded fonts
   await win.document.fonts.load('13px "IBM Plex Mono"', GLYPHS);
@@ -53,7 +81,8 @@ async function collect(
     await settle(); // the refactored page animates panels in and out; legacy has none
     for (const kind of KINDS) {
       copied.length = 0;
-      click(`[data-copy="${kind}"]`);
+      if (legacy) click(`[data-copy="${kind}"]`);
+      else app.copy(kind); // the refactored page picks a format, then presses Copy
       out[`${label}/${kind}`] = copied.join('\u0000');
     }
     out[`${label}/pixels`] = hash(view.toDataURL());
@@ -93,7 +122,7 @@ async function collect(
     for (const palette of ['color', 'gray']) {
       click(`[data-palette="${palette}"]`);
       for (const mode of MODES) {
-        click(`[data-mode="${mode}"]`);
+        await selectMode(mode);
         if (mode === 'custom') setValue('#customChars', ' .:oO@#');
         await capture(`${theme}/${palette}/${mode}`);
       }
@@ -105,7 +134,7 @@ async function collect(
   click('[data-palette="color"]');
   click('#bUnder');
   for (const mode of ['braille', 'shade']) {
-    click(`[data-mode="${mode}"]`);
+    await selectMode(mode);
     await capture(`under/${mode}`);
   }
   click('#bUnder');

@@ -40,7 +40,7 @@ new MutationObserver(markDirty).observe(document.documentElement, {
 });
 // a collapse animation resizes the stage every frame on purpose; reveal.ts re-fits once it ends
 new ResizeObserver(() => {
-  if (!layoutBusy()) resize();
+  if (!layoutBusy()) resize(undefined, false);
 }).observe(stage);
 
 const start = () => {

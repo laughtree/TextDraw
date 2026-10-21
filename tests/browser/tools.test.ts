@@ -21,7 +21,7 @@ async function copyText(): Promise<string[]> {
   await app.frames(2);
   app.copied.length = 0;
   app.click('#bCopy');
-  app.click('[data-copy="text"]');
+  app.copy('text');
   await app.frames();
   return app.copied.join('').split('\n');
 }
@@ -196,7 +196,7 @@ describe('shapes', () => {
     drag(0.1, 0.5, 0.9, 0.5);
     app.copied.length = 0;
     await app.frames(2);
-    app.click('[data-copy="html"]');
+    app.copy('html');
     expect(app.copied.join('')).toContain('color:#da1e28');
   });
 });
@@ -298,7 +298,7 @@ describe('text', () => {
     await app.sleep(100);
     key('Enter');
     app.copied.length = 0;
-    app.click('[data-copy="html"]');
+    app.copy('html');
     expect(app.copied.join('')).toContain('color:#0f62fe');
   });
 });
