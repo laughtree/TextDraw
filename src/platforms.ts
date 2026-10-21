@@ -6,14 +6,16 @@ export type Counter = 'weighted' | 'graphemes' | 'chars';
 export interface Platform {
   id: string;
   label: string;
-  /** maximum count, in the platform's own unit */
-  limit: number;
+  /** maximum count, in the platform's own unit; null when there is no single verifiable limit */
+  limit: number | null;
   counter: Counter;
   /** count of one cell in the worst case (a block / braille cell); X weighs those 2 */
   cellWeight: number;
-  /** 'official': limit and rule come from the platform's own documentation */
-  source: 'official' | 'thirdparty';
-  /** one line on how the platform counts, shown under the budget */
+  /** 'official': limit and rule come from the platform's own documentation; 'estimate': a generic guess */
+  source: 'official' | 'thirdparty' | 'estimate';
+  /** a fixed suggested size that replaces the one derived from `limit` */
+  grid?: Grid;
+  /** one line on how the platform counts, shown in the help bubble */
   rule: string;
 }
 
@@ -26,6 +28,17 @@ export interface Platform {
  * The rest only have third-party sources.
  */
 export const PLATFORMS: readonly Platform[] = [
+  {
+    id: 'chat',
+    label: '聊天室',
+    limit: null,
+    counter: 'chars',
+    cellWeight: 1,
+    source: 'estimate',
+    // chat bubbles are narrower and wrap sooner than posts, so this is smaller than any post preset
+    grid: { cols: 24, rows: 12 },
+    rule: '聊天泡泡通常比發文更窄、更容易換行，所以尺寸比發文保守；沒有對應的字數上限，不顯示讀數',
+  },
   {
     id: 'x',
     label: 'X',
@@ -147,7 +160,7 @@ export function deriveGrid(limit: number, cellWeight: number): Grid {
   return { cols: LIMITS.minCols, rows: LIMITS.minRows };
 }
 
-export const presetGrid = (p: Platform): Grid => deriveGrid(p.limit, p.cellWeight);
+export const presetGrid = (p: Platform): Grid => p.grid ?? deriveGrid(p.limit ?? 0, p.cellWeight);
 
 export const findPlatform = (id: string | null): Platform | null =>
   PLATFORMS.find((p) => p.id === id) ?? null;

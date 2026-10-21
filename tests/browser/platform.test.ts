@@ -48,14 +48,22 @@ async function copyText() {
 }
 
 describe('platform drop-down', () => {
-  it('offers a custom entry plus an official and a third-party group', () => {
+  it('is a plain list: custom first, then the chat room and the platforms, no groups', () => {
     expect(select().value).toBe('');
-    const groups = [...select().querySelectorAll('optgroup')].map((g) => g.label);
-    expect(groups).toEqual(['官方文件已確認', '第三方來源（未經官方確認）']);
+    expect(select().querySelectorAll('optgroup')).toHaveLength(0);
     const labels = [...select().options].map((o) => o.textContent);
-    expect(labels).toContain('X · 16 × 8');
-    expect(labels).toContain('Telegram · 32 × 16');
+    expect(labels).toHaveLength(11);
+    expect(labels.slice(0, 6)).toEqual([
+      '自訂',
+      '聊天室 · 24 × 12',
+      'X · 16 × 8',
+      'Telegram · 32 × 16',
+      'Discord · 32 × 16',
+      'Mastodon · 30 × 15',
+    ]);
+    expect(labels.some((l) => /官方|第三方/.test(l ?? ''))).toBe(false);
     expect(app.q('#budget').hidden).toBe(true);
+    expect(app.doc.getElementById('budgetNote')).toBeNull();
   });
 
   it('applies the suggested grid, leaves auto mode, and can be undone', async () => {
@@ -126,5 +134,93 @@ describe('platform drop-down', () => {
     await fill();
     await copyText();
     expect(app.q('#toast').textContent).toBe('已複製純文字');
+  });
+
+  it('applies the chat room size and shows no readout for it', async () => {
+    await choose('chat');
+    expect(meta()).toBe('24 × 12 cells');
+    expect(app.q('#bAuto').getAttribute('aria-pressed')).toBe('false');
+    expect(app.q('#budget').hidden).toBe(true);
+    expect(app.q('#canvasBudget').hidden).toBe(true);
+    await fill();
+    await copyText();
+    expect(app.q('#toast').textContent).toBe('已複製純文字');
+    await choose('x');
+    expect(app.q('#budget').hidden).toBe(false);
+  });
+});
+
+describe('platform help bubble', () => {
+  const btn = () => app.q('#platformTipBtn');
+  const tip = () => app.q('#platformTip');
+
+  it('only exists once a platform is chosen', async () => {
+    expect(btn().hidden).toBe(true);
+    await choose('x');
+    expect(btn().hidden).toBe(false);
+    expect(btn().getAttribute('aria-expanded')).toBe('false');
+    expect(tip().hidden).toBe(true);
+    await choose('');
+    expect(btn().hidden).toBe(true);
+  });
+
+  it('opens and closes on click and explains limit, rule, source and size', async () => {
+    await choose('x');
+    btn().click();
+    expect(tip().hidden).toBe(false);
+    expect(btn().getAttribute('aria-expanded')).toBe('true');
+    const text = tip().textContent ?? '';
+    for (const part of ['X', '上限 280', '加權計數', '官方文件已確認', '16 × 8', '估計值']) {
+      expect(text, part).toContain(part);
+    }
+    btn().click();
+    expect(tip().hidden).toBe(true);
+  });
+
+  it('says when the numbers come from a third party or are a generic estimate', async () => {
+    await choose('instagram-bio');
+    btn().click();
+    expect(tip().textContent).toContain('第三方來源，未經官方確認');
+    expect(tip().textContent).toContain('上限 150');
+    await choose('chat');
+    btn().click();
+    const text = tip().textContent ?? '';
+    for (const part of ['聊天室', '通用估計', '非任何平台的官方數字', '24 × 12']) {
+      expect(text, part).toContain(part);
+    }
+  });
+
+  it('closes on Escape and on a click elsewhere', async () => {
+    await choose('x');
+    btn().click();
+    app.doc.dispatchEvent(new app.win.KeyboardEvent('keydown', { key: 'Escape' }));
+    expect(tip().hidden).toBe(true);
+    btn().click();
+    app.q('#meta').click();
+    expect(tip().hidden).toBe(true);
+  });
+
+  it('closes when switching back to custom', async () => {
+    await choose('x');
+    btn().click();
+    await choose('');
+    expect(tip().hidden).toBe(true);
+    expect(btn().hidden).toBe(true);
+  });
+
+  it('keeps only one help bubble open, and the whitespace one still works', async () => {
+    await choose('x');
+    app.click('#bCopy');
+    const space = app.q('#spaceTip');
+    app.click('#tipBtn');
+    expect(space.hidden).toBe(false);
+    btn().click();
+    expect(tip().hidden).toBe(false);
+    expect(space.hidden).toBe(true);
+    app.click('#tipBtn');
+    expect(space.hidden).toBe(false);
+    expect(tip().hidden).toBe(true);
+    app.click('#tipBtn');
+    expect(space.hidden).toBe(true);
   });
 });

@@ -139,15 +139,29 @@
                 disabled
               />
             </div>
-            <div class="row">
+            <div class="row has-tip">
               <label class="label" for="platform">平台</label>
               <select id="platform" class="select">
                 <option value="">自訂</option>
               </select>
+              <button
+                id="platformTipBtn"
+                class="info"
+                aria-label="平台說明"
+                aria-expanded="false"
+                aria-controls="platformTip"
+                hidden
+              >
+                <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+                  <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" />
+                  <rect x="7.4" y="7" width="1.2" height="4.5" fill="currentColor" />
+                  <circle cx="8" cy="5" r=".8" fill="currentColor" />
+                </svg>
+              </button>
+              <div id="platformTip" class="tip" role="tooltip" hidden></div>
             </div>
             <div id="budget" class="budget" hidden>
               <div class="budget-count" id="budgetCount" role="status"></div>
-              <div class="budget-note" id="budgetNote"></div>
             </div>
           </div>
         </div>

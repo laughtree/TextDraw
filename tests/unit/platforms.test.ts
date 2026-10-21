@@ -40,6 +40,7 @@ describe('deriveGrid', () => {
   };
 
   it('gives each platform the planned size', () => {
+    expect(sizeOf('chat')).toBe('24x12');
     expect(sizeOf('x')).toBe('16x8');
     expect(sizeOf('mastodon')).toBe('30x15');
     expect(sizeOf('threads')).toBe('30x15');
@@ -47,6 +48,17 @@ describe('deriveGrid', () => {
     expect(sizeOf('instagram-bio')).toBe('16x8');
     for (const id of ['telegram', 'discord', 'line', 'instagram-caption']) {
       expect(sizeOf(id), id).toBe('32x16');
+    }
+  });
+
+  it('makes the chat room narrower than the presets that are not limited by their character budget', () => {
+    const chat = findPlatform('chat');
+    if (!chat) throw new Error('chat missing');
+    const ids = ['telegram', 'discord', 'line', 'instagram-caption', 'mastodon', 'threads'];
+    for (const id of ids) {
+      const p = findPlatform(id);
+      if (!p) throw new Error(id);
+      expect(presetGrid(chat).cols, id).toBeLessThan(presetGrid(p).cols);
     }
   });
 
@@ -66,18 +78,31 @@ describe('deriveGrid', () => {
   });
 });
 
+const CHAT_LIMITS = PLATFORMS.filter((p) => ['telegram', 'discord', 'line'].includes(p.id)).map(
+  (p) => p.limit ?? Infinity,
+);
+
 describe('presets stay within every platform limit, worst case', () => {
   for (const p of PLATFORMS) {
     it(`${p.label}: a fully inked preset still fits`, () => {
       const { cols, rows } = presetGrid(p);
       const worst = Array.from({ length: rows }, () => '█'.repeat(cols)).join('\n');
-      expect(countOf(worst, p.counter)).toBeLessThanOrEqual(p.limit);
+      // the chat room has no verifiable limit of its own: it must fit under every named chat app
+      const limit = p.limit ?? Math.min(...CHAT_LIMITS);
+      expect(countOf(worst, p.counter)).toBeLessThanOrEqual(limit);
       expect(cols).toBeLessThanOrEqual(32);
       expect(cols).toBeGreaterThanOrEqual(LIMITS.minCols);
       expect(rows).toBeGreaterThanOrEqual(LIMITS.minRows);
       expect(rows).toBeLessThanOrEqual(LIMITS.maxRows);
     });
   }
+
+  it('marks the chat room as a generic estimate without a limit', () => {
+    const chat = findPlatform('chat');
+    expect(chat?.limit).toBeNull();
+    expect(chat?.source).toBe('estimate');
+    expect(PLATFORMS[0].id).toBe('chat');
+  });
 
   it('lists official platforms and flags the rest as third-party', () => {
     const official = PLATFORMS.filter((p) => p.source === 'official').map((p) => p.id);

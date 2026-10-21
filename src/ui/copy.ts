@@ -3,6 +3,7 @@ import { state } from '../state';
 import type { ExportKind } from '../types';
 import { exportCurrent } from './exportCurrent';
 import { overLimit } from './platform';
+import { bindTip } from './tip';
 import { toast } from './toast';
 
 const LABELS: Record<ExportKind, string> = {
@@ -11,24 +12,7 @@ const LABELS: Record<ExportKind, string> = {
   ansi: 'ANSI 文字',
 };
 
-function initSpaceTip(): void {
-  const tipBtn = $('tipBtn'),
-    tip = $('spaceTip');
-  const setTip = (open: boolean) => {
-    tip.hidden = !open;
-    tipBtn.setAttribute('aria-expanded', String(open));
-  };
-  tipBtn.onclick = (e) => {
-    e.stopPropagation();
-    setTip(Boolean(tip.hidden));
-  };
-  document.addEventListener('click', (e) => {
-    if (!tip.hidden && !tip.contains(e.target as Node)) setTip(false);
-  });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') setTip(false);
-  });
-}
+const initSpaceTip = () => bindTip($('tipBtn'), $('spaceTip'));
 
 /** Space substitute and code fence change what gets copied (and how many characters it counts). */
 const exportChanged = () => document.dispatchEvent(new Event('exportchange'));

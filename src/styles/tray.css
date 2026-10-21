@@ -140,11 +140,6 @@
   color: var(--danger);
   font-weight: 600;
 }
-.budget-note {
-  font-size: 12px;
-  line-height: 16px;
-  color: var(--text-2);
-}
 .canvas-budget {
   font: 12px/16px var(--f-mono);
   color: var(--text-2);
