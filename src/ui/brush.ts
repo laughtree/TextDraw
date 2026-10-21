@@ -22,6 +22,7 @@ export function initBrush(): void {
     ring.hidden = true;
   };
   const place = (x: number, y: number, size: number) => {
+    if (state.tool === 'text') return hide(); // the text cursor stands in
     clearTimeout(timer);
     ring.classList.remove('fading');
     const d = ringDiameter(state.tool, size, state.scale);

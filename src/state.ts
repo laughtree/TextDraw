@@ -9,6 +9,8 @@ export const state = {
   palette: 'color' as Palette,
   under: false,
   size: 5,
+  /** font size of the text tool, in drawing-buffer px */
+  textSize: 48,
   penColor: '#000000',
   customRamp: Array.from(' .oO@'),
   spaceChar: '⠀',

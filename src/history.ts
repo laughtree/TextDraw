@@ -4,7 +4,7 @@ import { state } from './state';
 import { bctx, setGrid } from './surface';
 
 /** A snapshot plus the grid setting it was taken under, so grid changes can be undone too. */
-interface Entry {
+export interface Entry {
   img: ImageData;
   fixed: Grid | null;
 }
@@ -37,15 +37,31 @@ function restore(e: Entry): void {
   state.dirty = true;
 }
 
-export function pushUndo(): void {
+/** A snapshot of the drawing and its grid setting; null if the canvas could not be read. */
+export function takeSnapshot(): Entry | null {
   try {
-    undo.push(snap());
+    return snap();
+  } catch {
+    return null; // e.g. a zero-size canvas: carry on without history for this step
+  }
+}
+
+/** Record `entry` as the state before an edit, so undo returns to it; the edit clears redo. */
+export function commitUndo(entry: Entry | null): void {
+  if (entry) {
+    undo.push(entry);
     while (undo.length > MAX_STEPS || (undo.length > 1 && totalBytes() > MAX_BYTES)) undo.shift();
     redo.length = 0;
-  } catch {
-    // snapshot failed (e.g. zero-size canvas): carry on without history for this stroke
   }
   syncHist();
+}
+
+export const pushUndo = (): void => commitUndo(takeSnapshot());
+
+/** Put a snapshot's pixels back (used to redraw a live preview from a clean base). */
+export function restoreBase(entry: Entry): void {
+  bctx.putImageData(entry.img, 0, 0);
+  state.dirty = true;
 }
 
 export function doUndo(): void {

@@ -7,6 +7,7 @@ import '@fontsource/noto-sans-tc/600.css';
 import './styles/main.css';
 
 import { initDraw } from './draw';
+import { initText } from './text';
 import { loop } from './render';
 import { sample } from './sample';
 import { state } from './state';
@@ -19,6 +20,7 @@ import { initPlatform } from './ui/platform';
 import { layoutBusy } from './ui/reveal';
 
 initDraw();
+initText();
 initControls();
 initBrush();
 initCanvasSize();

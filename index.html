@@ -17,6 +17,15 @@
         <div id="paper">
           <canvas id="view" aria-label="繪圖區"></canvas>
           <div id="brush" class="brush" hidden aria-hidden="true"></div>
+          <input
+            id="textEdit"
+            class="text-edit"
+            type="text"
+            hidden
+            autocomplete="off"
+            spellcheck="false"
+            aria-label="輸入文字，按 Enter 確定、Esc 取消"
+          />
         </div>
       </div>
 
@@ -66,14 +75,62 @@
             <button class="sw" data-color="#8a3ffc" aria-pressed="false" aria-label="紫">
               <i style="background: #8a3ffc"></i>
             </button>
-            <label class="sw pick" for="colorPick" aria-label="自選顏色">
-              <i id="pickSwatch" style="background: #ee5396"></i>
+            <label
+              class="sw pick"
+              for="colorPick"
+              aria-label="自選顏色（調色盤）"
+              style="--pick: #ee5396"
+            >
+              <svg class="palette" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+                <path
+                  class="disc"
+                  d="M12 3C6.5 3 2.5 7 2.5 12s4 9 9.5 9c1.4 0 2-.9 2-1.8 0-.5-.2-.9-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1 .8-1.8 1.8-1.8H17c2.8 0 5-2.2 5-5 0-4.5-4.5-8.8-10-8.8z"
+                />
+                <circle cx="7.5" cy="11.5" r="1.6" fill="#da1e28" />
+                <circle cx="10.5" cy="7.3" r="1.6" fill="#f1c21b" />
+                <circle cx="15.5" cy="7.3" r="1.6" fill="#24a148" />
+                <circle cx="18" cy="11.5" r="1.6" fill="#0f62fe" />
+              </svg>
               <input id="colorPick" type="color" value="#ee5396" />
             </label>
           </div>
           <div class="seg" role="group" aria-label="工具">
-            <button id="tPen" aria-pressed="true">繪製</button>
-            <button id="tErase" aria-pressed="false">擦除</button>
+            <button id="tPen" data-tool="pen" aria-pressed="true">繪製</button>
+            <button id="tErase" data-tool="erase" aria-pressed="false">擦除</button>
+          </div>
+        </div>
+        <div class="row tools">
+          <div class="seg iconseg" role="group" aria-label="圖形與文字">
+            <button data-tool="line" aria-pressed="false" aria-label="直線" title="直線（拖曳）">
+              <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+                <path d="M5 19L19 5" />
+              </svg>
+            </button>
+            <button data-tool="circle" aria-pressed="false" aria-label="圓" title="圓（拖出外框）">
+              <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+                <circle cx="12" cy="12" r="7.5" />
+              </svg>
+            </button>
+            <button data-tool="rect" aria-pressed="false" aria-label="方" title="方（拖出外框）">
+              <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+                <rect x="5" y="5" width="14" height="14" />
+              </svg>
+            </button>
+            <button
+              data-tool="text"
+              aria-pressed="false"
+              aria-label="文字"
+              title="文字（點一下輸入）"
+            >
+              <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+                <path d="M6 7V5h12v2M12 5v14M9.5 19h5" />
+              </svg>
+            </button>
+          </div>
+          <div id="textOpts" class="textopts" hidden>
+            <label class="label" for="textSize">字級</label>
+            <input id="textSize" type="range" min="12" max="160" value="48" />
+            <span class="out" id="textSizeOut">48</span>
           </div>
         </div>
         <div class="row">

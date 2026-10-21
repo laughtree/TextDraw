@@ -38,3 +38,18 @@
     transition: none;
   }
 }
+
+/* the text tool's one-line editor, over the canvas next to where the text will appear */
+.text-edit {
+  position: absolute;
+  z-index: 5;
+  width: min(240px, calc(100% - 8px));
+  height: 36px;
+  padding: 0 12px;
+  font: 600 14px var(--f-mono);
+  color: var(--text);
+  background: var(--layer);
+  border: 1px solid var(--sel-inv);
+  border-radius: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}

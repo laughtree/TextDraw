@@ -237,3 +237,18 @@ button:disabled {
   padding: 0 8px;
   border-radius: 0;
 }
+
+/* palette swatch: a palette icon whose disc shows the custom colour */
+.sw.pick .palette {
+  display: block;
+  pointer-events: none;
+}
+.sw.pick .disc {
+  fill: var(--pick, #ee5396);
+  stroke: var(--text);
+  stroke-width: 1.25;
+}
+.sw.pick circle {
+  stroke: #fff;
+  stroke-width: 0.75;
+}

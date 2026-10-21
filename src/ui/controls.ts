@@ -2,14 +2,11 @@ import { $ } from '../dom';
 import { doRedo, doUndo, pushUndo } from '../history';
 import { state } from '../state';
 import { bctx } from '../surface';
-import type { Mode, Palette } from '../types';
+import { refreshText } from '../text';
+import type { Mode, Palette, Tool } from '../types';
 import { reveal } from './reveal';
+import { setTool } from './tools';
 import { toast } from './toast';
-
-function setPressed(a: string, b: string, on: boolean): void {
-  $(a).setAttribute('aria-pressed', String(on));
-  $(b).setAttribute('aria-pressed', String(!on));
-}
 
 /** Mark `active` as the pressed one among `buttons` (single-choice segmented control). */
 function selectOne(buttons: HTMLElement[], active: HTMLElement): void {
@@ -17,18 +14,19 @@ function selectOne(buttons: HTMLElement[], active: HTMLElement): void {
 }
 
 function initTools(): void {
-  $('tPen').onclick = () => {
-    state.tool = 'pen';
-    setPressed('tPen', 'tErase', true);
-  };
-  $('tErase').onclick = () => {
-    state.tool = 'erase';
-    setPressed('tPen', 'tErase', false);
-  };
+  document
+    .querySelectorAll<HTMLElement>('[data-tool]')
+    .forEach((b) => (b.onclick = () => setTool(b.dataset.tool as Tool)));
   $('size').oninput = (e) => {
     state.size = +(e.target as HTMLInputElement).value;
     $('sizeOut').textContent = String(state.size);
   };
+  $('textSize').oninput = (e) => {
+    state.textSize = +(e.target as HTMLInputElement).value;
+    $('textSizeOut').textContent = String(state.textSize);
+    refreshText();
+  };
+  $('stage').dataset.activeTool = state.tool;
 }
 
 function initModes(): void {
@@ -68,19 +66,17 @@ function initColors(): void {
     pickLbl = pick.parentElement as HTMLElement;
   function choose(color: string, fromPicker: boolean): void {
     state.penColor = color;
-    if (state.tool === 'erase') {
-      state.tool = 'pen';
-      setPressed('tPen', 'tErase', true);
-    }
+    if (state.tool === 'erase') setTool('pen');
     swBtns.forEach((b) =>
       b.setAttribute('aria-pressed', String(!fromPicker && b.dataset.color === color)),
     );
     pickLbl.classList.toggle('on', fromPicker);
+    refreshText(); // a text being typed takes the new colour
   }
   swBtns.forEach((b) => (b.onclick = () => choose(b.dataset.color ?? '#000000', false)));
   pick.oninput = (e) => {
     const value = (e.target as HTMLInputElement).value;
-    $('pickSwatch').style.background = value;
+    pickLbl.style.setProperty('--pick', value);
     // pure black is reserved for "theme ink", so nudge a picked black off it
     choose(value === '#000000' ? '#010101' : value, true);
   };

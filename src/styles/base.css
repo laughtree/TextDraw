@@ -57,6 +57,10 @@ body::before {
   background: var(--bg);
   overflow: hidden;
 }
+/* the text tool uses the I-beam; everything else shows the brush ring instead of a cursor */
+#stage[data-active-tool='text'] #view {
+  cursor: text;
+}
 /* a fixed-size grid is letterboxed inside the stage */
 #stage.fixed {
   background: var(--layer);
