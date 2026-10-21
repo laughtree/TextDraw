@@ -3,7 +3,8 @@
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
-  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  /* just below the 48px header (which sits under the top safe area) */
+  top: calc(48px + 8px + env(safe-area-inset-top, 0px));
   background: var(--sel-inv);
   color: var(--text-inv);
   border-left: 3px solid var(--success);
