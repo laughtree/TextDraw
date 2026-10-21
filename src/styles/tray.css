@@ -30,7 +30,8 @@
 .actions {
   flex-wrap: nowrap;
 }
-.actions #bCopy {
+.actions #bCopy,
+.actions #bImport {
   flex: none;
 }
 .toprow,
@@ -43,7 +44,8 @@
   min-width: 0;
   padding: 0 8px;
 }
-#copyMenu {
+#copyMenu,
+#importMenu {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -232,4 +234,27 @@
   .colorrow::after {
     transition: none;
   }
+}
+
+/* import panel: the pane below the type switch */
+.importpane {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+#importText {
+  height: 96px;
+  resize: none;
+  font: 12px/1.25 var(--f-mono);
+  background: var(--layer);
+  color: var(--text);
+  border: 0;
+  border-bottom: 1px solid var(--border-strong);
+  padding: 8px 12px;
+  white-space: pre;
+  overflow: auto;
+  border-radius: 0;
+}
+.importpane .label {
+  white-space: normal;
 }

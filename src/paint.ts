@@ -2,6 +2,28 @@ import { blockPaint } from './blocks';
 import { DOTS } from './charsets';
 import type { Mode } from './types';
 
+/** Braille dot bits as [bit, column, row] in the cell's 2×4 dot layout. */
+export const BRAILLE_BITS: readonly (readonly [number, number, number])[] = [
+  [1, 0, 0],
+  [2, 0, 1],
+  [4, 0, 2],
+  [64, 0, 3],
+  [8, 1, 0],
+  [16, 1, 1],
+  [32, 1, 2],
+  [128, 1, 3],
+];
+
+/** Centre of a braille dot in the cell whose top-left corner is (x0, y0). */
+export const brailleDot = (
+  x0: number,
+  y0: number,
+  cw: number,
+  ch: number,
+  sc: number,
+  sr: number,
+): [number, number] => [x0 + cw * (0.28 + sc * 0.44), y0 + ch * (0.14 + sr * 0.24)];
+
 export interface PaintGeometry {
   cw: number;
   ch: number;
@@ -28,17 +50,7 @@ export function paintGrid(
   ctx.textBaseline = 'middle';
   if (mode === 'braille') {
     // draw dots ourselves so they look even regardless of font coverage
-    const r = Math.max(1, cw * 0.16),
-      BIT = [
-        [1, 0, 0],
-        [2, 0, 1],
-        [4, 0, 2],
-        [64, 0, 3],
-        [8, 1, 0],
-        [16, 1, 1],
-        [32, 1, 2],
-        [128, 1, 3],
-      ];
+    const r = Math.max(1, cw * 0.16);
     for (let k = 0; k < grid.length; k++) {
       const c = grid[k];
       if (c === ' ') continue;
@@ -47,10 +59,9 @@ export function paintGrid(
         y0 = ((k / cols) | 0) * ch;
       ctx.fillStyle = colorAt(k);
       ctx.beginPath();
-      for (const [bit, sc, sr] of BIT)
+      for (const [bit, sc, sr] of BRAILLE_BITS)
         if (b & bit) {
-          const x = x0 + cw * (0.28 + sc * 0.44),
-            y = y0 + ch * (0.14 + sr * 0.24);
+          const [x, y] = brailleDot(x0, y0, cw, ch, sc, sr);
           ctx.moveTo(x + r, y);
           ctx.arc(x, y, r, 0, Math.PI * 2);
         }

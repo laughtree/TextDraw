@@ -133,6 +133,10 @@ function download(format: ExportFormat): void {
 function initExportMenu(): void {
   $('bCopy').onclick = (e) => {
     const show = !isOpen($('copyMenu'));
+    if (show) {
+      reveal($('importMenu'), false, 'collapse'); // one panel at a time
+      $('bImport').setAttribute('aria-expanded', 'false');
+    }
     reveal($('copyMenu'), show, 'collapse');
     (e.currentTarget as HTMLElement).setAttribute('aria-expanded', String(show));
   };

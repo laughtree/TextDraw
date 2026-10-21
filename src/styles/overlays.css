@@ -80,3 +80,13 @@
   display: block;
   font-weight: 600;
 }
+
+/* a file is being dragged over the canvas */
+#stage.dropping::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 2px dashed var(--sel-inv);
+  pointer-events: none;
+  z-index: 6;
+}

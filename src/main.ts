@@ -17,6 +17,7 @@ import { initCanvasSize } from './ui/canvasSize';
 import { initControls } from './ui/controls';
 import { initCopy } from './ui/copy';
 import { initEyedropper } from './ui/eyedropper';
+import { initImport } from './ui/importMenu';
 import { initPlatform } from './ui/platform';
 import { layoutBusy } from './ui/reveal';
 import { initSegments } from './ui/segments';
@@ -29,6 +30,7 @@ initEyedropper();
 initCanvasSize();
 initPlatform();
 initCopy();
+initImport();
 initSegments(); // last: the groups it watches are all in place
 
 // any theme change (OS preference or explicit data-theme) needs a repaint in the new ink colours

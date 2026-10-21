@@ -30,3 +30,18 @@ export function bufferSize(g: Grid, cw: number, ch: number): { W: number; H: num
 export function fitScale(W: number, H: number, availW: number, availH: number): number {
   return Math.max(1e-3, Math.min(availW / W, availH / H));
 }
+
+export interface Box {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+/** The largest rectangle with the source's proportions that fits the target, centred in it. */
+export function containRect(srcW: number, srcH: number, dstW: number, dstH: number): Box {
+  const s = Math.min(dstW / srcW, dstH / srcH),
+    w = srcW * s,
+    h = srcH * s;
+  return { x: (dstW - w) / 2, y: (dstH - h) / 2, w, h };
+}
