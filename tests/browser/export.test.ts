@@ -254,3 +254,63 @@ describe('image', () => {
     }
   });
 });
+
+describe('whitespace substitute', () => {
+  const SPACES: [string, string, string][] = [
+    ['標準', ' ', '[data-space=" "]'],
+    ['不斷行', '\u00a0', '[data-space="\u00a0"]'],
+    ['點字', '\u2800', '[data-space="\u2800"]'],
+  ];
+
+  /** a shape with blank cells in the middle and an indented first row, in braille mode */
+  async function drawShape() {
+    app.click('[data-mode="braille"]');
+    app.click('[data-color="#0f62fe"]');
+    app.click('[data-tool="rect"]');
+    app.setValue('#size', '5');
+    const v = app.view.getBoundingClientRect();
+    app.stroke(line(v.width * 0.3, v.height * 0.3, v.width * 0.7, v.height * 0.7, 8));
+    await app.frames(3);
+  }
+
+  const ANSI = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, 'g');
+  const visible = (format: string, text: string) =>
+    format === 'ansi' ? text.replace(ANSI, '') : text.replace(/<[^>]*>/g, '');
+
+  it.each(SPACES)('writes %s blanks into the text, HTML and ANSI exports', async (_n, ch, sel) => {
+    await drawShape();
+    app.click(sel);
+    for (const format of ['text', 'html', 'ansi']) {
+      app.copied.length = 0;
+      app.copy(format);
+      const body = visible(format, app.copied.join(''));
+      // every character in the picture is a braille dot pattern or the chosen blank
+      const chars = [...body.replace(/^<pre[^>]*>|<\/pre>$/g, '').replace(/\n/g, '')];
+      expect(chars.length, format).toBeGreaterThan(20);
+      for (const c of chars) {
+        expect(
+          c === ch || (c >= '\u2801' && c <= '\u28ff'),
+          `${format}: ${JSON.stringify(c)}`,
+        ).toBe(true);
+      }
+      expect(chars.includes(ch), `${format} has blank cells`).toBe(true);
+    }
+  });
+
+  it('changes the exports when the substitute is changed, and only in the blank cells', async () => {
+    await drawShape();
+    const exported = () => {
+      app.copied.length = 0;
+      app.copy('text');
+      return app.copied.join('');
+    };
+    app.click('[data-space=" "]');
+    const standard = exported();
+    app.click('[data-space="\u2800"]');
+    const braille = exported();
+    expect(braille).not.toBe(standard);
+    expect(braille.replaceAll('\u2800', ' ')).toBe(standard);
+    app.click('[data-space="\u00a0"]');
+    expect(exported().replaceAll('\u00a0', ' ')).toBe(standard);
+  });
+});

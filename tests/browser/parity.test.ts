@@ -83,7 +83,13 @@ async function collect(
       copied.length = 0;
       if (legacy) click(`[data-copy="${kind}"]`);
       else app.copy(kind); // the refactored page picks a format, then presses Copy
-      out[`${label}/${kind}`] = copied.join('\u0000');
+      let text = copied.join('\u0000');
+      // Legacy writes blank cells into the HTML as plain spaces; the refactored page uses the chosen
+      // whitespace substitute there too (on purpose). The substitutes never occur anywhere else,
+      // so turning them back into spaces compares everything else strictly.
+      if (kind === 'html' && !legacy)
+        text = text.replaceAll('\u2800', ' ').replaceAll('\u00a0', ' ');
+      out[`${label}/${kind}`] = text;
     }
     out[`${label}/pixels`] = hash(view.toDataURL());
   };

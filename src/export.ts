@@ -8,7 +8,7 @@ export interface ExportGrid {
 }
 
 export interface ExportOptions {
-  /** replaces ' ' in text and ANSI output */
+  /** replaces the blank cells in the text, HTML and ANSI output */
   spaceChar: string;
   /** wrap text/ANSI output in a ``` fence */
   fence: boolean;
@@ -65,7 +65,7 @@ export function exportAs(kind: ExportKind, src: ExportGrid, opts: ExportOptions)
             : '\x1b[39m';
         cur = col;
       }
-      line += kind === 'html' ? esc(c) : c === ' ' ? opts.spaceChar : c;
+      line += c === ' ' ? opts.spaceChar : kind === 'html' ? esc(c) : c;
     }
     if (kind === 'html' && cur) line += '</span>';
     if (kind === 'ansi' && cur) line += '\x1b[0m';
