@@ -1,5 +1,12 @@
 {
-  "name": "asciipaint",
+  "name": "text-draw",
+  "description": "在畫布上畫圖，即時轉成字元畫的網頁工具",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/laughtree/text-draw.git"
+  },
+  "homepage": "https://laughtree.github.io/text-draw/",
   "version": "0.1.0",
   "private": true,
   "type": "module",

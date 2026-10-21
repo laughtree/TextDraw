@@ -7,11 +7,11 @@ export interface ExportFile {
 }
 
 export const EXPORT_FILES: Record<ExportFormat, ExportFile> = {
-  text: { name: 'ascii-paint.txt', mime: 'text/plain;charset=utf-8' },
-  html: { name: 'ascii-paint.html', mime: 'text/html;charset=utf-8' },
+  text: { name: 'text-draw.txt', mime: 'text/plain;charset=utf-8' },
+  html: { name: 'text-draw.html', mime: 'text/html;charset=utf-8' },
   // colour escape sequences in UTF-8: the usual extension for ANSI art, and `cat` shows the colours
-  ansi: { name: 'ascii-paint.ans', mime: 'text/plain;charset=utf-8' },
-  image: { name: 'ascii-paint.png', mime: 'image/png' },
+  ansi: { name: 'text-draw.ans', mime: 'text/plain;charset=utf-8' },
+  image: { name: 'text-draw.png', mime: 'image/png' },
 };
 
 export const EXPORT_LABELS: Record<ExportFormat, string> = {
@@ -28,7 +28,7 @@ export function htmlDocument(fragment: string): string {
     '<html>',
     '<head>',
     '<meta charset="utf-8">',
-    '<title>ASCIIpaint</title>',
+    '<title>Text Draw</title>',
     '</head>',
     '<body style="margin:0;padding:16px;background:#fff;color:#161616">',
     fragment,

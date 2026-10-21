@@ -36,6 +36,9 @@ async function collect(
   const legacy = url.includes('/legacy/');
   const { iframe, win, doc, view, copied, frames, sleep, settle, click, setValue, stroke } = app;
   const stageH = () => Math.floor(app.q('#stage').getBoundingClientRect().height);
+  // The page declares lang=zh-Hant, which makes the canvas pick Traditional-Chinese glyph forms for
+  // CJK text; the frozen legacy page has no lang, so give it the same one before anything is drawn.
+  if (legacy) doc.documentElement.lang = 'zh-Hant';
 
   // The refactored page keeps the canvas as it is when a panel opens over it; the legacy page
   // shrinks its stage (cropping the painting for good) when the custom-characters row appears.

@@ -4,13 +4,13 @@ import { EXPORT_FILES, EXPORT_LABELS, fileContent, htmlDocument } from '../../sr
 describe('export files', () => {
   it('names and types every format', () => {
     expect(EXPORT_FILES.text).toEqual({
-      name: 'ascii-paint.txt',
+      name: 'text-draw.txt',
       mime: 'text/plain;charset=utf-8',
     });
-    expect(EXPORT_FILES.html.name).toBe('ascii-paint.html');
+    expect(EXPORT_FILES.html.name).toBe('text-draw.html');
     expect(EXPORT_FILES.html.mime).toContain('text/html');
-    expect(EXPORT_FILES.ansi.name).toBe('ascii-paint.ans');
-    expect(EXPORT_FILES.image).toEqual({ name: 'ascii-paint.png', mime: 'image/png' });
+    expect(EXPORT_FILES.ansi.name).toBe('text-draw.ans');
+    expect(EXPORT_FILES.image).toEqual({ name: 'text-draw.png', mime: 'image/png' });
   });
 
   it('labels every format in Chinese', () => {

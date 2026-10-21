@@ -109,9 +109,9 @@ describe('text formats', () => {
   it('downloads each one as a file with the right name, type and content', async () => {
     await drawLine();
     const files: [string, string, string, string | RegExp][] = [
-      ['text', 'ascii-paint.txt', 'text/plain;charset=utf-8', /[\u2801-\u28ff]/],
-      ['html', 'ascii-paint.html', 'text/html;charset=utf-8', '<meta charset="utf-8">'],
-      ['ansi', 'ascii-paint.ans', 'text/plain;charset=utf-8', '\x1b[38;2;218;30;40m'],
+      ['text', 'text-draw.txt', 'text/plain;charset=utf-8', /[\u2801-\u28ff]/],
+      ['html', 'text-draw.html', 'text/html;charset=utf-8', '<meta charset="utf-8">'],
+      ['ansi', 'text-draw.ans', 'text/plain;charset=utf-8', '\x1b[38;2;218;30;40m'],
     ];
     for (const [format, name, mime, needle] of files) {
       app.download(format);
@@ -168,7 +168,7 @@ describe('text formats', () => {
     await app.frames(2);
     expect(toast()).toMatch(/^已複製純文字，但超過 Instagram 簡介 上限/);
     app.download('text');
-    expect(toast()).toBe('已下載 ascii-paint.txt');
+    expect(toast()).toBe('已下載 text-draw.txt');
   });
 });
 
@@ -212,9 +212,9 @@ describe('image', () => {
     await drawLine();
     app.download('image');
     await until(() => app.downloads.length === 1);
-    expect(app.downloads[0].name).toBe('ascii-paint.png');
+    expect(app.downloads[0].name).toBe('text-draw.png');
     expect(app.downloads[0].blob.type).toBe('image/png');
-    expect(toast()).toBe('已下載 ascii-paint.png');
+    expect(toast()).toBe('已下載 text-draw.png');
   });
 
   it('saves a file instead when the browser cannot copy images', async () => {
@@ -222,7 +222,7 @@ describe('image', () => {
     await drawLine();
     app.copy('image');
     await until(() => app.downloads.length === 1);
-    expect(app.downloads[0].name).toBe('ascii-paint.png');
+    expect(app.downloads[0].name).toBe('text-draw.png');
     expect(app.images).toHaveLength(0);
     expect(toast()).toBe('瀏覽器不支援圖片複製，已改為下載');
   });
