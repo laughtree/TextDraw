@@ -3,7 +3,9 @@
 import { describe, expect, it } from 'vitest';
 import { line, openApp } from './harness';
 
-const MODES = ['mix', 'braille', 'block', 'shade', 'dots', 'cjk', 'line', 'custom'];
+// 'mix' and 'block' are left out on purpose: their character sets were redesigned after the
+// refactor (blocks + braille only, eighth blocks), so they intentionally differ from legacy/.
+const MODES = ['braille', 'shade', 'dots', 'cjk', 'line', 'custom'];
 const KINDS = ['text', 'html', 'ansi'];
 const SPACES = [' ', ' ', '⠀'];
 // every glyph the converters may measure, so lazily-loaded font subsets are in place before drawing
@@ -57,6 +59,7 @@ async function collect(
     out[`${label}/pixels`] = hash(view.toDataURL());
   };
 
+  click('[data-mode="shade"]');
   await capture('initial');
 
   // a few strokes: default ink, colours, picker, thick pen, eraser
@@ -99,12 +102,12 @@ async function collect(
   doc.documentElement.dataset.theme = 'light';
   click('[data-palette="color"]');
   click('#bUnder');
-  for (const mode of ['mix', 'braille', 'block']) {
+  for (const mode of ['braille', 'shade']) {
     click(`[data-mode="${mode}"]`);
     await capture(`under/${mode}`);
   }
   click('#bUnder');
-  click('[data-mode="mix"]');
+  click('[data-mode="shade"]');
   for (const fence of [false, true]) {
     if (fence) click('#bFence');
     for (const sp of SPACES) {

@@ -1,6 +1,8 @@
-import { BAYER8, CJK, DOTS_R, FILL, QUAD, SHADE, SHADEBLK } from './charsets';
+import { BLOCK_SET, type Candidate } from './blocks';
+import { BAYER8, CJK, DOTS_R, FILL, SHADE } from './charsets';
 import { hex, lum } from './color';
 import { calibrated, mixSet, pickGlyph } from './glyphs';
+import { BLANK_BELOW, bestMatch, brailleCandidate } from './match';
 import type { Metrics, Mode, Palette } from './types';
 
 export interface ConvertOptions {
@@ -90,39 +92,27 @@ export function convert(px: Uint8ClampedArray, m: Metrics, opts: ConvertOptions)
   }
   if (subMode) {
     const subA = area / 8;
-    const MV = mode === 'mix' ? mixSet(m) : [];
+    const mixed = mode === 'mix' ? mixSet(m) : null;
+    const scratch: Candidate = { c: ' ', v: new Array<number>(8).fill(0), m: 0 };
+    const t = new Array<number>(8).fill(0);
     for (let k = 0; k < n; k++) {
       const o = k * 8,
         on = (q: number) => sub[o + q] / subA;
-      if (mode === 'mix') {
-        // match the cell's 2×4 ink layout against every glyph's measured layout
+      if (mode === 'mix' || mode === 'block') {
+        // match the cell's 2×4 ink layout against the candidate characters' layouts
         let tm = 0;
-        const t = new Array<number>(8);
         for (let q = 0; q < 8; q++) {
           t[q] = Math.min(1, on(q));
           tm += t[q];
         }
         tm /= 8;
-        if (tm < 0.02) {
+        if (tm < BLANK_BELOW) {
           out[k] = ' ';
           continue;
         }
-        let best = ' ',
-          bd = Infinity;
-        for (const g of MV) {
-          let e = 0;
-          for (let q = 0; q < 8; q++) {
-            const d = g.v[q] - t[q];
-            e += d * d;
-          }
-          const dm = g.m - tm;
-          e += 12 * dm * dm;
-          if (e < bd) {
-            bd = e;
-            best = g.c;
-          }
-        }
-        out[k] = best;
+        out[k] = mixed
+          ? bestMatch(t, tm, mixed.blocks, brailleCandidate(t, mixed.dots, scratch))
+          : bestMatch(t, tm, BLOCK_SET);
         continue;
       }
       if (mode === 'braille') {
@@ -139,28 +129,6 @@ export function convert(px: Uint8ClampedArray, m: Metrics, opts: ConvertOptions)
         if (on(5) > T(5)) b |= 32;
         if (on(7) > T(7)) b |= 128;
         out[k] = b ? String.fromCharCode(0x2800 + b) : ' ';
-      } else {
-        // even cells get a shade block (░▒▓█) by tone; cells with an edge get a quadrant shape
-        const qv = [
-          sub[o] + sub[o + 2],
-          sub[o + 1] + sub[o + 3],
-          sub[o + 4] + sub[o + 6],
-          sub[o + 5] + sub[o + 7],
-        ].map((v) => v / (subA * 2));
-        const mx = Math.max(...qv),
-          mn = Math.min(...qv),
-          avg = (qv[0] + qv[1] + qv[2] + qv[3]) / 4;
-        if (avg < 0.06) out[k] = ' ';
-        else if (mx - mn < 0.3)
-          out[k] = SHADEBLK[Math.max(0, Math.min(3, Math.round(avg * 4) - 1))];
-        else
-          out[k] =
-            QUAD[
-              (qv[0] > 0.35 ? 1 : 0) |
-                (qv[1] > 0.35 ? 2 : 0) |
-                (qv[2] > 0.35 ? 4 : 0) |
-                (qv[3] > 0.35 ? 8 : 0)
-            ];
       }
     }
     return { chars: out, colors: gridCol };

@@ -1,4 +1,5 @@
-import { DOTS, QUAD, SHADEBLK } from './charsets';
+import { blockPaint } from './blocks';
+import { DOTS } from './charsets';
 import { convert } from './convert';
 import { state } from './state';
 import { bctx, buf, metrics, monoFont, tctx, tint, vctx } from './surface';
@@ -74,26 +75,16 @@ export function render(): void {
     return;
   }
   if (mode === 'block') {
-    const hw = cw / 2,
-      hh = ch / 2;
     for (let k = 0; k < grid.length; k++) {
+      const paint = blockPaint(grid[k]);
+      if (!paint) continue;
       const x0 = (k % cols) * cw,
-        y0 = ((k / cols) | 0) * ch,
-        sh = SHADEBLK.indexOf(grid[k]);
-      if (sh >= 0) {
-        vctx.fillStyle = colorAt(k);
-        vctx.globalAlpha = (sh + 1) / 4;
-        vctx.fillRect(x0, y0, cw + 0.5, ch + 0.5);
-        vctx.globalAlpha = 1;
-        continue;
-      }
-      const bits = QUAD.indexOf(grid[k]);
-      if (bits <= 0) continue;
+        y0 = ((k / cols) | 0) * ch;
       vctx.fillStyle = colorAt(k);
-      if (bits & 1) vctx.fillRect(x0, y0, hw + 0.5, hh + 0.5);
-      if (bits & 2) vctx.fillRect(x0 + hw, y0, hw + 0.5, hh + 0.5);
-      if (bits & 4) vctx.fillRect(x0, y0 + hh, hw + 0.5, hh + 0.5);
-      if (bits & 8) vctx.fillRect(x0 + hw, y0 + hh, hw + 0.5, hh + 0.5);
+      vctx.globalAlpha = paint.alpha;
+      for (const [fx0, fy0, fx1, fy1] of paint.rects)
+        vctx.fillRect(x0 + fx0 * cw, y0 + fy0 * ch, (fx1 - fx0) * cw + 0.5, (fy1 - fy0) * ch + 0.5);
+      vctx.globalAlpha = 1;
     }
     return;
   }

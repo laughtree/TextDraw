@@ -1,4 +1,5 @@
-import { MIXCHARS } from './charsets';
+import { BLOCK_CHARS } from './blocks';
+import { BRAILLE_ZONE_BITS } from './charsets';
 import { ctx2d } from './dom';
 import type { Metrics, Ramp } from './types';
 
@@ -6,7 +7,7 @@ import type { Metrics, Ramp } from './types';
 // Results depend on the font and cell size, so callers must clearGlyphCaches() when either changes.
 const glyphCache = new Map<string, number>();
 const rampCache = new Map<string, Ramp>();
-let mixCache: MixGlyph[] | null = null;
+let mixCache: MixSet | null = null;
 
 let scratch: { canvas: HTMLCanvasElement; ctx: CanvasRenderingContext2D } | null = null;
 function getScratch() {
@@ -106,13 +107,26 @@ export interface MixGlyph {
   m: number;
 }
 
-export function mixSet(m: Metrics): MixGlyph[] {
+/** What the mix mode may draw with: measured block glyphs, and the measured single braille dots. */
+export interface MixSet {
+  blocks: MixGlyph[];
+  /** dots[q]: ink layout of the one braille dot that sits in 2×4 zone q */
+  dots: number[][];
+}
+
+const mean = (v: number[]) => v.reduce((a, b) => a + b, 0) / v.length;
+
+export function mixSet(m: Metrics): MixSet {
   if (mixCache) return mixCache;
-  const raw = MIXCHARS.map((c) => ({ c, v: glyphVec(c, m) }));
-  const maxM = Math.max(...raw.map((g) => g.v.reduce((a, b) => a + b, 0) / 8)) || 1;
-  mixCache = raw.map((g) => {
+  const raw = [' ', ...BLOCK_CHARS].map((c) => ({ c, v: glyphVec(c, m) }));
+  const maxM = Math.max(...raw.map((g) => mean(g.v))) || 1;
+  const blocks = raw.map((g) => {
     const v = g.v.map((x) => x / maxM);
-    return { c: g.c, v, m: v.reduce((a, b) => a + b, 0) / 8 };
+    return { c: g.c, v, m: mean(v) };
   });
+  const dots = BRAILLE_ZONE_BITS.map((bit) =>
+    glyphVec(String.fromCharCode(0x2800 + bit), m).map((x) => x / maxM),
+  );
+  mixCache = { blocks, dots };
   return mixCache;
 }
