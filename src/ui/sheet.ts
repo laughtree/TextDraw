@@ -1,4 +1,5 @@
 import { $ } from '../dom';
+import { t } from '../i18n';
 import { SHEET_QUERY } from '../panels';
 import { EASE, HIDE_MS, SHOW_MS } from './reveal';
 
@@ -24,10 +25,13 @@ export function initSheet(): void {
 
   const isOpen = () => tray.dataset.sheet === 'open';
 
+  const label = () => handle.setAttribute('aria-label', t(isOpen() ? 'sheet.close' : 'sheet.open'));
+  document.addEventListener('langchange', label);
+
   const setState = (open: boolean) => {
     tray.dataset.sheet = open ? 'open' : 'closed';
     handle.setAttribute('aria-expanded', String(open));
-    handle.setAttribute('aria-label', open ? '收合工具列' : '展開工具列');
+    label();
   };
 
   /** Height of the collapsed sheet: everything down to the bottom of the shape row, plus padding. */

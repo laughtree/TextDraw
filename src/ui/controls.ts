@@ -4,6 +4,7 @@ import { state } from '../state';
 import { bctx } from '../surface';
 import { refreshText } from '../text';
 import type { Mode, Palette, Tool } from '../types';
+import { t } from '../i18n';
 import { initColors } from './colors';
 import { reveal } from './reveal';
 import { setErase, setTool } from './tools';
@@ -89,7 +90,7 @@ function initHistory(): void {
     pushUndo();
     bctx.clearRect(0, 0, state.W, state.H);
     state.dirty = true;
-    toast('已清空');
+    toast(t('toast.cleared'));
   };
 }
 

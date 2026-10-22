@@ -5,6 +5,7 @@ import { paper, view } from '../surface';
 import { css } from '../theme';
 import { usePickedColor } from './colors';
 import { toast } from './toast';
+import { t } from '../i18n';
 
 /**
  * Eyedropper tuned for characters: a click means the character nearby, wherever in its cell it
@@ -55,7 +56,7 @@ export function initEyedropper(): void {
     if (state.tool !== 'pick') return;
     aim(e); // touch has no hover, so the character is found where the finger lifted
     if (target === null) {
-      toast('附近沒有字元');
+      toast(t('toast.noChar'));
       return;
     }
     usePickedColor(state.gridSrc[target] ?? null); // also returns to the previous tool

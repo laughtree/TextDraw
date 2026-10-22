@@ -3,6 +3,7 @@ import { pushUndo } from './history';
 import { state } from './state';
 import { bctx } from './surface';
 import { commitText } from './text';
+import { t } from './i18n';
 import { toast } from './ui/toast';
 
 const MAX_BYTES = 25 * 1024 * 1024;
@@ -10,19 +11,19 @@ const MAX_BYTES = 25 * 1024 * 1024;
 /** Replace the canvas with a picture, whole and centred; the grid stays as it is. */
 export async function importImage(file: Blob): Promise<boolean> {
   if (file.size > MAX_BYTES) {
-    toast('圖片太大（上限 25 MB）');
+    toast(t('toast.imageTooBig'));
     return false;
   }
   let bmp: ImageBitmap;
   try {
     bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
   } catch {
-    toast('無法讀取圖片');
+    toast(t('toast.imageUnreadable'));
     return false;
   }
   try {
     if (!bmp.width || !bmp.height) {
-      toast('無法讀取圖片');
+      toast(t('toast.imageUnreadable'));
       return false;
     }
     commitText();
@@ -33,7 +34,7 @@ export async function importImage(file: Blob): Promise<boolean> {
     bctx.imageSmoothingQuality = 'high';
     bctx.drawImage(bmp, r.x, r.y, r.w, r.h);
     state.dirty = true;
-    toast('已匯入圖片');
+    toast(t('toast.imageDone'));
     return true;
   } finally {
     bmp.close();

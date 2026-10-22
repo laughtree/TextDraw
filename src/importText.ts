@@ -6,6 +6,7 @@ import { state } from './state';
 import { bctx, monoFont, setGrid } from './surface';
 import { commitText } from './text';
 import { type Art, cellWidth, isBlank, parseArt } from './textGrid';
+import { t } from './i18n';
 import { toast } from './ui/toast';
 
 /** Braille dots are drawn larger than on screen: each must cover well over 0.28 of its 2×4 zone. */
@@ -57,7 +58,7 @@ let token = 0;
 export async function importText(text: string): Promise<boolean> {
   const art = parseArt(text);
   if (art.rows === 0) {
-    toast('沒有可匯入的文字');
+    toast(t('toast.textEmpty'));
     return false;
   }
   const mine = ++token;
@@ -78,8 +79,8 @@ export async function importText(text: string): Promise<boolean> {
   state.dirty = true;
   toast(
     art.cropped
-      ? `已匯入文字，已裁切到 ${grid.cols} × ${grid.rows}`
-      : `已匯入文字（${grid.cols} × ${grid.rows}）`,
+      ? t('toast.textCropped', { cols: grid.cols, rows: grid.rows })
+      : t('toast.textDone', { cols: grid.cols, rows: grid.rows }),
   );
   return true;
 }

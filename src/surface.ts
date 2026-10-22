@@ -1,6 +1,7 @@
 import { $, ctx2d } from './dom';
 import { bufferSize, fitScale, type Grid } from './grid';
 import { clearGlyphCaches } from './glyphs';
+import { t } from './i18n';
 import { panelExtra } from './panels';
 import { state } from './state';
 import { css } from './theme';
@@ -117,10 +118,17 @@ export function resize(content?: ContentMode, force = true): void {
   state.cols = fixed ? fixed.cols : Math.floor(state.W / state.cw);
   state.rows = fixed ? fixed.rows : Math.floor(state.H / state.ch);
   paper.style.setProperty('--cellh', state.ch * state.scale + 'px');
-  $('meta').textContent = `${state.cols} × ${state.rows} cells`;
+  renderMeta();
   state.dirty = true;
   document.dispatchEvent(new Event('gridchange'));
 }
+
+/** The "20 × 12 cells" readout in the header, in the current language. */
+export function renderMeta(): void {
+  if (state.cols && state.rows)
+    $('meta').textContent = t('meta.cells', { cols: state.cols, rows: state.rows });
+}
+document.addEventListener('langchange', renderMeta);
 
 /** Switch between auto (null) and a fixed grid. */
 export function setGrid(fixed: Grid | null, content?: ContentMode): void {

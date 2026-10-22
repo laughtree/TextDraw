@@ -15,8 +15,6 @@ export interface Platform {
   source: 'official' | 'thirdparty' | 'estimate';
   /** a fixed suggested size that replaces the one derived from `limit` */
   grid?: Grid;
-  /** one line on how the platform counts, shown in the help bubble */
-  rule: string;
 }
 
 /**
@@ -30,14 +28,13 @@ export interface Platform {
 export const PLATFORMS: readonly Platform[] = [
   {
     id: 'chat',
-    label: '小尺寸通用',
+    label: 'Small general size',
     limit: null,
     counter: 'chars',
     cellWeight: 1,
     source: 'estimate',
     // small enough for chat bubbles, which are narrower and wrap sooner than posts; the start-up size
     grid: { cols: 20, rows: 12 },
-    rule: '通用的小尺寸：聊天泡泡通常比發文更窄、更容易換行，所以比發文的尺寸保守；沒有對應的字數上限，不顯示讀數',
   },
   {
     id: 'x',
@@ -46,7 +43,6 @@ export const PLATFORMS: readonly Platform[] = [
     counter: 'weighted',
     cellWeight: 2,
     source: 'official',
-    rule: '加權計數：方塊、點字與中文每字算 2，換行與標準空白算 1',
   },
   {
     id: 'telegram',
@@ -55,7 +51,6 @@ export const PLATFORMS: readonly Platform[] = [
     counter: 'chars',
     cellWeight: 1,
     source: 'official',
-    rule: '以字元計（換行是否算 2 未經證實）',
   },
   {
     id: 'discord',
@@ -64,7 +59,6 @@ export const PLATFORMS: readonly Platform[] = [
     counter: 'chars',
     cellWeight: 1,
     source: 'official',
-    rule: '以字元計；Nitro 的 4000 未納入',
   },
   {
     id: 'mastodon',
@@ -73,25 +67,22 @@ export const PLATFORMS: readonly Platform[] = [
     counter: 'chars',
     cellWeight: 1,
     source: 'official',
-    rule: '以字元計；500 是預設值，各站可調整',
   },
   {
     id: 'instagram-caption',
-    label: 'Instagram 說明',
+    label: 'Instagram caption',
     limit: 2200,
     counter: 'chars',
     cellWeight: 1,
     source: 'thirdparty',
-    rule: '以字元計',
   },
   {
     id: 'instagram-bio',
-    label: 'Instagram 簡介',
+    label: 'Instagram bio',
     limit: 150,
     counter: 'chars',
     cellWeight: 1,
     source: 'thirdparty',
-    rule: '以字元計',
   },
   {
     id: 'threads',
@@ -100,7 +91,6 @@ export const PLATFORMS: readonly Platform[] = [
     counter: 'chars',
     cellWeight: 1,
     source: 'thirdparty',
-    rule: '以字元計',
   },
   {
     id: 'line',
@@ -109,7 +99,6 @@ export const PLATFORMS: readonly Platform[] = [
     counter: 'chars',
     cellWeight: 1,
     source: 'thirdparty',
-    rule: '以 UTF-16 單位計（方塊與點字各為 1）',
   },
   {
     id: 'bluesky',
@@ -118,7 +107,6 @@ export const PLATFORMS: readonly Platform[] = [
     counter: 'graphemes',
     cellWeight: 1,
     source: 'thirdparty',
-    rule: '以 grapheme 計；另有 3000 bytes 上限',
   },
 ];
 

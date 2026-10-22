@@ -14,13 +14,6 @@ export const EXPORT_FILES: Record<ExportFormat, ExportFile> = {
   image: { name: 'text-draw.png', mime: 'image/png' },
 };
 
-export const EXPORT_LABELS: Record<ExportFormat, string> = {
-  text: '純文字',
-  html: 'HTML',
-  ansi: 'ANSI 文字',
-  image: '圖片',
-};
-
 /** Wrap the copied `<pre>` fragment into a document that opens correctly on its own. */
 export function htmlDocument(fragment: string): string {
   return [

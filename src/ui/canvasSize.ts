@@ -1,7 +1,9 @@
 import { $ } from '../dom';
 import { clampGrid, LIMITS, parseDim } from '../grid';
 import { pushUndo } from '../history';
+import { t } from '../i18n';
 import { findPlatform } from '../platforms';
+import { platformLabel } from './platformText';
 import { state } from '../state';
 import { setGrid } from '../surface';
 import { isOpen, reveal } from './reveal';
@@ -25,11 +27,13 @@ export function initCanvasSize(): void {
     inCols.value = String(state.cols);
     inRows.value = String(state.rows);
     // what the size is for: full window, the chosen platform, or a size of your own
-    const name = isFull ? '滿版' : (findPlatform(state.platform)?.label ?? '自訂');
+    const found = findPlatform(state.platform),
+      name = isFull ? t('canvas.full') : found ? platformLabel(found) : t('platform.custom');
     summary.textContent = `${name} · ${state.cols} × ${state.rows}`;
   };
   document.addEventListener('gridchange', sync);
   document.addEventListener('platformchange', sync);
+  document.addEventListener('langchange', sync);
 
   toggle.onclick = () => {
     const show = !isOpen(panel);
@@ -47,8 +51,7 @@ export function initCanvasSize(): void {
     const c = parseDim(inCols.value, state.cols),
       r = parseDim(inRows.value, state.rows);
     const g = clampGrid(c, r);
-    if (g.cols !== Math.round(c) || g.rows !== Math.round(r))
-      toast(`欄 ${LIMITS.minCols}–${LIMITS.maxCols}、列 ${LIMITS.minRows}–${LIMITS.maxRows}`);
+    if (g.cols !== Math.round(c) || g.rows !== Math.round(r)) toast(t('canvas.range', LIMITS));
     if (g.cols === state.cols && g.rows === state.rows) {
       sync(); // nothing changed, or the typed text was invalid: show the real values again
       return;

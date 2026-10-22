@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { EXPORT_FILES, EXPORT_LABELS, fileContent, htmlDocument } from '../../src/exportFile';
+import { EXPORT_FILES, fileContent, htmlDocument } from '../../src/exportFile';
 
 describe('export files', () => {
   it('names and types every format', () => {
@@ -11,15 +11,6 @@ describe('export files', () => {
     expect(EXPORT_FILES.html.mime).toContain('text/html');
     expect(EXPORT_FILES.ansi.name).toBe('text-draw.ans');
     expect(EXPORT_FILES.image).toEqual({ name: 'text-draw.png', mime: 'image/png' });
-  });
-
-  it('labels every format in Chinese', () => {
-    expect(EXPORT_LABELS).toEqual({
-      text: '純文字',
-      html: 'HTML',
-      ansi: 'ANSI 文字',
-      image: '圖片',
-    });
   });
 });
 

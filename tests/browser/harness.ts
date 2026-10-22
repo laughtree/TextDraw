@@ -37,20 +37,29 @@ export interface OpenOptions {
    * window) once the page is ready, which is the canvas most tests are written for.
    */
   full?: boolean;
+  /**
+   * Interface language, passed as `?lang=`. Tests default to Traditional Chinese, the wording most
+   * assertions were written in, so no test depends on the machine's browser language.
+   */
+  lang?: string;
 }
 
 export async function openApp(
   url: string,
   width = 480,
   height = 720,
-  { full = true }: OpenOptions = {},
+  { full = true, lang = 'zh-TW' }: OpenOptions = {},
 ): Promise<App> {
   const iframe = document.createElement('iframe');
   iframe.style.cssText = `width:${width}px;height:${height}px;border:0`;
   document.body.append(iframe);
   await new Promise<void>((resolve) => {
     iframe.addEventListener('load', () => resolve(), { once: true });
-    iframe.src = url;
+    // the legacy page has no languages; the real one reads `?lang=` (an empty `lang` leaves it off)
+    iframe.src =
+      url.includes('/legacy/') || !lang
+        ? url
+        : `${url}${url.includes('?') ? '&' : '?'}lang=${encodeURIComponent(lang)}`;
   });
   const win = iframe.contentWindow as Window & typeof globalThis;
   const doc = win.document;

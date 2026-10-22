@@ -1,7 +1,8 @@
 import { $ } from '../dom';
 import { downloadBlob } from '../download';
 import { bounds } from '../export';
-import { EXPORT_FILES, EXPORT_LABELS, fileContent } from '../exportFile';
+import { EXPORT_FILES, fileContent } from '../exportFile';
+import { getLang, t } from '../i18n';
 import { renderPng } from '../png';
 import { state } from '../state';
 import type { ExportFormat, ExportKind } from '../types';
@@ -32,8 +33,12 @@ function initSpaceChar(): void {
   };
 }
 
-/** Put a space between Chinese text and a label that starts with a Latin letter (已複製 HTML). */
-const spaced = (label: string): string => (/^[A-Za-z]/.test(label) ? ` ${label}` : label);
+/** The name of an export format as it reads in a sentence ("plain text", "HTML"…). */
+const nounOf = (format: ExportFormat): string => {
+  const noun = t(`noun.${format}`);
+  // Chinese puts a space between its text and a Latin-letter word (已複製 HTML)
+  return getLang() === 'zh-TW' && /^[A-Za-z]/.test(noun) ? ` ${noun}` : noun;
+};
 
 /** Close the export menu once something has been copied or saved. */
 const closeExportMenu = (): void => closeMenu('export');
@@ -46,26 +51,31 @@ function hasInk(): boolean {
 
 /** Copy a text format; the clipboard can be blocked, so fall back to showing it to copy by hand. */
 function copyText(kind: ExportKind): void {
-  const t = exportCurrent(kind);
-  if (!t) {
-    toast('畫布是空的');
+  const text = exportCurrent(kind);
+  if (!text) {
+    toast(t('toast.empty'));
     return;
   }
   const fallback = () => {
     const ta = $<HTMLTextAreaElement>('copyText');
-    ta.value = t;
+    ta.value = text;
     reveal($('copyPanel'), true, 'fade');
     ta.select();
   };
   try {
-    navigator.clipboard.writeText(t).then(() => {
+    navigator.clipboard.writeText(text).then(() => {
       // only the plain text is what gets posted, so only it is checked against the limit
-      const over = kind === 'text' ? overLimit(t) : null;
-      const label = spaced(EXPORT_LABELS[kind]);
+      const over = kind === 'text' ? overLimit(text) : null;
+      const what = nounOf(kind);
       toast(
         over
-          ? `已複製${label}，但超過 ${over.label} 上限（${over.used} / ${over.limit}）`
-          : `已複製${label}`,
+          ? t('toast.copiedOver', {
+              what,
+              platform: over.label,
+              used: over.used,
+              limit: over.limit,
+            })
+          : t('toast.copied', { what }),
       );
       closeExportMenu();
     }, fallback);
@@ -77,14 +87,14 @@ function copyText(kind: ExportKind): void {
 /** Save the picture as a PNG file. */
 function savePng(blob: Blob, message?: string): void {
   downloadBlob(blob, EXPORT_FILES.image.name);
-  toast(message ?? `已下載 ${EXPORT_FILES.image.name}`);
+  toast(message ?? t('toast.downloaded', { name: EXPORT_FILES.image.name }));
   closeExportMenu();
 }
 
 /** Copy the picture to the clipboard, or save it when the browser cannot copy images. */
 function copyImage(): void {
   if (!hasInk()) {
-    toast('畫布是空的');
+    toast(t('toast.empty'));
     return;
   }
   // the blob is passed as a promise so the copy starts inside the click (Safari insists on that)
@@ -93,13 +103,13 @@ function copyImage(): void {
     typeof ClipboardItem !== 'undefined' && typeof navigator.clipboard?.write === 'function';
   const saveInstead = () =>
     void png.then(
-      (b) => savePng(b, '瀏覽器不支援圖片複製，已改為下載'),
-      () => toast('無法產生圖片'),
+      (b) => savePng(b, t('toast.imageNoCopy')),
+      () => toast(t('toast.imageFail')),
     );
   if (!canCopy) return saveInstead();
   try {
     navigator.clipboard.write([new ClipboardItem({ 'image/png': png })]).then(() => {
-      toast('已複製圖片');
+      toast(t('toast.copied', { what: nounOf('image') }));
       closeExportMenu();
     }, saveInstead);
   } catch {
@@ -109,13 +119,13 @@ function copyImage(): void {
 
 function download(format: ExportFormat): void {
   if (!hasInk()) {
-    toast('畫布是空的');
+    toast(t('toast.empty'));
     return;
   }
   if (format === 'image') {
     void renderPng().then(
-      (b) => (b ? savePng(b) : toast('無法產生圖片')),
-      () => toast('無法產生圖片'),
+      (b) => (b ? savePng(b) : toast(t('toast.imageFail'))),
+      () => toast(t('toast.imageFail')),
     );
     return;
   }
@@ -124,7 +134,7 @@ function download(format: ExportFormat): void {
     new Blob([fileContent(format, exportCurrent(format))], { type: file.mime }),
     file.name,
   );
-  toast(`已下載 ${file.name}`);
+  toast(t('toast.downloaded', { name: file.name }));
   closeExportMenu();
 }
 

@@ -7,6 +7,7 @@ import '@fontsource/noto-sans-tc/600.css';
 import './styles/main.css';
 
 import { initDraw } from './draw';
+import { initI18n } from './i18n';
 import { initText } from './text';
 import { loop } from './render';
 import { sample } from './sample';
@@ -23,6 +24,7 @@ import { layoutBusy } from './ui/reveal';
 import { initSegments } from './ui/segments';
 import { initSheet } from './ui/sheet';
 
+initI18n(); // first: the other modules read the language while they set up
 initDraw();
 initText();
 initControls();

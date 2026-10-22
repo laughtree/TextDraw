@@ -1,4 +1,5 @@
 import { $ } from '../dom';
+import { t } from '../i18n';
 import { importImage } from '../importImage';
 import { importText } from '../importText';
 import { stage } from '../surface';
@@ -15,7 +16,7 @@ const isField = (t: EventTarget | null): boolean =>
 
 async function importTextFile(file: File): Promise<void> {
   if (file.size > MAX_TEXT_BYTES) {
-    toast('文字檔太大（上限 2 MB）');
+    toast(t('toast.textTooBig'));
     return;
   }
   if (await importText(await file.text())) closeMenu('import');
@@ -28,7 +29,7 @@ async function importFile(file: File): Promise<void> {
   } else if (file.type.startsWith('text/') || TEXT_FILE.test(file.name)) {
     await importTextFile(file);
   } else {
-    toast('不支援的檔案');
+    toast(t('toast.unsupported'));
   }
 }
 

@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="zh-Hant">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
     <meta
       name="description"
-      content="Text Draw：在畫布上畫圖，即時轉成點字、方塊等字元畫，可匯入圖片與文字，並複製成純文字、HTML、ANSI 或圖片。"
+      content="Text Draw: draw on a canvas and watch it turn into text art. Import images or text, then copy as plain text, HTML, ANSI or an image."
     />
     <link
       rel="icon"
@@ -17,12 +17,21 @@
     <header class="shell">
       <h1 class="brand">Text <b>Draw</b></h1>
       <span class="meta" id="meta">0 × 0 cells</span>
+      <select id="lang" class="lang" aria-label="Language" data-i18n-attr="aria-label:lang.label">
+        <option value="en">English</option>
+        <option value="zh-TW">繁體中文</option>
+        <option value="ja">日本語</option>
+      </select>
     </header>
 
     <main class="work">
       <div id="stage">
         <div id="paper">
-          <canvas id="view" aria-label="繪圖區"></canvas>
+          <canvas
+            id="view"
+            aria-label="Drawing area"
+            data-i18n-attr="aria-label:canvas.aria"
+          ></canvas>
           <div id="brush" class="brush" hidden aria-hidden="true"></div>
           <div id="pickFrame" class="pick-frame" hidden aria-hidden="true">
             <i class="chip"></i>
@@ -35,7 +44,8 @@
             hidden
             autocomplete="off"
             spellcheck="false"
-            aria-label="輸入文字，按 Enter 確定、Esc 取消"
+            aria-label="Type text, Enter to confirm, Esc to cancel"
+            data-i18n-attr="aria-label:textedit.aria"
           />
         </div>
       </div>
@@ -46,51 +56,125 @@
           class="sheet-handle"
           aria-expanded="false"
           aria-controls="tray"
-          aria-label="展開工具列"
+          aria-label="Show the toolbar"
+          data-i18n-attr="aria-label:sheet.open"
         ></button>
         <div class="row toprow">
-          <div class="seg" role="group" aria-label="色彩模式">
-            <button data-palette="color" aria-pressed="true">色彩</button>
-            <button data-palette="gray" aria-pressed="false">灰階</button>
+          <div
+            class="seg"
+            role="group"
+            aria-label="Color mode"
+            data-i18n-attr="aria-label:palette.group"
+          >
+            <button data-palette="color" aria-pressed="true" data-i18n="palette.color">
+              Color
+            </button>
+            <button data-palette="gray" aria-pressed="false" data-i18n="palette.gray">Gray</button>
           </div>
           <button id="bUnder" class="toggle" aria-pressed="false">
-            <span class="track"></span>筆跡
+            <span class="track"></span><span data-i18n="under.label">Trace</span>
           </button>
           <span class="spacer"></span>
           <div class="hist">
-            <button id="bUndo" class="btn-tertiary" title="復原（Ctrl+Z）" disabled>復原</button>
-            <button id="bRedo" class="btn-tertiary" title="重做（Ctrl+Y）" disabled>重做</button>
+            <button
+              id="bUndo"
+              class="btn-tertiary"
+              title="Undo (Ctrl+Z)"
+              data-i18n="undo.label"
+              data-i18n-attr="title:undo.title"
+              disabled
+            >
+              Undo
+            </button>
+            <button
+              id="bRedo"
+              class="btn-tertiary"
+              title="Redo (Ctrl+Y)"
+              data-i18n="redo.label"
+              data-i18n-attr="title:redo.title"
+              disabled
+            >
+              Redo
+            </button>
           </div>
         </div>
         <div class="row colorrow">
-          <div class="swatches" role="group" aria-label="筆的顏色">
+          <div
+            class="swatches"
+            role="group"
+            aria-label="Pen color"
+            data-i18n-attr="aria-label:swatches.group"
+          >
             <button
               class="sw"
               data-color="#000000"
               aria-pressed="true"
-              aria-label="墨色（跟隨主題）"
+              aria-label="Ink (follows the theme)"
+              data-i18n-attr="aria-label:color.ink"
             >
               <i class="ink"></i>
             </button>
-            <button class="sw" data-color="#da1e28" aria-pressed="false" aria-label="紅">
+            <button
+              class="sw"
+              data-color="#da1e28"
+              aria-pressed="false"
+              aria-label="Red"
+              data-i18n-attr="aria-label:color.red"
+            >
               <i style="background: #da1e28"></i>
             </button>
-            <button class="sw" data-color="#ff832b" aria-pressed="false" aria-label="橙">
+            <button
+              class="sw"
+              data-color="#ff832b"
+              aria-pressed="false"
+              aria-label="Orange"
+              data-i18n-attr="aria-label:color.orange"
+            >
               <i style="background: #ff832b"></i>
             </button>
-            <button class="sw" data-color="#f1c21b" aria-pressed="false" aria-label="黃">
+            <button
+              class="sw"
+              data-color="#f1c21b"
+              aria-pressed="false"
+              aria-label="Yellow"
+              data-i18n-attr="aria-label:color.yellow"
+            >
               <i style="background: #f1c21b"></i>
             </button>
-            <button class="sw" data-color="#24a148" aria-pressed="false" aria-label="綠">
+            <button
+              class="sw"
+              data-color="#24a148"
+              aria-pressed="false"
+              aria-label="Green"
+              data-i18n-attr="aria-label:color.green"
+            >
               <i style="background: #24a148"></i>
             </button>
-            <button class="sw" data-color="#009d9a" aria-pressed="false" aria-label="青">
+            <button
+              class="sw"
+              data-color="#009d9a"
+              aria-pressed="false"
+              aria-label="Teal"
+              data-i18n-attr="aria-label:color.teal"
+            >
               <i style="background: #009d9a"></i>
             </button>
-            <button class="sw" data-color="#0f62fe" aria-pressed="false" aria-label="藍">
+            <button
+              class="sw"
+              data-color="#0f62fe"
+              aria-pressed="false"
+              aria-label="Blue"
+              data-i18n-attr="aria-label:color.blue"
+            >
               <i style="background: #0f62fe"></i>
             </button>
-            <button class="sw" data-color="#8a3ffc" aria-pressed="false" aria-label="紫">
+            <button
+              class="sw"
+              data-color="#8a3ffc"
+              aria-pressed="false"
+              aria-label="Purple"
+              data-i18n-attr="aria-label:color.purple"
+            >
               <i style="background: #8a3ffc"></i>
             </button>
           </div>
@@ -99,8 +183,9 @@
               class="sw eyedropper"
               data-tool="pick"
               aria-pressed="false"
-              aria-label="滴管"
-              title="滴管（點到字元就吸色）"
+              aria-label="Eyedropper"
+              title="Eyedropper (click a character to pick its color)"
+              data-i18n-attr="aria-label:eyedropper.label;title:eyedropper.title"
             >
               <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
                 <path d="M16.5 3.5l4 4-2.5 2.5-4-4 2.5-2.5zM13.5 8l-9 9L4 20l3-.5 9-9" />
@@ -109,7 +194,8 @@
             <label
               class="sw pick"
               for="colorPick"
-              aria-label="自選顏色（調色盤）"
+              aria-label="Custom color (palette)"
+              data-i18n-attr="aria-label:palette.custom"
               style="--pick: #ee5396"
             >
               <svg class="palette" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
@@ -127,23 +213,52 @@
           </div>
         </div>
         <div class="row tools">
-          <div class="seg iconseg" role="group" aria-label="形狀與文字">
-            <button data-tool="pen" aria-pressed="true" aria-label="筆" title="筆（自由繪畫）">
+          <div
+            class="seg iconseg"
+            role="group"
+            aria-label="Shapes and text"
+            data-i18n-attr="aria-label:tools.group"
+          >
+            <button
+              data-tool="pen"
+              aria-pressed="true"
+              aria-label="Pen"
+              title="Pen (freehand)"
+              data-i18n-attr="aria-label:tool.pen;title:tool.pen.title"
+            >
               <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
                 <path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19l-4 1zM14 7l3 3" />
               </svg>
             </button>
-            <button data-tool="line" aria-pressed="false" aria-label="直線" title="直線（拖曳）">
+            <button
+              data-tool="line"
+              aria-pressed="false"
+              aria-label="Line"
+              title="Line (drag)"
+              data-i18n-attr="aria-label:tool.line;title:tool.line.title"
+            >
               <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
                 <path d="M5 19L19 5" />
               </svg>
             </button>
-            <button data-tool="circle" aria-pressed="false" aria-label="圓" title="圓（拖出外框）">
+            <button
+              data-tool="circle"
+              aria-pressed="false"
+              aria-label="Circle"
+              title="Circle (drag its bounds)"
+              data-i18n-attr="aria-label:tool.circle;title:tool.circle.title"
+            >
               <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
                 <circle cx="12" cy="12" r="7.5" />
               </svg>
             </button>
-            <button data-tool="rect" aria-pressed="false" aria-label="方" title="方（拖出外框）">
+            <button
+              data-tool="rect"
+              aria-pressed="false"
+              aria-label="Rectangle"
+              title="Rectangle (drag its bounds)"
+              data-i18n-attr="aria-label:tool.rect;title:tool.rect.title"
+            >
               <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
                 <rect x="5" y="5" width="14" height="14" />
               </svg>
@@ -151,43 +266,60 @@
             <button
               data-tool="text"
               aria-pressed="false"
-              aria-label="文字"
-              title="文字（點一下輸入）"
+              aria-label="Text"
+              title="Text (click to type)"
+              data-i18n-attr="aria-label:tool.text;title:tool.text.title"
             >
               <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
                 <path d="M6 7V5h12v2M12 5v14M9.5 19h5" />
               </svg>
             </button>
           </div>
-          <div class="seg actionseg" role="group" aria-label="繪製或擦除">
-            <button id="tDraw" data-action="draw" aria-pressed="true">繪製</button>
-            <button id="tErase" data-action="erase" aria-pressed="false">擦除</button>
+          <div
+            class="seg actionseg"
+            role="group"
+            aria-label="Draw or erase"
+            data-i18n-attr="aria-label:action.group"
+          >
+            <button id="tDraw" data-action="draw" aria-pressed="true" data-i18n="action.draw">
+              Draw
+            </button>
+            <button id="tErase" data-action="erase" aria-pressed="false" data-i18n="action.erase">
+              Erase
+            </button>
           </div>
         </div>
         <div id="textOpts" class="row textopts" hidden>
-          <label class="label" for="textSize">字級</label>
+          <label class="label" for="textSize" data-i18n="textsize.label">Font size</label>
           <input id="textSize" type="range" min="12" max="160" value="48" />
           <span class="out" id="textSizeOut">48</span>
         </div>
         <div class="field">
-          <label class="label" for="size">粗細</label>
+          <label class="label" for="size" data-i18n="size.label">Width</label>
           <input id="size" type="range" min="2" max="40" value="5" />
           <span class="out" id="sizeOut">5</span>
         </div>
         <div class="row">
-          <div class="seg modes" role="group" aria-label="轉換樣式">
-            <button data-mode="braille" aria-pressed="true">點字</button>
-            <button data-mode="mix" aria-pressed="false">混合</button>
-            <button data-mode="block" aria-pressed="false">方塊</button>
-            <button data-mode="shade" aria-pressed="false">濃淡</button>
-            <button data-mode="dots" aria-pressed="false">圓點</button>
-            <button data-mode="cjk" aria-pressed="false">中文</button>
-            <button data-mode="line" aria-pressed="false">線段</button>
-            <button data-mode="custom" aria-pressed="false">自訂</button>
+          <div
+            class="seg modes"
+            role="group"
+            aria-label="Conversion style"
+            data-i18n-attr="aria-label:modes.group"
+          >
+            <button data-mode="braille" aria-pressed="true" data-i18n="mode.braille">
+              Braille
+            </button>
+            <button data-mode="mix" aria-pressed="false" data-i18n="mode.mix">Mix</button>
+            <button data-mode="block" aria-pressed="false" data-i18n="mode.block">Blocks</button>
+            <button data-mode="shade" aria-pressed="false" data-i18n="mode.shade">Shade</button>
+            <button data-mode="dots" aria-pressed="false" data-i18n="mode.dots">Dots</button>
+            <button data-mode="cjk" aria-pressed="false" data-i18n="mode.cjk">CJK</button>
+            <button data-mode="line" aria-pressed="false" data-i18n="mode.line">Lines</button>
+            <button data-mode="custom" aria-pressed="false" data-i18n="mode.custom">Custom</button>
           </div>
         </div>
         <div class="row" id="customRow" hidden>
-          <label class="label" for="customChars">字元</label>
+          <label class="label" for="customChars" data-i18n="custom.label">Characters</label>
           <input id="customChars" type="text" value=" .oO@" spellcheck="false" autocomplete="off" />
         </div>
         <div class="canvasbox">
@@ -197,8 +329,8 @@
             aria-expanded="false"
             aria-controls="canvasPanel"
           >
-            <span class="label">畫布大小</span>
-            <span class="canvas-summary" id="canvasSummary">小尺寸通用 · 20 × 12</span>
+            <span class="label" data-i18n="canvas.label">Canvas size</span>
+            <span class="canvas-summary" id="canvasSummary">Small general size · 20 × 12</span>
             <span class="canvas-budget" id="canvasBudget" hidden></span>
             <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
               <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" />
@@ -207,9 +339,9 @@
           <div id="canvasPanel" class="canvaspanel" hidden>
             <div class="row">
               <button id="bAuto" class="toggle" aria-pressed="false">
-                <span class="track"></span>滿版
+                <span class="track"></span><span data-i18n="canvas.full">Fit window</span>
               </button>
-              <label class="label" for="inCols">欄</label>
+              <label class="label" for="inCols" data-i18n="canvas.cols">Cols</label>
               <input
                 id="inCols"
                 class="num"
@@ -220,7 +352,7 @@
                 step="1"
                 disabled
               />
-              <label class="label" for="inRows">列</label>
+              <label class="label" for="inRows" data-i18n="canvas.rows">Rows</label>
               <input
                 id="inRows"
                 class="num"
@@ -233,14 +365,15 @@
               />
             </div>
             <div class="row has-tip">
-              <label class="label" for="platform">平台</label>
+              <label class="label" for="platform" data-i18n="platform.label">Platform</label>
               <select id="platform" class="select">
-                <option value="">自訂</option>
+                <option value="" data-i18n="platform.custom">Custom</option>
               </select>
               <button
                 id="platformTipBtn"
                 class="info"
-                aria-label="平台說明"
+                aria-label="About this platform"
+                data-i18n-attr="aria-label:platform.tip"
                 aria-expanded="false"
                 aria-controls="platformTip"
                 hidden
@@ -259,38 +392,61 @@
           </div>
         </div>
         <div class="row actions">
-          <button id="bClear" class="btn-tertiary">清空</button>
+          <button id="bClear" class="btn-tertiary" data-i18n="action.clear">Clear</button>
           <span class="spacer"></span>
-          <button id="bImport" class="btn-secondary" aria-expanded="false" aria-label="匯入">
-            匯入
+          <button
+            id="bImport"
+            class="btn-secondary"
+            aria-expanded="false"
+            aria-label="Import"
+            data-i18n-attr="aria-label:action.import"
+          >
+            Import
           </button>
-          <button id="bCopy" class="btn-secondary" aria-expanded="false" aria-label="匯出">
-            匯出
+          <button
+            id="bCopy"
+            class="btn-secondary"
+            aria-expanded="false"
+            aria-label="Export"
+            data-i18n-attr="aria-label:action.export"
+          >
+            Export
           </button>
         </div>
         <div id="importMenu" hidden>
-          <div class="seg modes" role="group" aria-label="匯入類型">
-            <button data-import="image" aria-pressed="true">圖片</button>
-            <button data-import="text" aria-pressed="false">文字</button>
+          <div
+            class="seg modes"
+            role="group"
+            aria-label="Import type"
+            data-i18n-attr="aria-label:import.group"
+          >
+            <button data-import="image" aria-pressed="true" data-i18n="import.image">Image</button>
+            <button data-import="text" aria-pressed="false" data-i18n="import.text">Text</button>
           </div>
           <div id="importImagePane" class="importpane">
-            <span class="label"
-              >圖片完整置中畫在畫布上，保留原色；也可以把檔案拖進畫布，或直接貼上圖片。</span
+            <span class="label" data-i18n="import.imageHint"
+              >The picture is placed whole and centered on the canvas, keeping its colors. You can
+              also drop a file on the canvas or paste an image.</span
             >
             <div class="row copyrow">
-              <button id="bPickImage" class="btn-secondary">選擇圖片</button>
+              <button id="bPickImage" class="btn-secondary" data-i18n="import.pickImage">
+                Choose image
+              </button>
             </div>
           </div>
           <div id="importTextPane" class="importpane" hidden>
             <textarea
               id="importText"
-              placeholder="貼上 ASCII art，畫布會變成文字的大小"
+              placeholder="Paste ASCII art here; the canvas takes the size of the text"
               spellcheck="false"
-              aria-label="要匯入的文字"
+              aria-label="Text to import"
+              data-i18n-attr="placeholder:import.placeholder;aria-label:import.textAria"
             ></textarea>
             <div class="row copyrow">
-              <button id="bPickText" class="btn-secondary">選擇檔案</button>
-              <button id="bDoImport" class="btn-secondary">匯入</button>
+              <button id="bPickText" class="btn-secondary" data-i18n="import.pickText">
+                Choose file
+              </button>
+              <button id="bDoImport" class="btn-secondary" data-i18n="action.import">Import</button>
             </div>
           </div>
           <input id="fileImage" type="file" accept="image/*" hidden />
@@ -299,10 +455,12 @@
         <div id="copyMenu" hidden>
           <div class="row has-tip">
             <span class="label tip-label"
-              >空白替代<button
+              ><span data-i18n="space.label">Space substitute</span
+              ><button
                 id="tipBtn"
                 class="info"
-                aria-label="空白替代說明"
+                aria-label="About the space substitute"
+                data-i18n-attr="aria-label:space.tip"
                 aria-expanded="false"
                 aria-controls="spaceTip"
               >
@@ -315,36 +473,66 @@
             </span>
             <div id="spaceTip" class="tip" role="tooltip" hidden>
               <p>
-                <b>標準</b
-                >標準的空白字元，適用於程式碼、終端機、編輯器。<br />多數聊天軟體與社群平台會吃掉開頭或連續的空白，不建議使用。
+                <b data-i18n="space.std">Standard</b
+                ><span data-i18n-html="space.std.body"
+                  >The ordinary space character, good for code, terminals and editors.<br />Most
+                  chat apps and social platforms drop leading or repeated spaces, so it is not
+                  recommended there.</span
+                >
               </p>
               <p>
-                <b>不斷行</b
-                >特殊的空白字元，顯示上寬度和標準空白相同，比較少被裁切掉，但部分主流平台會將其轉換為一般空白，使用上請自行確認。
+                <b data-i18n="space.nbsp">No-break</b
+                ><span data-i18n-html="space.nbsp.body"
+                  >A special space that looks as wide as a normal one and is less likely to be
+                  trimmed, but some major platforms turn it into a normal space, so check on your
+                  target platform.</span
+                >
               </p>
               <p>
-                <b>點字</b
-                >盲文字元中的空白字元，被裁切掉的可能性最低，適合用於聊天、社群平台。<br />不過比例字型下寬度可能不齊，且無法在程式碼中被當成空白。
+                <b data-i18n="space.braille">Braille</b
+                ><span data-i18n-html="space.braille.body"
+                  >The blank braille character: the least likely to be trimmed, a good fit for chat
+                  and social platforms.<br />In proportional fonts its width may not line up, and
+                  code cannot treat it as a space.</span
+                >
               </p>
             </div>
-            <div class="seg sm" role="group" aria-label="空白字元">
-              <button data-space=" " aria-pressed="false">標準</button>
-              <button data-space="&#xA0;" aria-pressed="false">不斷行</button>
-              <button data-space="&#x2800;" aria-pressed="true">點字</button>
+            <div
+              class="seg sm"
+              role="group"
+              aria-label="Space character"
+              data-i18n-attr="aria-label:space.group"
+            >
+              <button data-space=" " aria-pressed="false" data-i18n="space.std">Standard</button>
+              <button data-space="&#xA0;" aria-pressed="false" data-i18n="space.nbsp">
+                No-break
+              </button>
+              <button data-space="&#x2800;" aria-pressed="true" data-i18n="space.braille">
+                Braille
+              </button>
             </div>
             <button id="bFence" class="toggle" aria-pressed="false">
-              <span class="track"></span>``` 區塊
+              <span class="track"></span><span data-i18n="fence.label">``` block</span>
             </button>
           </div>
-          <div class="seg modes" role="group" aria-label="匯出格式">
-            <button data-format="text" aria-pressed="true">純文字</button>
-            <button data-format="html" aria-pressed="false">HTML</button>
-            <button data-format="ansi" aria-pressed="false">ANSI</button>
-            <button data-format="image" aria-pressed="false">圖片</button>
+          <div
+            class="seg modes"
+            role="group"
+            aria-label="Export format"
+            data-i18n-attr="aria-label:format.group"
+          >
+            <button data-format="text" aria-pressed="true" data-i18n="format.text">
+              Plain text
+            </button>
+            <button data-format="html" aria-pressed="false" data-i18n="format.html">HTML</button>
+            <button data-format="ansi" aria-pressed="false" data-i18n="format.ansi">ANSI</button>
+            <button data-format="image" aria-pressed="false" data-i18n="format.image">Image</button>
           </div>
           <div class="row copyrow">
-            <button id="bDoCopy" class="btn-secondary">複製</button>
-            <button id="bDoDownload" class="btn-secondary">下載</button>
+            <button id="bDoCopy" class="btn-secondary" data-i18n="export.copy">Copy</button>
+            <button id="bDoDownload" class="btn-secondary" data-i18n="export.download">
+              Download
+            </button>
           </div>
         </div>
       </div>
@@ -353,8 +541,10 @@
     <div id="toast" hidden></div>
     <div id="copyPanel" hidden>
       <div class="row">
-        <span class="label">剪貼簿被擋住了，長按下方文字全選複製</span><span class="spacer"></span>
-        <button id="bClosePanel" class="btn-secondary">關閉</button>
+        <span class="label" data-i18n="copypanel.message"
+          >The clipboard is blocked. Long-press the text below to select all and copy.</span
+        ><span class="spacer"></span>
+        <button id="bClosePanel" class="btn-secondary" data-i18n="copypanel.close">Close</button>
       </div>
       <textarea id="copyText" readonly></textarea>
     </div>
