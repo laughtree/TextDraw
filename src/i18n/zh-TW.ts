@@ -6,6 +6,7 @@ export const zhTW: Record<Key, string> = {
     'Text Draw：在畫布上畫圖，即時轉成點字、方塊等字元畫，可匯入圖片與文字，並複製成純文字、HTML、ANSI 或圖片。',
   'meta.cells': '{cols} × {rows} cells',
   'lang.label': '語言',
+  'gh.title': '在 GitHub 查看原始碼',
 
   'canvas.aria': '繪圖區',
   'textedit.aria': '輸入文字，按 Enter 確定、Esc 取消',

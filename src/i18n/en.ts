@@ -8,6 +8,7 @@ export const en = {
     'Text Draw: draw on a canvas and watch it turn into text art. Import images or text, then copy as plain text, HTML, ANSI or an image.',
   'meta.cells': '{cols} × {rows} cells',
   'lang.label': 'Language',
+  'gh.title': 'View the source on GitHub',
 
   // canvas and text editor
   'canvas.aria': 'Drawing area',

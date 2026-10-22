@@ -6,6 +6,7 @@ export const ja: Record<Key, string> = {
     'Text Draw：キャンバスに描くと、すぐに文字アートへ変換。画像やテキストを読み込み、プレーンテキスト・HTML・ANSI・画像としてコピーできます。',
   'meta.cells': '{cols} × {rows} セル',
   'lang.label': '言語',
+  'gh.title': 'GitHub でソースを見る',
 
   'canvas.aria': '描画エリア',
   'textedit.aria': 'テキストを入力。Enter で確定、Esc でキャンセル',

@@ -192,3 +192,54 @@ describe('the language switcher', () => {
     expect(c.doc.documentElement.lang).toBe('zh-Hant');
   });
 });
+
+describe('the GitHub link in the header', () => {
+  const link = (a: App) => a.q<HTMLAnchorElement>('.shell .gh');
+
+  it('points to the repository and opens in a new tab safely', async () => {
+    const a = await open('en');
+    expect(link(a).getAttribute('href')).toBe('https://github.com/laughtree/TextDraw');
+    expect(link(a).target).toBe('_blank');
+    expect(link(a).rel).toContain('noopener');
+    expect(link(a).textContent?.trim()).toBe('GitHub');
+  });
+
+  it('has an accessible name in every language', async () => {
+    for (const lang of Object.keys(DICTS)) {
+      const a = await open(lang);
+      expect(link(a).getAttribute('aria-label'), lang).toBe(DICTS[lang]['gh.title']);
+      expect(link(a).title, lang).toBe(DICTS[lang]['gh.title']);
+    }
+  });
+
+  it('sits right after the title, before the cells readout and the language switcher', async () => {
+    const a = await open('en');
+    const rect = (sel: string) => a.q(sel).getBoundingClientRect();
+    expect(rect('.shell .gh').left).toBeGreaterThanOrEqual(rect('.brand').right);
+    expect(rect('.shell .gh').right).toBeLessThanOrEqual(rect('#meta').left);
+    expect(rect('#meta').right).toBeLessThanOrEqual(rect('#lang').left + 1);
+  });
+
+  it('never cuts the cells readout off, in any language or width', async () => {
+    for (const lang of Object.keys(DICTS))
+      for (const width of [320, 360, 390, 480]) {
+        const a = await open(lang);
+        a.iframe.style.width = `${width}px`;
+        await a.frames(3);
+        const meta = a.q('#meta');
+        expect(meta.scrollWidth, `${lang} ${width}`).toBeLessThanOrEqual(meta.clientWidth);
+      }
+  });
+
+  it('shows the word on wider screens and only the icon on phones', async () => {
+    const wide = await openApp('/index.html', 480, 720, { lang: 'en', full: false });
+    app = wide;
+    expect(wide.win.getComputedStyle(wide.q('.shell .gh-text')).display).not.toBe('none');
+    const narrow = await openApp('/index.html', 320, 720, { lang: 'en', full: false });
+    wide.close();
+    app = narrow;
+    expect(narrow.win.getComputedStyle(narrow.q('.shell .gh-text')).display).toBe('none');
+    expect(narrow.q('.shell .gh svg').getBoundingClientRect().width).toBeGreaterThan(8);
+    expect(narrow.doc.documentElement.scrollWidth).toBeLessThanOrEqual(narrow.win.innerWidth);
+  });
+});
