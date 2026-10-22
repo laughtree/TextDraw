@@ -9,6 +9,8 @@ export function setTool(tool: Tool): void {
   if (state.tool === 'text' && tool !== 'text') commitText();
   if (tool === 'pick' && state.tool !== 'pick') state.prevTool = state.tool;
   state.tool = tool;
+  // the width is for strokes and shapes: the text tool has its own size, the eyedropper has none
+  $<HTMLInputElement>('size').disabled = tool === 'text' || tool === 'pick';
   document
     .querySelectorAll<HTMLElement>('button[data-tool]')
     .forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.tool === tool)));

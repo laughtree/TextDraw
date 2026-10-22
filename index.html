@@ -169,6 +169,11 @@
           <input id="textSize" type="range" min="12" max="160" value="48" />
           <span class="out" id="textSizeOut">48</span>
         </div>
+        <div class="field">
+          <label class="label" for="size">粗細</label>
+          <input id="size" type="range" min="2" max="40" value="5" />
+          <span class="out" id="sizeOut">5</span>
+        </div>
         <div class="row">
           <div class="seg modes" role="group" aria-label="轉換樣式">
             <button data-mode="braille" aria-pressed="true">點字</button>
@@ -184,11 +189,6 @@
         <div class="row" id="customRow" hidden>
           <label class="label" for="customChars">字元</label>
           <input id="customChars" type="text" value=" .oO@" spellcheck="false" autocomplete="off" />
-        </div>
-        <div class="field">
-          <label class="label" for="size">粗細</label>
-          <input id="size" type="range" min="2" max="40" value="5" />
-          <span class="out" id="sizeOut">5</span>
         </div>
         <div class="canvasbox">
           <button

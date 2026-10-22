@@ -367,6 +367,60 @@ describe('text', () => {
   });
 });
 
+describe('stroke width and font size sliders', () => {
+  const width = () => app.q<HTMLInputElement>('#size');
+  const rect = (sel: string) => app.q(sel).getBoundingClientRect();
+  const fieldOf = (sel: string) => app.q(sel).closest('.field, .textopts') as HTMLElement;
+
+  it('has the width enabled for the pen and every shape', () => {
+    expect(width().disabled).toBe(false);
+    for (const name of ['line', 'circle', 'rect', 'pen'] as const) {
+      tool(name);
+      expect(width().disabled, name).toBe(false);
+    }
+  });
+
+  it('greys out the width for the text tool and the eyedropper, and brings it back', () => {
+    app.setValue('#size', '17');
+    tool('text');
+    expect(width().disabled).toBe(true);
+    expect(width().value).toBe('17'); // the value is kept
+    tool('pen');
+    expect(width().disabled).toBe(false);
+    tool('rect');
+    tool('pick');
+    expect(width().disabled).toBe(true);
+    tool('rect'); // back to the shape the eyedropper was called from
+    expect(width().disabled).toBe(false);
+    expect(Number(app.win.getComputedStyle(fieldOf('#size')).opacity)).toBe(1);
+    tool('text');
+    expect(Number(app.win.getComputedStyle(fieldOf('#size')).opacity)).toBeLessThan(0.6);
+  });
+
+  it('puts the width right under the tool row, or under the font size when that shows', async () => {
+    const tools = rect('.tools'),
+      modes = rect('.modes');
+    expect(app.q('#textOpts').hidden).toBe(true);
+    expect(rect('#size').top).toBeGreaterThanOrEqual(tools.bottom);
+    expect(rect('#size').top - tools.bottom).toBeLessThan(30);
+    expect(rect('#size').bottom).toBeLessThanOrEqual(modes.top);
+    tool('text');
+    await app.settle();
+    expect(rect('#textSize').top).toBeGreaterThanOrEqual(rect('.tools').bottom);
+    expect(rect('#size').top).toBeGreaterThanOrEqual(rect('#textSize').bottom);
+    expect(rect('#size').bottom).toBeLessThanOrEqual(rect('.modes').top);
+  });
+
+  it('lines the two sliders and their numbers up', async () => {
+    tool('text');
+    await app.settle();
+    expect(rect('#textSize').left).toBeCloseTo(rect('#size').left, 0);
+    expect(rect('#textSize').right).toBeCloseTo(rect('#size').right, 0);
+    expect(rect('#textSizeOut').left).toBeCloseTo(rect('#sizeOut').left, 0);
+    expect(rect('#textSizeOut').right).toBeCloseTo(rect('#sizeOut').right, 0);
+  });
+});
+
 describe('text caret', () => {
   const input = () => app.q<HTMLInputElement>('#textEdit');
   const caret = () => app.q('#textCaret');

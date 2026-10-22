@@ -196,7 +196,7 @@
 .textopts {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px; /* the same as the 粗細 row below it, so the two sliders line up */
   flex-wrap: nowrap;
 }
 .textopts input[type='range'] {
@@ -358,4 +358,14 @@
     border-radius: 2px;
     background: var(--border-strong);
   }
+}
+
+/* 粗細 and 字級 are one group: the one the current tool does not use is greyed out */
+.field:has(:disabled),
+.textopts:has(:disabled) {
+  opacity: 0.4;
+}
+.field input:disabled,
+.textopts input:disabled {
+  cursor: not-allowed;
 }
