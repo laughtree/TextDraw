@@ -259,8 +259,8 @@
   white-space: normal;
 }
 
-/* narrow phones (320–389 px): the two rows that never wrap give up some width instead of overflowing */
-@media (max-width: 389px) {
+/* narrow phones (up to 419 px): the rows that never wrap give up some width instead of overflowing */
+@media (max-width: 419px) {
   .tray {
     --hist-w: 112px;
     --hist-gap: 4px;
@@ -368,4 +368,37 @@
 .field input:disabled,
 .textopts input:disabled {
   cursor: not-allowed;
+}
+
+/* English and Japanese labels are wider than the Chinese ones: smaller type on the tightest rows */
+@media (max-width: 419px) {
+  :root:not(:lang(zh-Hant)) .tray .modes > button {
+    font-size: 13px;
+    letter-spacing: 0;
+  }
+  .actions button {
+    padding: 0 12px;
+  }
+}
+@media (max-width: 389px) {
+  :root:not(:lang(zh-Hant)) .tray .modes > button {
+    font-size: 12px;
+  }
+}
+@media (max-width: 339px) {
+  :root:not(:lang(zh-Hant)) .toprow {
+    gap: 4px;
+  }
+  :root:not(:lang(zh-Hant)) .tray .toprow .seg > button,
+  :root:not(:lang(zh-Hant)) .toprow .toggle {
+    font-size: 12px;
+    padding: 0 4px;
+  }
+}
+
+/* the labels of the two sliders differ in length in English and Japanese: keep the sliders in line */
+:root:not(:lang(zh-Hant)) .field > .label,
+:root:not(:lang(zh-Hant)) .textopts > .label {
+  flex: none;
+  min-width: 5.5em;
 }

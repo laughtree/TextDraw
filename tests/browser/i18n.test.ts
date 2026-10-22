@@ -96,6 +96,14 @@ describe('each language', () => {
       a.click('#bCopy');
       expect(a.q('#bCopy').textContent?.trim()).toBe(dict['action.export']);
     });
+
+    it(`${lang}: the two sliders line up whatever the length of their labels`, async () => {
+      const a = await open(lang);
+      a.click('[data-tool="text"]');
+      await a.settle();
+      const left = (sel: string) => a.q(sel).getBoundingClientRect().left;
+      expect(left('#textSize')).toBeCloseTo(left('#size'), 0);
+    });
   }
 
   it('falls back to English for a language it does not have', async () => {

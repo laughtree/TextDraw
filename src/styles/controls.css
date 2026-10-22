@@ -119,7 +119,7 @@ button:disabled {
   display: flex;
 }
 .modes button {
-  flex: 1;
+  flex: 1 1 auto; /* by the label's width, so a long label never overflows its neighbours' equal share */
   padding: 0 4px;
   min-width: 0;
 }

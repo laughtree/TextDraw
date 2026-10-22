@@ -32,6 +32,12 @@
   --f-mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
   --f-body: 'IBM Plex Sans', 'Noto Sans TC', system-ui, -apple-system, 'PingFang TC', sans-serif;
 }
+/* Japanese: kanji in Japanese glyph forms (Noto Sans JP) instead of the Traditional Chinese ones */
+:root:lang(ja) {
+  --f-body:
+    'IBM Plex Sans', 'Noto Sans JP', system-ui, -apple-system, 'Hiragino Sans', 'Yu Gothic',
+    sans-serif;
+}
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     --bg: #161616;

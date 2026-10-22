@@ -4,9 +4,11 @@ import { openApp, type App } from './harness';
 let app: App | undefined;
 afterEach(() => app?.close());
 
-async function open(w: number, h: number, full = true): Promise<App> {
+const LANGS = ['zh-TW', 'en', 'ja'];
+
+async function open(w: number, h: number, full = true, lang = 'zh-TW'): Promise<App> {
   app?.close();
-  app = await openApp('/index.html', w, h, { full });
+  app = await openApp('/index.html', w, h, { full, lang });
   await app.settle();
   return app;
 }
@@ -33,25 +35,33 @@ const height = (el: Element) => el.getBoundingClientRect().height;
 const meta = (a: App) => a.q('#meta').textContent;
 
 describe('common screen sizes', () => {
-  for (const [w, h] of SIZES) {
-    it(`${w} × ${h}: nothing overflows sideways`, async () => {
-      const a = await open(w, h);
-      const root = a.doc.documentElement;
-      expect(root.scrollWidth, 'page').toBeLessThanOrEqual(a.win.innerWidth);
-      for (const el of a.doc.querySelectorAll<HTMLElement>(
-        '.shell, .tray, .tray .row, .tray .seg',
-      )) {
-        if (el.clientWidth === 0) continue;
-        expect(el.scrollWidth, el.className).toBeLessThanOrEqual(el.clientWidth + 1);
-      }
-      for (const b of a.doc.querySelectorAll<HTMLElement>('.tray button')) {
-        if (b.getClientRects().length === 0) continue;
-        expect(b.getBoundingClientRect().right, b.id || b.textContent || '').toBeLessThanOrEqual(
-          a.win.innerWidth + 1,
-        );
-      }
-    });
+  for (const lang of LANGS)
+    for (const [w, h] of SIZES) {
+      // English and Japanese labels are longer than the Chinese ones: they must fit too, with the
+      // text tool selected (its extra row) and the export panel open (the widest content)
+      it(`${lang} ${w} × ${h}: nothing overflows sideways`, async () => {
+        const a = await open(w, h, true, lang);
+        a.click('[data-tool="text"]');
+        a.click('#bCopy');
+        await a.settle();
+        const root = a.doc.documentElement;
+        expect(root.scrollWidth, 'page').toBeLessThanOrEqual(a.win.innerWidth);
+        for (const el of a.doc.querySelectorAll<HTMLElement>(
+          '.shell, .tray, .tray .row, .tray .seg, .tray .field',
+        )) {
+          if (el.clientWidth === 0) continue;
+          expect(el.scrollWidth, el.className).toBeLessThanOrEqual(el.clientWidth + 1);
+        }
+        for (const b of a.doc.querySelectorAll<HTMLElement>('.tray button')) {
+          if (b.getClientRects().length === 0) continue;
+          expect(b.getBoundingClientRect().right, b.id || b.textContent || '').toBeLessThanOrEqual(
+            a.win.innerWidth + 1,
+          );
+        }
+      });
+    }
 
+  for (const [w, h] of SIZES) {
     it(`${w} × ${h}: the canvas keeps a usable height`, async () => {
       const a = await open(w, h);
       expect(height(a.q('#stage'))).toBeGreaterThanOrEqual(150);

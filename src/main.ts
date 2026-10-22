@@ -2,6 +2,8 @@ import '@fontsource/ibm-plex-mono/400.css';
 import '@fontsource/ibm-plex-mono/600.css';
 import '@fontsource/ibm-plex-sans/400.css';
 import '@fontsource/ibm-plex-sans/600.css';
+import '@fontsource/noto-sans-jp/400.css';
+import '@fontsource/noto-sans-jp/600.css';
 import '@fontsource/noto-sans-tc/400.css';
 import '@fontsource/noto-sans-tc/600.css';
 import './styles/main.css';

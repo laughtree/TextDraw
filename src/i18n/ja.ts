@@ -53,7 +53,7 @@ export const ja: Record<Key, string> = {
 
   'modes.group': '変換スタイル',
   'mode.braille': '点字',
-  'mode.mix': 'ミックス',
+  'mode.mix': '混合',
   'mode.block': 'ブロック',
   'mode.shade': '濃淡',
   'mode.dots': 'ドット',
