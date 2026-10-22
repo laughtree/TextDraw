@@ -64,10 +64,13 @@ export async function openApp(
     for (let i = 0; i < n; i++) await new Promise((r) => win.requestAnimationFrame(r));
   };
   const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
-  const animations = () => doc.getAnimations().length;
+  // endless animations (the text caret's blink) never finish, so they are not waited for
+  const running = () =>
+    doc.getAnimations().filter((a) => a.effect?.getComputedTiming().iterations !== Infinity);
+  const animations = () => running().length;
   const settle = async () => {
     for (let i = 0; i < 20 && animations() > 0; i++) {
-      await Promise.allSettled(doc.getAnimations().map((a) => a.finished));
+      await Promise.allSettled(running().map((a) => a.finished));
       await frames(1);
     }
     await frames(2);

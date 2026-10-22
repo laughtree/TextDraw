@@ -367,6 +367,133 @@ describe('text', () => {
   });
 });
 
+describe('text caret', () => {
+  const input = () => app.q<HTMLInputElement>('#textEdit');
+  const caret = () => app.q('#textCaret');
+  const box = () => caret().getBoundingClientRect();
+  const click = (x = 0.2, y = 0.3) => {
+    const v = size();
+    app.fire('pointerdown', v.width * x, v.height * y);
+    app.fire('pointerup', v.width * x, v.height * y);
+    return { x: v.width * x, y: v.height * y };
+  };
+  const type = async (value: string) => {
+    input().value = value;
+    input().dispatchEvent(new app.win.Event('input', { bubbles: true }));
+    await app.sleep(150);
+    await app.frames(2);
+  };
+  const key = (k: string) =>
+    input().dispatchEvent(new app.win.KeyboardEvent('keydown', { key: k, bubbles: true }));
+
+  it('is not there until the text tool is used', () => {
+    expect(caret().hidden).toBe(true);
+    tool('text');
+    expect(caret().hidden).toBe(true);
+  });
+
+  it('appears at the click, as tall as the text will be', async () => {
+    tool('text');
+    const at = click();
+    await app.frames(2);
+    expect(caret().hidden).toBe(false);
+    const v = app.view.getBoundingClientRect(),
+      b = box();
+    expect(b.left - v.left).toBeCloseTo(at.x, 0);
+    expect(b.top - v.top).toBeLessThanOrEqual(at.y + 1); // tall letters reach up to the click point
+    expect(b.top - v.top).toBeGreaterThan(at.y - 48);
+    // the default size is 48: the bar spans the letters, from ascenders to descenders
+    expect(b.height).toBeGreaterThanOrEqual(48 * 0.8);
+    expect(b.height).toBeLessThanOrEqual(48 * 1.4);
+  });
+
+  it('grows and shrinks with the font size slider', async () => {
+    tool('text');
+    click();
+    await app.frames(2);
+    const small = box().height;
+    app.setValue('#textSize', '120');
+    await app.frames(2);
+    const big = box().height;
+    expect(big / small).toBeGreaterThan(2.2);
+    expect(big / small).toBeLessThan(2.8);
+    app.setValue('#textSize', '24');
+    await app.frames(2);
+    expect(box().height).toBeLessThan(small);
+  });
+
+  it('follows the typing and the cursor, and takes the pen colour', async () => {
+    tool('text');
+    click();
+    await app.frames(2);
+    const start = box().left;
+    await type('HI');
+    expect(box().left).toBeGreaterThan(start + 20);
+    const end = box().left;
+    input().setSelectionRange(0, 0);
+    input().dispatchEvent(new app.win.KeyboardEvent('keyup', { key: 'Home', bubbles: true }));
+    await app.frames(2);
+    expect(box().left).toBeCloseTo(start, 0);
+    input().setSelectionRange(2, 2);
+    input().dispatchEvent(new app.win.KeyboardEvent('keyup', { key: 'End', bubbles: true }));
+    await app.frames(2);
+    expect(box().left).toBeCloseTo(end, 0);
+    app.click('[data-color="#0f62fe"]');
+    await app.frames(2);
+    expect(app.win.getComputedStyle(caret()).backgroundColor).toBe('rgb(15, 98, 254)');
+  });
+
+  it('blinks, and goes away on Enter, Esc and a tool change', async () => {
+    tool('text');
+    click();
+    await app.frames(2);
+    expect(app.win.getComputedStyle(caret()).animationName).toBe('caret-blink');
+    key('Enter');
+    expect(caret().hidden).toBe(true);
+    click(0.4, 0.5);
+    await app.frames(2);
+    expect(caret().hidden).toBe(false);
+    key('Escape');
+    expect(caret().hidden).toBe(true);
+    click(0.5, 0.5);
+    await app.frames(2);
+    tool('pen');
+    expect(caret().hidden).toBe(true);
+  });
+
+  it('is not counted as motion that has to finish, and stays inside the paper', async () => {
+    tool('text');
+    click(0.1, 0.1);
+    await app.settle(); // would wait forever on an endless blink
+    expect(app.animations()).toBe(0);
+    const p = app.q('#paper').getBoundingClientRect(),
+      b = box();
+    expect(b.left).toBeGreaterThanOrEqual(p.left - 1);
+    expect(b.right).toBeLessThanOrEqual(p.right + 1);
+  });
+
+  it('scales with a fixed grid that is fitted to the stage', async () => {
+    tool('text');
+    click(0.2, 0.3);
+    await app.frames(2);
+    const fullHeight = box().height,
+      cols = Number(/^(\d+) ×/.exec(app.q('#meta').textContent ?? '')?.[1]),
+      cellW = app.view.getBoundingClientRect().width / cols; // about one cell, in CSS px
+    key('Escape');
+    app.click('#bAuto'); // leave 滿版: a fixed grid, shown at some scale
+    app.setValue('#inCols', '24', 'change');
+    app.setValue('#inRows', '12', 'change');
+    await app.settle();
+    const scale = app.q('#paper').getBoundingClientRect().width / (24 * cellW);
+    expect(Math.abs(scale - 1)).toBeGreaterThan(0.1); // the grid really is scaled
+    click(0.2, 0.3);
+    await app.frames(2);
+    expect(box().height / fullHeight).toBeCloseTo(scale, 0);
+    expect(box().height / fullHeight / scale).toBeGreaterThan(0.9);
+    expect(box().height / fullHeight / scale).toBeLessThan(1.1);
+  });
+});
+
 describe('erase mode applies to every shape', () => {
   const input = () => app.q<HTMLInputElement>('#textEdit');
   // braille mode, and ink counted in dots: fine enough to notice a thin cut
