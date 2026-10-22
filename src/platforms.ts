@@ -30,14 +30,14 @@ export interface Platform {
 export const PLATFORMS: readonly Platform[] = [
   {
     id: 'chat',
-    label: '聊天室',
+    label: '小尺寸通用',
     limit: null,
     counter: 'chars',
     cellWeight: 1,
     source: 'estimate',
-    // chat bubbles are narrower and wrap sooner than posts, so this is smaller than any post preset
+    // small enough for chat bubbles, which are narrower and wrap sooner than posts; the start-up size
     grid: { cols: 20, rows: 12 },
-    rule: '聊天泡泡通常比發文更窄、更容易換行，所以尺寸比發文保守；沒有對應的字數上限，不顯示讀數',
+    rule: '通用的小尺寸：聊天泡泡通常比發文更窄、更容易換行，所以比發文的尺寸保守；沒有對應的字數上限，不顯示讀數',
   },
   {
     id: 'x',

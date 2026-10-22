@@ -318,13 +318,13 @@ describe('text', () => {
 
   it('records nothing when no text was typed', () => {
     tool('text');
-    app.click('#bUndo');
-    const redoWas = app.q<HTMLButtonElement>('#bRedo').disabled;
+    const redoWas = app.q<HTMLButtonElement>('#bRedo').disabled,
+      undoWas = undoDisabled();
     open();
     key('Enter');
     expect(input().hidden).toBe(true);
     expect(app.q<HTMLButtonElement>('#bRedo').disabled).toBe(redoWas);
-    expect(undoDisabled()).toBe(true);
+    expect(undoDisabled()).toBe(undoWas);
   });
 
   it('waits for the input method: Enter while composing does not commit', async () => {

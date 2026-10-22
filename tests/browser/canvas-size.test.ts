@@ -12,7 +12,7 @@ const meta = () => app.q('#meta').textContent;
 const rect = (sel: string) => app.q(sel).getBoundingClientRect();
 const pressed = (sel: string) => app.q(sel).getAttribute('aria-pressed');
 
-/** leave auto mode and commit an explicit grid */
+/** leave 滿版 and commit an explicit grid */
 async function fix(cols: number, rows: number) {
   app.click('#bAuto');
   app.setValue('#inCols', String(cols), 'change');
@@ -28,10 +28,11 @@ async function copyText() {
 }
 
 describe('canvas size panel', () => {
-  it('starts in auto mode, following the window', () => {
+  it('shows 滿版 while following the window', () => {
     expect(pressed('#bAuto')).toBe('true');
+    expect(app.q('#bAuto').textContent).toContain('滿版');
     expect(app.q<HTMLInputElement>('#inCols').disabled).toBe(true);
-    expect(app.q('#canvasSummary').textContent).toMatch(/^自動 · \d+ × \d+$/);
+    expect(app.q('#canvasSummary').textContent).toMatch(/^滿版 · \d+ × \d+$/);
     const p = rect('#paper'),
       s = rect('#stage');
     expect(p.width).toBeCloseTo(s.width, 0);
@@ -55,7 +56,7 @@ describe('canvas size panel', () => {
   it('fixes the grid and fits it, centred, into the stage', async () => {
     await fix(40, 10);
     expect(meta()).toBe('40 × 10 cells');
-    expect(app.q('#canvasSummary').textContent).toBe('40 × 10');
+    expect(app.q('#canvasSummary').textContent).toBe('小尺寸通用 · 40 × 10'); // the platform stays chosen
     expect(app.q<HTMLInputElement>('#inCols').disabled).toBe(false);
     const p = rect('#paper'),
       s = rect('#stage');
@@ -176,5 +177,64 @@ describe('brush ring with a fixed grid', () => {
     const w = app.q('#brush').getBoundingClientRect().width;
     expect(w).toBeLessThan(20);
     expect(w).toBeGreaterThanOrEqual(6);
+  });
+});
+
+describe('the first thing a visitor sees', () => {
+  let fresh: App;
+  beforeEach(async () => {
+    app.close(); // the outer hooks opened a full-size page; this one starts as a visitor would see it
+    fresh = await openApp('/index.html', 480, 720, { full: false });
+    await fresh.win.document.fonts.load('13px "IBM Plex Mono"', 'M');
+    await fresh.settle();
+  });
+  afterEach(() => fresh.close());
+
+  const summary = () => fresh.q('#canvasSummary').textContent;
+
+  it('starts on the small general size, not full window', () => {
+    expect(fresh.q('#meta').textContent).toBe('20 × 12 cells');
+    expect(summary()).toBe('小尺寸通用 · 20 × 12');
+    expect(fresh.q('#bAuto').getAttribute('aria-pressed')).toBe('false');
+    expect(fresh.q('#stage').classList.contains('fixed')).toBe(true);
+    expect(fresh.q<HTMLSelectElement>('#platform').value).toBe('chat');
+    expect(fresh.q('#platformTipBtn').hidden).toBe(false);
+    expect(fresh.q('#budget').hidden).toBe(true); // no limit, no readout
+  });
+
+  it('starts with nothing to undo and no motion playing', () => {
+    expect(fresh.q<HTMLButtonElement>('#bUndo').disabled).toBe(true);
+    expect(fresh.animations()).toBe(0);
+  });
+
+  it('draws the starter picture inside the 20 × 12 grid', async () => {
+    fresh.click('#bCopy');
+    await fresh.settle();
+    fresh.copied.length = 0;
+    fresh.copy('text');
+    await fresh.frames(2);
+    const rows = fresh.copied.join('').split('\n');
+    expect(rows.length).toBeGreaterThan(4);
+    expect(rows.length).toBeLessThanOrEqual(12);
+    expect(Math.max(...rows.map((r) => r.length))).toBeLessThanOrEqual(20);
+  });
+
+  it('names what the size is for, and follows platform, 自訂 and 滿版', async () => {
+    const select = fresh.q<HTMLSelectElement>('#platform');
+    const choose = async (id: string) => {
+      select.value = id;
+      select.dispatchEvent(new fresh.win.Event('change', { bubbles: true }));
+      await fresh.settle();
+    };
+    await choose('telegram');
+    expect(summary()).toBe('Telegram · 32 × 16');
+    await choose('');
+    expect(summary()).toBe('自訂 · 32 × 16'); // the size stays, only its purpose changes
+    fresh.click('#bAuto');
+    await fresh.settle();
+    expect(summary()).toMatch(/^滿版 · \d+ × \d+$/);
+    fresh.click('#bAuto');
+    await fresh.settle();
+    expect(summary()).toMatch(/^自訂 · \d+ × \d+$/);
   });
 });

@@ -31,7 +31,20 @@ export interface App {
   close: () => void;
 }
 
-export async function openApp(url: string, width = 480, height = 720): Promise<App> {
+export interface OpenOptions {
+  /**
+   * The app starts on a small fixed grid; by default the helper switches it to 滿版 (the whole
+   * window) once the page is ready, which is the canvas most tests are written for.
+   */
+  full?: boolean;
+}
+
+export async function openApp(
+  url: string,
+  width = 480,
+  height = 720,
+  { full = true }: OpenOptions = {},
+): Promise<App> {
   const iframe = document.createElement('iframe');
   iframe.style.cssText = `width:${width}px;height:${height}px;border:0`;
   document.body.append(iframe);
@@ -125,6 +138,15 @@ export async function openApp(url: string, width = 480, height = 720): Promise<A
     for (const p of pts.slice(1)) fire('pointermove', ...p);
     fire('pointerup', ...pts[pts.length - 1]);
   };
+
+  if (full && doc.getElementById('bAuto')) {
+    // wait for the first layout, then leave the start-up grid (the legacy page has no such button)
+    for (let i = 0; i < 100 && doc.getElementById('meta')?.textContent === '0 × 0 cells'; i++) {
+      await sleep(25);
+    }
+    q('#bAuto').click();
+    await frames(3);
+  }
 
   return {
     iframe,

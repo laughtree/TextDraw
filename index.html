@@ -197,7 +197,7 @@
             aria-controls="canvasPanel"
           >
             <span class="label">畫布大小</span>
-            <span class="canvas-summary" id="canvasSummary">自動 · 0 × 0</span>
+            <span class="canvas-summary" id="canvasSummary">小尺寸通用 · 20 × 12</span>
             <span class="canvas-budget" id="canvasBudget" hidden></span>
             <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
               <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" />
@@ -205,8 +205,8 @@
           </button>
           <div id="canvasPanel" class="canvaspanel" hidden>
             <div class="row">
-              <button id="bAuto" class="toggle" aria-pressed="true">
-                <span class="track"></span>自動
+              <button id="bAuto" class="toggle" aria-pressed="false">
+                <span class="track"></span>滿版
               </button>
               <label class="label" for="inCols">欄</label>
               <input
@@ -260,8 +260,12 @@
         <div class="row actions">
           <button id="bClear" class="btn-tertiary">清空</button>
           <span class="spacer"></span>
-          <button id="bImport" class="btn-secondary" aria-expanded="false">匯入</button>
-          <button id="bCopy" class="btn-secondary" aria-expanded="false">匯出</button>
+          <button id="bImport" class="btn-secondary" aria-expanded="false" aria-label="匯入">
+            匯入
+          </button>
+          <button id="bCopy" class="btn-secondary" aria-expanded="false" aria-label="匯出">
+            匯出
+          </button>
         </div>
         <div id="importMenu" hidden>
           <div class="seg modes" role="group" aria-label="匯入類型">

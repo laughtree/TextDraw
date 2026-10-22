@@ -7,7 +7,8 @@ import { state } from '../state';
 import type { ExportFormat, ExportKind } from '../types';
 import { exportCurrent } from './exportCurrent';
 import { overLimit } from './platform';
-import { isOpen, reveal } from './reveal';
+import { closeMenu, toggleMenu } from './menus';
+import { reveal } from './reveal';
 import { bindTip } from './tip';
 import { toast } from './toast';
 
@@ -35,10 +36,7 @@ function initSpaceChar(): void {
 const spaced = (label: string): string => (/^[A-Za-z]/.test(label) ? ` ${label}` : label);
 
 /** Close the export menu once something has been copied or saved. */
-function closeMenu(): void {
-  reveal($('copyMenu'), false, 'collapse');
-  $('bCopy').setAttribute('aria-expanded', 'false');
-}
+const closeExportMenu = (): void => closeMenu('export');
 
 /** Anything drawn? (The text formats and the PNG all need at least one character.) */
 function hasInk(): boolean {
@@ -69,7 +67,7 @@ function copyText(kind: ExportKind): void {
           ? `已複製${label}，但超過 ${over.label} 上限（${over.used} / ${over.limit}）`
           : `已複製${label}`,
       );
-      closeMenu();
+      closeExportMenu();
     }, fallback);
   } catch {
     fallback();
@@ -80,7 +78,7 @@ function copyText(kind: ExportKind): void {
 function savePng(blob: Blob, message?: string): void {
   downloadBlob(blob, EXPORT_FILES.image.name);
   toast(message ?? `已下載 ${EXPORT_FILES.image.name}`);
-  closeMenu();
+  closeExportMenu();
 }
 
 /** Copy the picture to the clipboard, or save it when the browser cannot copy images. */
@@ -102,7 +100,7 @@ function copyImage(): void {
   try {
     navigator.clipboard.write([new ClipboardItem({ 'image/png': png })]).then(() => {
       toast('已複製圖片');
-      closeMenu();
+      closeExportMenu();
     }, saveInstead);
   } catch {
     saveInstead();
@@ -127,19 +125,11 @@ function download(format: ExportFormat): void {
     file.name,
   );
   toast(`已下載 ${file.name}`);
-  closeMenu();
+  closeExportMenu();
 }
 
 function initExportMenu(): void {
-  $('bCopy').onclick = (e) => {
-    const show = !isOpen($('copyMenu'));
-    if (show) {
-      reveal($('importMenu'), false, 'collapse'); // one panel at a time
-      $('bImport').setAttribute('aria-expanded', 'false');
-    }
-    reveal($('copyMenu'), show, 'collapse');
-    (e.currentTarget as HTMLElement).setAttribute('aria-expanded', String(show));
-  };
+  $('bCopy').onclick = () => toggleMenu('export');
 
   const formatBtns = [...document.querySelectorAll<HTMLElement>('[data-format]')];
   formatBtns.forEach(

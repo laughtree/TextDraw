@@ -134,6 +134,76 @@ describe('import panel', () => {
   });
 });
 
+describe('menu buttons', () => {
+  const label = (sel: string) => app.q(sel).textContent?.trim();
+  const expanded = (sel: string) => app.q(sel).getAttribute('aria-expanded');
+
+  it('say 取消 while their menu is open and keep their accessible name', async () => {
+    expect([label('#bImport'), label('#bCopy')]).toEqual(['匯入', '匯出']);
+    app.click('#bImport');
+    expect([label('#bImport'), label('#bCopy')]).toEqual(['取消', '匯出']);
+    expect(expanded('#bImport')).toBe('true');
+    expect(app.q('#bImport').getAttribute('aria-label')).toBe('匯入');
+    await app.settle();
+    app.click('#bImport');
+    expect([label('#bImport'), label('#bCopy')]).toEqual(['匯入', '匯出']);
+    expect(expanded('#bImport')).toBe('false');
+    app.click('#bCopy');
+    expect([label('#bImport'), label('#bCopy')]).toEqual(['匯入', '取消']);
+    expect(app.q('#bCopy').getAttribute('aria-label')).toBe('匯出');
+  });
+
+  it('restore the text when the other button takes over', async () => {
+    app.click('#bCopy');
+    await app.settle();
+    app.click('#bImport'); // straight from one menu to the other
+    expect([label('#bImport'), label('#bCopy')]).toEqual(['取消', '匯出']);
+    expect([expanded('#bImport'), expanded('#bCopy')]).toEqual(['true', 'false']);
+    await app.settle();
+    app.click('#bCopy');
+    expect([label('#bImport'), label('#bCopy')]).toEqual(['匯入', '取消']);
+    expect([expanded('#bImport'), expanded('#bCopy')]).toEqual(['false', 'true']);
+    await app.settle();
+    expect(app.q('#importMenu').hidden).toBe(true);
+    expect(app.q('#copyMenu').hidden).toBe(false);
+  });
+
+  it('restore the text when an action finishes and closes the menu', async () => {
+    await importText('⣿⣿\n⣿⣿');
+    expect([label('#bImport'), label('#bCopy')]).toEqual(['匯入', '匯出']);
+    expect([expanded('#bImport'), expanded('#bCopy')]).toEqual(['false', 'false']);
+    app.click('#bCopy');
+    await app.settle();
+    app.copy('text');
+    await app.frames(3);
+    await app.settle();
+    expect(label('#bCopy')).toBe('匯出');
+    expect(app.q('#copyMenu').hidden).toBe(true);
+    app.click('#bCopy');
+    await app.settle();
+    app.download('text');
+    await app.frames(3);
+    await app.settle();
+    expect(label('#bCopy')).toBe('匯出');
+  });
+
+  it('end consistent after a quick double click', async () => {
+    app.click('#bImport');
+    app.click('#bImport');
+    await app.settle();
+    expect(label('#bImport')).toBe('匯入');
+    expect(expanded('#bImport')).toBe('false');
+    expect(app.q('#importMenu').hidden).toBe(true);
+    app.click('#bCopy');
+    app.click('#bImport');
+    app.click('#bCopy');
+    await app.settle();
+    expect([label('#bImport'), label('#bCopy')]).toEqual(['匯入', '取消']);
+    expect(app.q('#copyMenu').hidden).toBe(false);
+    expect(app.q('#importMenu').hidden).toBe(true);
+  });
+});
+
 describe('text import', () => {
   const ART = '⣿⣿⣿⡇⠀⣿\n⢸⡇⣀⣤⠶⠛\n⠁⠂⠄⡀⢀⠠';
 

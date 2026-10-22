@@ -48,14 +48,14 @@ async function copyText() {
 }
 
 describe('platform drop-down', () => {
-  it('is a plain list: custom first, then the chat room and the platforms, no groups', () => {
-    expect(select().value).toBe('');
+  it('is a plain list: custom first, then the general size and the platforms, no groups', () => {
+    expect(select().value).toBe('chat'); // the page starts on the general small size
     expect(select().querySelectorAll('optgroup')).toHaveLength(0);
     const labels = [...select().options].map((o) => o.textContent);
     expect(labels).toHaveLength(11);
     expect(labels.slice(0, 6)).toEqual([
       '自訂',
-      '聊天室 · 20 × 12',
+      '小尺寸通用 · 20 × 12',
       'X · 16 × 8',
       'Telegram · 32 × 16',
       'Discord · 32 × 16',
@@ -159,7 +159,9 @@ describe('platform help bubble', () => {
     await app.settle();
   };
 
-  it('only exists once a platform is chosen', async () => {
+  it('only exists while a platform is chosen', async () => {
+    expect(btn().hidden).toBe(false); // the page starts on 小尺寸通用
+    await choose('');
     expect(btn().hidden).toBe(true);
     await choose('x');
     expect(btn().hidden).toBe(false);
@@ -190,7 +192,7 @@ describe('platform help bubble', () => {
     await choose('chat');
     await toggle();
     const text = tip().textContent ?? '';
-    for (const part of ['聊天室', '通用估計', '非任何平台的官方數字', '20 × 12']) {
+    for (const part of ['小尺寸通用', '通用估計', '非任何平台的官方數字', '20 × 12']) {
       expect(text, part).toContain(part);
     }
   });

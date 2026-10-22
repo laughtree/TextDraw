@@ -7,6 +7,9 @@ import { exportCurrent } from './exportCurrent';
 import { reveal } from './reveal';
 import { bindTip } from './tip';
 
+/** The platform preset the page starts with. */
+const START_PLATFORM = 'chat';
+
 const SOURCE_TEXT: Record<Platform['source'], string> = {
   official: '官方文件已確認',
   thirdparty: '第三方來源，未經官方確認',
@@ -90,6 +93,7 @@ export function initPlatform(): void {
   select.onchange = () => {
     const p = findPlatform(select.value);
     state.platform = p?.id ?? null;
+    document.dispatchEvent(new Event('platformchange'));
     tip.close();
     reveal(tipBtn, !!p, 'fade');
     tipBox.replaceChildren(...(p ? describe(p) : []));
@@ -100,6 +104,16 @@ export function initPlatform(): void {
     shown = '';
     update();
   };
+
+  // start on the general small size: the first layout already uses its grid (no undo step, no motion)
+  const initial = findPlatform(START_PLATFORM);
+  if (initial) {
+    state.platform = initial.id;
+    state.fixed = { ...presetGrid(initial) };
+    select.value = initial.id;
+    tipBox.replaceChildren(...describe(initial));
+    tipBtn.hidden = false;
+  }
 
   document.addEventListener('rendered', update);
   document.addEventListener('exportchange', () => {

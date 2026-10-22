@@ -1,12 +1,13 @@
 import { $ } from '../dom';
 import { clampGrid, LIMITS, parseDim } from '../grid';
 import { pushUndo } from '../history';
+import { findPlatform } from '../platforms';
 import { state } from '../state';
 import { setGrid } from '../surface';
 import { isOpen, reveal } from './reveal';
 import { toast } from './toast';
 
-/** "畫布大小" panel: auto (follow the window) or a fixed columns × rows grid. */
+/** "畫布大小" panel: 滿版 (follow the window) or a fixed columns × rows grid. */
 export function initCanvasSize(): void {
   const toggle = $('bCanvas'),
     panel = $('canvasPanel'),
@@ -15,17 +16,20 @@ export function initCanvasSize(): void {
     inCols = $<HTMLInputElement>('inCols'),
     inRows = $<HTMLInputElement>('inRows');
 
-  // reflect the current grid (also after undo/redo and window resizes in auto mode)
+  // reflect the current grid (also after undo/redo and window resizes in full mode)
   const sync = () => {
-    const isAuto = !state.fixed;
-    auto.setAttribute('aria-pressed', String(isAuto));
-    inCols.disabled = isAuto;
-    inRows.disabled = isAuto;
+    const isFull = !state.fixed;
+    auto.setAttribute('aria-pressed', String(isFull));
+    inCols.disabled = isFull;
+    inRows.disabled = isFull;
     inCols.value = String(state.cols);
     inRows.value = String(state.rows);
-    summary.textContent = `${isAuto ? '自動 · ' : ''}${state.cols} × ${state.rows}`;
+    // what the size is for: full window, the chosen platform, or a size of your own
+    const name = isFull ? '滿版' : (findPlatform(state.platform)?.label ?? '自訂');
+    summary.textContent = `${name} · ${state.cols} × ${state.rows}`;
   };
   document.addEventListener('gridchange', sync);
+  document.addEventListener('platformchange', sync);
 
   toggle.onclick = () => {
     const show = !isOpen(panel);
@@ -35,7 +39,7 @@ export function initCanvasSize(): void {
 
   auto.onclick = () => {
     pushUndo();
-    // leaving auto starts from the grid on screen; returning to it stretches the painting to the window
+    // leaving 滿版 starts from the grid on screen; returning to it stretches the painting to the window
     setGrid(state.fixed ? null : clampGrid(state.cols, state.rows), 'scale');
   };
 

@@ -2,7 +2,8 @@ import { $ } from '../dom';
 import { importImage } from '../importImage';
 import { importText } from '../importText';
 import { stage } from '../surface';
-import { isOpen, reveal } from './reveal';
+import { closeMenu, setMenu, toggleMenu } from './menus';
+import { reveal } from './reveal';
 import { toast } from './toast';
 
 const TEXT_FILE = /\.(txt|ans|asc|nfo)$/i;
@@ -12,23 +13,18 @@ const MAX_TEXT_BYTES = 2 * 1024 * 1024;
 const isField = (t: EventTarget | null): boolean =>
   t instanceof HTMLElement && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
 
-function closeMenu(): void {
-  reveal($('importMenu'), false, 'collapse');
-  $('bImport').setAttribute('aria-expanded', 'false');
-}
-
 async function importTextFile(file: File): Promise<void> {
   if (file.size > MAX_TEXT_BYTES) {
     toast('文字檔太大（上限 2 MB）');
     return;
   }
-  if (await importText(await file.text())) closeMenu();
+  if (await importText(await file.text())) closeMenu('import');
 }
 
 /** Send a picked, dropped or pasted file to the importer that understands it. */
 async function importFile(file: File): Promise<void> {
   if (file.type.startsWith('image/')) {
-    if (await importImage(file)) closeMenu();
+    if (await importImage(file)) closeMenu('import');
   } else if (file.type.startsWith('text/') || TEXT_FILE.test(file.name)) {
     await importTextFile(file);
   } else {
@@ -49,15 +45,7 @@ function initPanel(): void {
       }),
   );
 
-  $('bImport').onclick = (e) => {
-    const show = !isOpen($('importMenu'));
-    if (show) {
-      reveal($('copyMenu'), false, 'collapse'); // one panel at a time
-      $('bCopy').setAttribute('aria-expanded', 'false');
-    }
-    reveal($('importMenu'), show, 'collapse');
-    (e.currentTarget as HTMLElement).setAttribute('aria-expanded', String(show));
-  };
+  $('bImport').onclick = () => toggleMenu('import');
 
   const fileImage = $<HTMLInputElement>('fileImage'),
     fileText = $<HTMLInputElement>('fileText');
@@ -71,7 +59,9 @@ function initPanel(): void {
     };
   }
   $('bDoImport').onclick = () => {
-    void importText($<HTMLTextAreaElement>('importText').value).then((ok) => ok && closeMenu());
+    void importText($<HTMLTextAreaElement>('importText').value).then(
+      (ok) => ok && closeMenu('import'),
+    );
   };
 }
 
@@ -112,5 +102,6 @@ function initDropAndPaste(): void {
 
 export function initImport(): void {
   initPanel();
+  setMenu(null); // both buttons start with their plain labels
   initDropAndPaste();
 }

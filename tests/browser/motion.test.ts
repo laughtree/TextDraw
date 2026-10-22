@@ -170,6 +170,9 @@ describe('enter/exit motion', () => {
   });
 
   it('fades in the readout and the info button when a platform is chosen', async () => {
+    choose(''); // the page starts on 小尺寸通用; go to 自訂 first
+    await app.settle();
+    expect(app.q('#platformTipBtn').hidden).toBe(true);
     choose('x');
     expect(app.q('#budget').hidden).toBe(false);
     expect(anims('#budget')).toBeGreaterThan(0);

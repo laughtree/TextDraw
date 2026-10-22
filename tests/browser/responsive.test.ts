@@ -4,9 +4,9 @@ import { openApp, type App } from './harness';
 let app: App | undefined;
 afterEach(() => app?.close());
 
-async function open(w: number, h: number): Promise<App> {
+async function open(w: number, h: number, full = true): Promise<App> {
   app?.close();
-  app = await openApp('/index.html', w, h);
+  app = await openApp('/index.html', w, h, { full });
   await app.settle();
   return app;
 }
@@ -142,7 +142,7 @@ describe('bottom sheet', () => {
   });
 
   it('a tap on the canvas closes it without drawing', async () => {
-    const a = await open(375, 667);
+    const a = await open(375, 667, false); // a clean history: nothing to undo yet
     handle(a).click();
     await a.settle();
     a.stroke([
