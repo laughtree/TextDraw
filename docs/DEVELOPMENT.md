@@ -1,103 +1,116 @@
-# 開發說明
+# Development notes
 
-Text Draw 是以 Vite 與 TypeScript（strict）寫成的單頁應用，沒有使用前端框架。這份文件說明專案結構、轉換流程、實作上的重點與測試方式；使用方式請見 [README](../README.md)。
+**English** | [繁體中文](DEVELOPMENT.zh-TW.md)
 
-## 專案結構
+Text Draw is a single-page app written in Vite and TypeScript (strict), with no front-end framework. This document covers the project structure, the conversion pipeline, notes on the implementation and how it is tested; for how to use it, see the [README](../README.md).
+
+## Project structure
 
 ```
-index.html          頁面標記（無內嵌 style / script）
+index.html          page markup (no inline style or script)
 src/
-  main.ts           進入點：載入字型與樣式、初始化各模組、啟動繪製迴圈
-  state.ts          共用的可變狀態（工具、模式、畫布尺寸、轉換結果）
-  types.ts          Mode / Palette / Metrics 等共用型別
-  convert.ts        畫布像素 → 每格一個字元（純函式，不碰 DOM）
-  blocks.ts         方塊字元（濃淡、象限、八分之一）的矩形定義與解析墨量向量（純函式）
-  match.ts          每格 2×4 墨量與候選字的比對、點字候選合成（純函式）
-  glyphs.ts         字形墨量校準（依實際字型量測，字型或格寬改變時須清快取）
-  charsets.ts       各模式使用的字元表
-  color.ts          sRGB 亮度計算、hex 工具（純函式）
-  theme.ts          讀取 CSS 變數
-  surface.ts        畫布 / 暫存層、格寬量測、視窗縮放
-  render.ts         轉換後把結果畫到螢幕
-  paint.ts          把轉換結果畫成點字、方塊、圓點或文字（螢幕與 PNG 共用同一份）
-  png.ts            把轉換結果畫成 PNG（透明背景、裁到內容）
-  download.ts       下載檔案
-  exportFile.ts     各匯出格式的檔名、類型與 HTML 文件包裝（純函式）
-  export.ts         純文字 / HTML / ANSI 輸出（純函式）
-  panels.ts         計算展開中的面板佔掉多少舞台高度（讓畫布不隨面板縮小）
-  draw.ts           指標事件：自由筆跡、拖曳圖形（預覽用還原基底）、文字工具的點擊
-  shapes.ts         直線、圓、方的繪製（外框矩形，純函式部分可測）
-  pick.ts           滴管的目標字元選擇（純函式）
-  text.ts           文字工具：單行輸入框、即時預覽、畫布上的游標、確定／取消
-  caret.ts          文字游標的位置與大小計算（純函式）
-  brush.ts          筆寬計算（筆跡與預覽圓圈共用，純函式）
-  grid.ts           欄列數的範圍、夾限、緩衝尺寸、縮放與置中計算（純函式）
-  snap.ts           把疊層邊緣吸附到整數裝置像素（純函式）
-  platforms.ts      各平台字數上限、計數規則與建議尺寸推算（純函式）
-  history.ts        復原 / 重做
-  sample.ts         把起始畫面（DRAW / TEXT）畫進緩衝
-  sampleLayout.ts   起始畫面的版面（純函式：置中、等寬對齊）
-  font.ts           起始畫面用的 7×7 等寬點陣字
-  textGrid.ts       匯入用：把文字排成逐格的版面、字寬、裁切（純函式）
-  importText.ts     文字匯入：撐出格數、逐格把字元畫進緩衝
-  importImage.ts    圖片匯入：解碼並置中畫進緩衝
-  ui/               各面板與控制項：工具選取（tools.ts）、選色（colors.ts）、滴管（eyedropper.ts）、
-                    工具列（controls.ts）、匯出選單（copy.ts）、匯入選單與拖放／貼上（importMenu.ts）、
-                    畫布大小（canvasSize.ts）、平台（platform.ts）、小螢幕底部面板（sheet.ts）、
-                    按鈕組的滑動選取（segments.ts）、顯示／收起動效（reveal.ts）、提示訊息（toast.ts）、
-                    筆刷範圍圓圈（brush.ts）
-  styles/           tokens（主題色）/ base / brush / shell / controls / tray / overlays
+  main.ts           entry point: loads fonts and styles, initialises the modules, starts the draw loop
+  state.ts          shared mutable state (tool, mode, canvas size, conversion result)
+  types.ts          shared types such as Mode / Palette / Metrics
+  convert.ts        canvas pixels → one character per cell (pure, no DOM)
+  blocks.ts         rectangles of block characters (shades, quadrants, eighths) and their ink vectors (pure)
+  match.ts          matches each cell's 2×4 ink against candidate characters, builds braille candidates (pure)
+  glyphs.ts         glyph ink calibration (measured from the real font; clear the cache when the font or cell width changes)
+  charsets.ts       character sets used by the modes
+  color.ts          sRGB luminance and hex helpers (pure)
+  theme.ts          reads CSS variables
+  surface.ts        canvas / scratch layer, cell measurement, window resizing, the cells readout in the header
+  render.ts         draws the converted result on screen
+  paint.ts          paints the result as braille, blocks, dots or text (shared by the screen and the PNG)
+  png.ts            paints the result into a PNG (transparent, cropped to the content)
+  download.ts       file download
+  exportFile.ts     file names, types and the HTML document wrapper of each export format (pure)
+  export.ts         plain text / HTML / ANSI output (pure)
+  panels.ts         how much stage height the open panels take (so the canvas does not shrink with them)
+  draw.ts           pointer events: freehand strokes, dragged shapes (previewed over a restored base), text-tool clicks
+  shapes.ts         line, circle and rectangle drawing (outline rectangle; the pure parts are testable)
+  pick.ts           which character the eyedropper takes (pure)
+  text.ts           text tool: one-line editor, live preview, the caret on the canvas, confirm / cancel
+  caret.ts          position and size of the text caret (pure)
+  brush.ts          pen width (shared by strokes and the preview ring, pure)
+  grid.ts           column/row limits, clamping, buffer size, scaling and centring (pure)
+  snap.ts           snaps overlay edges to whole device pixels (pure)
+  platforms.ts      per-platform character limits, counting rules and suggested sizes (pure)
+  history.ts        undo / redo
+  sample.ts         paints the starter picture (DRAW / TEXT) into the buffer
+  sampleLayout.ts   layout of the starter picture (pure: centred, monospaced)
+  font.ts           7×7 monospaced bitmap font for the starter picture
+  textGrid.ts       for import: lays text out on cells, character widths, cropping (pure)
+  importText.ts     text import: sizes the grid, paints each character into the buffer
+  importImage.ts    image import: decodes and centres into the buffer
+  i18n/             translations: dictionaries (en.ts is the reference, zh-TW.ts, ja.ts), language detection (lang.ts, pure), t() (index.ts)
+  ui/               panels and controls: tool selection (tools.ts), colors (colors.ts), eyedropper (eyedropper.ts),
+                    toolbar (controls.ts), export menu (copy.ts), import menu with drag-and-drop and paste (importMenu.ts),
+                    canvas size (canvasSize.ts), platform (platform.ts; names and help text in platformText.ts),
+                    bottom sheet for small screens (sheet.ts), sliding selection of button groups (segments.ts),
+                    enter / exit motion (reveal.ts), toasts (toast.ts), brush ring (brush.ts)
+  styles/           tokens (theme colors) / base / brush / shell / controls / tray / overlays
 tests/
-  unit/             Node 環境：不碰 DOM 的純函式
-  browser/          真實 Chromium（Vitest browser mode + Playwright）：轉換、介面、匯入匯出、版面
-legacy/             重構前的單檔版本，僅供對照測試使用
+  unit/             Node: pure functions that never touch the DOM
+  browser/          real Chromium (Vitest browser mode + Playwright): conversion, interface, import and export, layout
+legacy/             the single-file version from before the refactor, only used by the parity test
 ```
 
-## 轉換流程
+## Conversion pipeline
 
-繪製的內容先畫進一個「繪圖緩衝」（`surface.ts` 的 `buf`），`convert.ts` 再把它轉成字元：
+What you draw goes into a drawing buffer (`buf` in `surface.ts`), and `convert.ts` turns it into characters:
 
-1. 每個儲存格（`cw × ch`，高約為寬的 2.05 倍）取 2×4 個分區的墨量。
-2. 依樣式挑字：點字樣式以固定門檻（灰階以 Bayer 抖動）決定每個點；方塊與混合樣式用 `match.ts` 比對每格的 2×4 墨量分佈與候選字的墨量，選誤差最小的；濃淡、圓點、中文、自訂依整格墨量挑；線段樣式依筆跡方向挑。
-3. 結果存進 `state.grid`、`state.gridCol`（顯示用顏色）與 `state.gridSrc`（當初畫的顏色，滴管讀這個）。
-4. `paint.ts` 把結果畫到螢幕，PNG 匯出共用同一份，所以匯出的圖就是看到的畫面。
+1. For every cell (`cw × ch`, the height about 2.05 times the width) it takes the ink in 2×4 zones.
+2. It picks a character by style: Braille uses a fixed threshold (Bayer dithering in gray) for each dot; Blocks and Mix use `match.ts` to compare the cell's 2×4 ink distribution with each candidate's and take the smallest error; Shade, Dots, CJK and Custom pick by the ink of the whole cell; Lines picks by the direction of the stroke.
+3. The result goes into `state.grid`, `state.gridCol` (the color to display) and `state.gridSrc` (the color it was drawn in, which the eyedropper reads).
+4. `paint.ts` draws the result on screen, and the PNG export shares it, so the exported picture is the picture you see.
 
-方塊與混合的調整參數集中在 `src/match.ts`：`BLANK_BELOW`（低於此墨量留白）、`BRAILLE_MIN`（點字最低墨量）、`TONE_WEIGHT`（整格濃度誤差的權重）。
+The tuning knobs for Blocks and Mix are in `src/match.ts`: `BLANK_BELOW` (below this ink the cell stays blank), `BRAILLE_MIN` (minimum ink for braille) and `TONE_WEIGHT` (weight of the whole-cell density error).
 
-混合樣式的字集包含方塊（`█ ▀ ▄ ▌ ▐` 與象限組合）、濃淡（`░ ▒ ▓`）、八分之一方塊與點字，不含 ASCII 符號；字形的墨量由字型實際繪出並量測（`glyphs.ts`）。方塊樣式只用方塊類字元，自繪矩形、不依賴字型。八分之一方塊只有「貼底」與「貼左」的長條，所以方塊樣式中段的細水平線會被換成最接近的字或留白。
+The Mix character set has blocks (`█ ▀ ▄ ▌ ▐` and quadrant combinations), shades (`░ ▒ ▓`), eighth-blocks and braille, and no ASCII symbols; the ink of each glyph is measured from the real font (`glyphs.ts`). Blocks only uses block characters, drawn as rectangles without depending on the font. Eighth-blocks only come as bars glued to the bottom or the left, so a thin horizontal line in the middle of a cell becomes the nearest character or a blank in the Blocks style.
 
-## 匯入
+## Import
 
-- 文字：`textGrid.ts` 的 `parseArt` 正規化換行與 tab、移除 ANSI 跳脫序列與零寬字元、依字寬（全形算兩格）排成逐格版面並裁到 200 × 100。`importText.ts` 把畫布設成固定格後逐格畫字：點字畫成比螢幕上略大的圓點（每個點的覆蓋率需明顯高於轉換門檻 0.28，往返才不會掉點）、方塊字元以 `blocks.ts` 的矩形畫、其餘用等寬字型 `fillText`。
-- 圖片：`importImage.ts` 以 `createImageBitmap`（依 EXIF 方向）解碼，用 `containRect` 置中等比縮放後畫進緩衝；解碼成功後才記錄復原步驟。
-- 匯入前一律先記錄復原快照（緩衝像素與格數設定一起），所以一次復原即可還原。
+- Text: `parseArt` in `textGrid.ts` normalises line breaks and tabs, removes ANSI escape sequences and zero-width characters, lays the text out on cells by character width (full-width counts two) and crops it to 200 × 100. `importText.ts` sets the canvas to that fixed grid and paints each character: braille as dots slightly larger than on screen (each dot must cover clearly more than the 0.28 conversion threshold so the round trip loses none), block characters as the rectangles from `blocks.ts`, everything else with `fillText` in the monospaced font.
+- Image: `importImage.ts` decodes with `createImageBitmap` (honouring EXIF orientation), scales it with `containRect` and centres it in the buffer; the undo step is only recorded once decoding has succeeded.
+- A snapshot (buffer pixels and the grid setting together) is recorded before any import, so a single undo restores everything.
 
-## 動效與版面
+## Motion and layout
 
-- `src/ui/reveal.ts` 用 Web Animations API 做進出動效：會推擠版面的區塊以高度滑動＋淡入（展開約 200 ms、收起約 150 ms），toast 由上方滑入，提示框由下方滑入，其餘淡入淡出。系統設定「減少動態效果」時完全不播放。
-- 收起時 `hidden` 屬性要等動畫結束才設定；判斷是否開啟請用 `isOpen()`，不要直接讀 `hidden`。
-- 面板打開時畫布不縮小也不被裁切：滿版模式下，畫布大小取「所有面板都收起時」的舞台高度（`panels.ts` 的 `panelExtra()`），面板只是蓋住畫布的下緣。滑動期間畫布維持原本的像素大小，結束後只在尺寸真的改變時才重新計算。
-- 單選按鈕組（`.seg`）與色票選取框的滑動選取由 `src/ui/segments.ts` 負責：監看 `aria-pressed`、量測被選取的按鈕，再移動一層疊在按鈕後面的反白底（`::before`／`::after`，CSS 過渡 200 ms）。疊層的邊緣用 `snap.ts` 吸附到整數裝置像素，與按鈕邊緣對齊；`::before`／`::after` 需要 `box-sizing: border-box`（`base.css`）。頁面載入與版面改變時直接就位、不播放。
-- 小螢幕：高度低於 700 px 時（`panels.ts` 的 `SHEET_QUERY`、`tray.css` 的 `@media (max-height: 699px)`），工具列成為固定在底部的面板（`src/ui/sheet.ts`）。收合時只露出把手與兩列常用控制，畫布在它上方；展開時蓋在畫布上，不改變畫布大小，所以此模式下 `panelExtra()` 回傳 0。收合時看不到的列以 `visibility: hidden` 排除在鍵盤與螢幕閱讀器之外。寬度 389 px 以下頂端兩列另有縮小的間距。
-- 文字工具編輯時，畫布上有一個閃爍的游標（`#textCaret`，CSS 無限動畫；位置與大小由 `caret.ts` 依字型量測：從高字母（`H d`）頂端到下伸字母（`g p`）底端，乘上目前縮放比例）。「減少動態效果」時不閃爍。
-- 測試用 `app.settle()`（等所有動畫結束）取代固定等待；無限動畫（游標閃爍）不會結束，`settle()` 與 `animations()` 會忽略它。
+- `src/ui/reveal.ts` uses the Web Animations API for enter and exit motion: blocks that push the layout slide their height and fade (about 200 ms to open, 150 ms to close), toasts slide in from above, bubbles from below, the rest fade. Nothing animates when the system asks for reduced motion.
+- When closing, the `hidden` attribute is only set after the animation ends; use `isOpen()` to find out whether something is open, not `hidden`.
+- An open panel does not shrink or crop the canvas: in Fit window mode the canvas takes the stage height it has with every panel closed (`panelExtra()` in `panels.ts`), and panels simply cover its lower edge. During the motion the canvas keeps its pixel size and is only recomputed afterwards if its size really changed.
+- The sliding selection of single-choice groups (`.seg`) and of the color frame is done by `src/ui/segments.ts`: it watches `aria-pressed`, measures the selected button and moves a highlight layer behind the buttons (`::before` / `::after`, CSS transition of 200 ms). The layer's edges are snapped to whole device pixels with `snap.ts` so they line up with the buttons' edges; `::before` and `::after` need `box-sizing: border-box` (`base.css`). The layer is placed directly on page load and on layout changes.
+- Small screens: below 700 px of height (`SHEET_QUERY` in `panels.ts`, `@media (max-height: 699px)` in `tray.css`) the toolbar becomes a bottom sheet fixed to the bottom (`src/ui/sheet.ts`). Collapsed it shows the handle and the two most-used rows with the canvas above it; expanded it covers the canvas without changing its size, which is why `panelExtra()` returns 0 in this mode. Rows that are not visible when collapsed are hidden with `visibility: hidden`, so they are out of reach of the keyboard and screen readers. Below 420 px of width the rows that never wrap (the top rows and the action row) use less spacing and padding, and English and Japanese labels, which are longer than the Chinese ones, use smaller type on narrow screens.
+- While you type with the text tool there is a blinking caret on the canvas (`#textCaret`, an endless CSS animation; its position and size come from `caret.ts`, measured from the font: from the top of tall letters (`H d`) to the bottom of hanging ones (`g p`), times the current scale). It does not blink when the system asks for reduced motion.
+- Tests use `app.settle()` (wait until every animation has finished) instead of fixed waits; endless animations (the caret's blink) never finish, so `settle()` and `animations()` ignore them.
 
-## 目標平台資料
+## Translations
 
-字數上限、計數規則與建議尺寸都在 `src/platforms.ts`，規則變動時只需更新那裡。建議尺寸的算法：欄數約為列數的 2 倍，取最大且「每格都是權重最高的字元加上換行」也不超過上限的列數，列數最多 16、欄數最多 32。各平台聊天泡泡的換行寬度、顯示字型與行數沒有可信資料，因此沒有建模。
+- **Dictionaries**: `src/i18n/en.ts` is the reference for every string (a flat key → string object, `{name}` marks a value `t()` fills in); `zh-TW.ts` and `ja.ts` are typed `Record<Key, string>`, so a missing key fails to compile. Brand names (Text Draw, X, Telegram…), export file names and the starter picture (DRAW / TEXT) are not translated.
+- **Choosing the language** (`lang.ts`, pure): `?lang=` > the saved choice (`text-draw.lang` in `localStorage`) > the browser's languages (the first supported one in the user's order; any `zh*` is Traditional Chinese) > English.
+- **Static text**: elements in `index.html` carry `data-i18n="key"` (text), `data-i18n-html="key"` (paragraphs with `<br />`) and `data-i18n-attr="title:key;aria-label:key"` (attributes); `applyStatic()` writes them at start-up and whenever the language changes. The HTML file holds the **English** defaults (so the interface is never empty before JavaScript runs), and a browser test checks that every default equals `en.ts`, so the two cannot drift apart.
+- **Dynamic text**: every message in the code goes through `t()`; things rendered once (the platform list and its help, the used/limit readout, the canvas-size summary, the import and export button labels, the cells readout, the sheet's aria-label) listen for the `langchange` event and render again. A toast is transient and uses the language at the moment it appears.
+- **Fonts**: the Japanese interface uses Noto Sans JP (Japanese glyph forms); Traditional Chinese and English keep Noto Sans TC (`:root:lang(ja)` in `tokens.css`).
+- **Adding a language**: 1. add `src/i18n/<id>.ts` (typed like `ja.ts`); 2. add it to `Lang`, `LANGS`, `HTML_LANG` and `fromTag()` in `lang.ts` and to `DICTS` in `index.ts`; 3. add an `<option>` to `#lang` in `index.html`; 4. if the script needs a font, import the matching `@fontsource` package and add a font stack in `tokens.css`; 5. run `pnpm test`: the dictionary tests check that the keys and `{placeholders}` match exactly, and `responsive.test.ts` checks that every language fits every common screen size without sideways overflow.
+- **Tests**: the browser tests open the page with `?lang=zh-TW` by default (the `lang` option of `harness.ts`), so they do not depend on the browser language of the machine they run on and the existing Chinese assertions stay valid.
 
-## 測試
+## Target platform data
+
+Character limits, counting rules and suggested sizes are in `src/platforms.ts` (the help text is in each language's dictionary as `platform.<id>.rule`); when a rule changes, only that needs updating. Suggested sizes: the columns are about twice the rows, taking the largest number of rows for which "every cell holds the heaviest character, plus a line break" still fits the limit, at most 16 rows and 32 columns. How wide each platform's chat bubbles are, which font they use and how many lines they show have no reliable data, so none of it is modelled.
+
+## Tests
 
 ```bash
-pnpm test:unit      # 單元測試（Node）
-pnpm test:browser   # 瀏覽器測試
+pnpm test:unit      # unit tests (Node)
+pnpm test:browser   # browser tests
 ```
 
-- 單元測試涵蓋不碰 DOM 的純函式（轉換比對、匯出、平台計數、格數運算、文字版面、吸附……）。
-- 瀏覽器測試把頁面載入 iframe，用合成的指標事件操作，驗證轉換、匯出匯入、動效、版面（`tests/browser/responsive.test.ts` 檢查 320×568 到 1366×768 與橫放手機等尺寸沒有橫向溢出）等。剪貼簿與下載由 `harness.ts` 攔截。
-- **對照測試**（`tests/browser/parity.test.ts`）：同時載入 `legacy/index.html`（重構前的單檔版本）與目前版本，餵入相同的筆跡與操作，比對 6 種樣式（點字、濃淡、圓點、中文、線段、自訂）× 色彩／灰階 × 亮／暗主題 × 3 種複製格式與畫布像素，用來確認重構沒有改變行為。刻意不同之處由測試補償：起始畫面不同，所以兩邊先清空；混合與方塊的字集已重新設計，不在比對範圍；舊版 HTML 一律用標準空白，所以比對前把新版的 U+00A0、U+2800 換回空白；舊版的擦除是筆寬的 2.5 倍；舊版頁面沒有 `lang`，測試為它補上與目前頁面相同的 `lang`。若之後刻意改變行為，更新或移除 `legacy/` 與這個測試即可。
+- Unit tests cover the pure functions that never touch the DOM (matching, export, platform counting, grid maths, text layout, snapping, language detection, dictionaries…).
+- Browser tests load the page in an iframe and drive it with synthetic pointer events to check conversion, export and import, motion and layout (`tests/browser/responsive.test.ts` checks that every language fits screens from 320×568 to 1366×768, including phones on their side, without sideways overflow). The clipboard and downloads are intercepted by `harness.ts`.
+- **Parity test** (`tests/browser/parity.test.ts`): loads `legacy/index.html` (the single-file version from before the refactor) and the current version, feeds both the same strokes and actions, and compares 6 styles (Braille, Shade, Dots, CJK, Lines, Custom) × color / gray × light / dark theme × the 3 copy formats and the canvas pixels, to confirm that the refactor did not change behaviour. The test compensates for the differences that are on purpose: the starter pictures differ, so both start by clearing; the Mix and Blocks character sets were redesigned and are out of scope; the old HTML always used standard spaces, so U+00A0 and U+2800 are turned back into spaces before comparing; the old eraser was 2.5 times the pen width; the legacy page has no `lang`, so the test gives it the same `lang` as the current page. If behaviour is changed on purpose later, update or remove `legacy/` and this test.
 
-## 已知問題
+## Known issues
 
-- 圓點樣式最淡的一級（`·`）轉換後會被「折回 ASCII」成 `.`，畫面上因此不會畫出該級圓點，輸出也是 `.`（`src/convert.ts` 結尾的 `·` → `.` 取代作用在所有走到該處的樣式）。
-- 自訂字元若包含 `·`，也會被同一段取代成 `.`。
+- The lightest dot of the Dots style (`·`) is folded back to ASCII `.` after conversion, so that level of dot is never drawn and the output is `.` as well (the `·` → `.` replacement at the end of `src/convert.ts` applies to every style that reaches it).
+- Custom characters that contain `·` are replaced by the same code.

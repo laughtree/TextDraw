@@ -1,135 +1,142 @@
 # Text Draw
 
-在畫布上畫圖，即時轉成**字元畫**；也能匯入圖片或現成的 ASCII art，再複製成純文字、HTML、ANSI 或圖片，貼到各平台前先預覽效果。全部在瀏覽器內執行，不會上傳任何資料。
+**English** | [繁體中文](README.zh-TW.md)
 
-**線上使用：<https://laughtree.github.io/TextDraw/>**
+Draw on a canvas and watch it turn into **text art** as you go. You can also import an image or existing ASCII art, then copy the result as plain text, HTML, ANSI or an image, and preview how it looks before posting it to a platform. Everything runs in your browser; nothing is uploaded.
 
-## 功能
+**Try it online: <https://laughtree.github.io/TextDraw/>**
 
-- 即時轉換：點字、混合、方塊、濃淡、圓點、中文、線段、自訂字元，共 8 種樣式，彩色或灰階
-- 筆、直線、圓、方、文字、滴管；繪製與擦除、復原與重做
-- 匯入圖片或 ASCII art（貼上文字、讀檔、拖放、貼上剪貼簿圖片）
-- 匯出純文字、HTML、ANSI、PNG 圖片；可選空白替代字元，避免聊天軟體吃掉空白
-- 內建 X、Telegram、Discord、Mastodon、Threads、LINE、Bluesky、Instagram 的字數上限與建議尺寸
-- 亮色與暗色主題（跟隨系統），手機與小螢幕也能操作
+## Features
 
-## 使用說明
+- Live conversion with 8 styles (Braille, Mix, Blocks, Shade, Dots, CJK, Lines, Custom characters), in color or gray
+- Pen, line, circle, rectangle, text and an eyedropper; draw and erase; undo and redo
+- Import an image or ASCII art (paste text, open a file, drag and drop, or paste an image from the clipboard)
+- Export plain text, HTML, ANSI or a PNG image, with a choice of space characters so chat apps do not swallow your spaces
+- Built-in character limits and suggested sizes for X, Telegram, Discord, Mastodon, Threads, LINE, Bluesky and Instagram
+- Interface in English, Traditional Chinese and Japanese, chosen from your browser language or from a switcher
+- Light and dark themes (following your system), and it works on phones and small screens
 
-### 基本操作
+## How to use it
 
-1. 在畫布上拖曳作畫，畫的內容會即時轉成字元顯示；畫布上的圓圈就是筆刷範圍。
-2. 用**色票**選筆的顏色，最右的調色盤可自選顏色。「色彩／灰階」切換顯示方式；「筆跡」開關可在字元下面墊一層淡淡的原始筆跡。
-3. 用**轉換樣式**決定用哪一類字元表現（見下表）。
-4. 用「**粗細**」調整筆的粗細；文字工具改用「字級」，滴管不用這兩項，這時粗細會變灰。
-5. 做錯了用「復原／重做」（`Ctrl+Z`／`Ctrl+Y`）；「清空」會清掉整個畫布，也可以復原。
+### The basics
 
-### 轉換樣式
+1. Drag on the canvas to draw; what you draw is converted to characters as you go. The circle on the canvas shows the size of the brush.
+2. Pick the pen color from the **swatches**; the palette on the right chooses any color. **Color / Gray** switches how the picture is shown, and the **Trace** switch puts a faint copy of your original strokes under the characters.
+3. Choose a **conversion style** to decide which kind of characters are used (see the table below).
+4. **Width** sets the stroke width. The text tool uses **Font size** instead, and the eyedropper uses neither, so Width turns gray for both.
+5. Use **Undo / Redo** (`Ctrl+Z` / `Ctrl+Y`) to fix mistakes. **Clear** empties the whole canvas (and can also be undone).
 
-| 樣式 | 用到的字元                                                                     |
-| ---- | ------------------------------------------------------------------------------ |
-| 點字 | 點字字元（預設）；線條細緻，適合大部分圖案                                     |
-| 混合 | 方塊、濃淡、八分之一方塊與點字的組合，自動挑最接近的字；細線與淡邊緣會變成點字 |
-| 方塊 | 方塊類字元（`█ ▀ ▄ ▌ ▐`、象限、`░ ▒ ▓`、八分之一方塊），不含點字               |
-| 濃淡 | ASCII 符號（` .:-=+*#%@`），由淡到濃                                           |
-| 圓點 | 大小不同的圓點（`· • ●`）                                                      |
-| 中文 | 筆畫由少到多的中文字（`丶一二三工王田目回国國圖龍鬱龘`）                       |
-| 線段 | `- \| / \` 等線段字元，依筆跡方向挑選                                          |
-| 自訂 | 你自己輸入的字元，由淡到濃排列                                                 |
+### Conversion styles
 
-方塊類的八分之一方塊只有「貼底」與「貼左」的長條，所以「方塊」樣式下中段的細水平線會被換成最接近的字或留白；「混合」樣式會改用點字表現。
+| Style   | Characters used                                                                                        |
+| ------- | ------------------------------------------------------------------------------------------------------ |
+| Braille | Braille characters (the default); fine lines, good for most pictures                                   |
+| Mix     | A mix of blocks, shades, eighth-blocks and braille, picking the closest one; thin lines become braille |
+| Blocks  | Block characters (`█ ▀ ▄ ▌ ▐`, quadrants, `░ ▒ ▓`, eighth-blocks), no braille                          |
+| Shade   | ASCII symbols (` .:-=+*#%@`), from light to dark                                                       |
+| Dots    | Dots of different sizes (`· • ●`)                                                                      |
+| CJK     | Chinese characters with more and more strokes (`丶一二三工王田目回国國圖龍鬱龘`)                       |
+| Lines   | Line characters such as `- \| / \`, chosen by the direction of the stroke                              |
+| Custom  | Characters you type yourself, from light to dark                                                       |
 
-### 工具
+Eighth-blocks only come as bars glued to the bottom or the left, so in the **Blocks** style a thin horizontal line in the middle of a cell becomes the nearest character or a blank; **Mix** uses braille for it instead.
 
-- **筆**：自由繪畫（預設）。
-- **直線、圓、方**：按住拖曳、放開確定，拖曳中會即時預覽，按 `Esc` 取消。方是以兩個對角拖出的矩形，圓是這個矩形的內切橢圓；只畫外框，線寬就是「粗細」。
-- **文字**：點一下畫布，輸入文字後按 `Enter` 確定、`Esc` 取消；用「字級」滑桿（12–160 px）調整大小。點下去的位置會出現一條閃爍的游標，高度就是文字的大小，拖動滑桿時它會跟著變大變小，可以先看出字會多大；輸入或用方向鍵移動時，游標也會跟著走。文字會畫進畫布，之後和其他筆跡一樣被轉成字元，可擦除與復原。字小時轉成字元後不易辨認（點字比方塊清楚），請放大字級。
-- **繪製／擦除**：擦除套用在所有形狀上，範圍與繪製一樣大，所以畫一個圓再用擦除拖出同一個圓剛好抵銷。
-- **滴管**：點到畫布上的字元就吸取它當初畫的顏色（灰階模式下也一樣），吸完回到原本的工具。點到空白格時會吸附到旁邊最近的字元；附近沒有字元時不動作。
+### Tools
 
-### 畫布大小
+- **Pen**: freehand drawing (the default).
+- **Line, circle, rectangle**: press and drag, release to confirm; a live preview shows while dragging and `Esc` cancels. The rectangle is drawn from two opposite corners and the circle is the ellipse inside it; only the outline is drawn, with the line width set by **Width**.
+- **Text**: click the canvas, type, then press `Enter` to confirm or `Esc` to cancel; set the size with the **Font size** slider (12–160 px). A blinking caret appears where you clicked and is as tall as the text will be, so you can see how big it will get; it follows your typing and moves with the arrow keys, and grows or shrinks as you drag the slider. The text is drawn into the canvas and converted to characters like any other stroke, so it can be erased and undone. Small text is hard to read once converted (braille is clearer than blocks), so use a large size.
+- **Draw / Erase**: erasing works with every shape and is as wide as drawing, so drawing a circle and erasing the same circle cancel out exactly.
+- **Eyedropper**: click a character on the canvas to pick the color it was drawn in (even in Gray mode), then it returns to the tool you were using. Clicking a blank cell picks the nearest character; if there is none nearby, nothing happens.
 
-一開始是「**小尺寸通用**」20 × 12，大小剛好放得進聊天室的訊息泡泡。點「畫布大小」展開可以改：選其他平台套用它的建議尺寸；直接輸入欄 8–200、列 4–100；或打開「**滿版**」讓畫布跟著視窗大小。固定格數時畫布會縮放置中；改變格數時已畫內容會跟著縮放，也可以復原。格數越大，重繪越慢。收合時的摘要列會顯示目前是哪個平台的尺寸（例如「小尺寸通用 · 20 × 12」）。
+### Canvas size
 
-### 目標平台
+It starts as **Small general size** (20 × 12), small enough to fit a chat bubble. Open **Canvas size** to change it: choose another platform to apply its suggested size, type columns 8–200 and rows 4–100, or turn on **Fit window** to make the canvas follow the window. A fixed-size canvas is scaled to fit; changing the size rescales what you drew, and can be undone. The bigger the grid, the slower the redraw. While the panel is collapsed, its summary line shows which size you are on (for example "Small general size · 20 × 12").
 
-「畫布大小」裡的「平台」選單會套用該平台的建議尺寸，並顯示「已用／上限」字數，超出時以紅字提醒，複製純文字時也會提示。計算的是複製純文字時實際會貼出去的內容（含空白替代與 ``` 區塊）。點旁邊的 ⓘ 可看該平台的規則與資料來源。
+### Target platforms
 
-| 平台                  | 上限                             | 計法                                                                                              | 建議尺寸         | 來源                                                                                                                                                             |
-| --------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 小尺寸通用            | —                                | —                                                                                                 | 20 × 12          | 通用估計，非任何平台的官方數字                                                                                                                                   |
-| X                     | 280                              | 加權：U+0000–10FF、2000–200D、2010–201F、2032–2037 算 1，其餘（含方塊、點字、中文）算 2；換行算 1 | 16 × 8           | 官方：[X 計數說明](https://docs.x.com/fundamentals/counting-characters)、[twitter-text 設定](https://github.com/twitter/twitter-text/blob/master/config/v3.json) |
-| Telegram              | 4096                             | 字元                                                                                              | 32 × 16          | 官方：[Bot API](https://core.telegram.org/bots/api)                                                                                                              |
-| Discord               | 2000                             | 字元                                                                                              | 32 × 16          | 官方說明文：[support.discord.com](https://support.discord.com/hc/en-us/articles/33694251638295)；Nitro 的 4000 未納入                                            |
-| Mastodon              | 500                              | 字元                                                                                              | 30 × 15          | 官方：[發文說明](https://docs.joinmastodon.org/user/posting/)；500 是預設值，各站可調整                                                                          |
-| Instagram 說明 / 簡介 | 2200 / 150                       | 字元                                                                                              | 32 × 16 / 16 × 8 | 第三方來源，未經官方確認                                                                                                                                         |
-| Threads               | 500                              | 字元                                                                                              | 30 × 15          | 第三方來源，未經官方確認                                                                                                                                         |
-| LINE                  | 5000                             | UTF-16 單位                                                                                       | 32 × 16          | 第三方來源，未經官方確認                                                                                                                                         |
-| Bluesky               | 300 graphemes（另有 3000 bytes） | grapheme                                                                                          | 20 × 12          | 第三方來源，未經官方確認                                                                                                                                         |
+The **Platform** list applies a platform's suggested size and shows "Used / limit" for the characters, in red when over; copying plain text also warns you. It counts what would actually be pasted (with your space substitute and ``` block). The ⓘ next to it shows the platform's rule and where the numbers come from.
 
-建議尺寸是估計值：欄數約為列數的 2 倍，取「每格都是權重最高的字元」也不超過上限的最大尺寸，最多 32 × 16。各平台聊天泡泡的換行寬度、顯示字型與可顯示行數沒有可信資料，因此沒有納入；實際貼出後仍可能折行，請在目標平台實測後調整。平台規則可能變動，請以官方公告為準。
+| Platform                | Limit                          | Counted as                                                                                                                           | Suggested size   | Source                                                                                                                                                                           |
+| ----------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Small general size      | —                              | —                                                                                                                                    | 20 × 12          | A general estimate, not an official figure for any platform                                                                                                                      |
+| X                       | 280                            | Weighted: U+0000–10FF, 2000–200D, 2010–201F, 2032–2037 count 1; everything else (blocks, braille, CJK) counts 2; line breaks count 1 | 16 × 8           | Official: [X character counting](https://docs.x.com/fundamentals/counting-characters), [twitter-text config](https://github.com/twitter/twitter-text/blob/master/config/v3.json) |
+| Telegram                | 4096                           | Characters                                                                                                                           | 32 × 16          | Official: [Bot API](https://core.telegram.org/bots/api)                                                                                                                          |
+| Discord                 | 2000                           | Characters                                                                                                                           | 32 × 16          | Official help article: [support.discord.com](https://support.discord.com/hc/en-us/articles/33694251638295); Nitro's 4000 is not used                                             |
+| Mastodon                | 500                            | Characters                                                                                                                           | 30 × 15          | Official: [posting](https://docs.joinmastodon.org/user/posting/); 500 is the default and each server can change it                                                               |
+| Instagram caption / bio | 2200 / 150                     | Characters                                                                                                                           | 32 × 16 / 16 × 8 | Third-party source, not confirmed officially                                                                                                                                     |
+| Threads                 | 500                            | Characters                                                                                                                           | 30 × 15          | Third-party source, not confirmed officially                                                                                                                                     |
+| LINE                    | 5000                           | UTF-16 units                                                                                                                         | 32 × 16          | Third-party source, not confirmed officially                                                                                                                                     |
+| Bluesky                 | 300 graphemes (and 3000 bytes) | Graphemes                                                                                                                            | 20 × 12          | Third-party source, not confirmed officially                                                                                                                                     |
 
-### 匯入
+Suggested sizes are estimates: the columns are about twice the rows, taking the largest size that still fits the limit if every cell held the heaviest character, up to 32 × 16. There is no reliable data on how wide chat bubbles are, which font they use or how many lines they show, so none of that is modelled; the real post may still wrap, so test on your target platform and adjust. Platform rules can change; the official announcements are authoritative.
 
-點「匯入」，選「圖片」或「文字」；匯入會**取代整個畫布**，可以復原。面板展開時按鈕會變成「取消」，再按一次即可收起。
+### Import
 
-- **圖片**（上限 25 MB）：完整置中畫在目前畫布上，保留原色，格數不變，再依目前的轉換樣式轉成字元。不透明的照片會填滿每一格，在彩色調色盤下大多變成大片實心字元。
-- **文字**（上限 2 MB）：貼上現成的 ASCII art，或讀入 `.txt`、`.ans` 檔。畫布會自動變成文字的大小（最長一行 × 行數，不小於 8 × 4，超過 200 × 100 的部分會被裁掉並提示），文字用目前筆的顏色畫在各自的格子裡。匯入點字或方塊字元後，以點字或方塊樣式匯出會得到原本的字。全形字（中文、全形符號、emoji）佔兩格；ANSI 色碼會被忽略，不會還原顏色。
-- 也可以直接把圖片或文字檔**拖進畫布**，或按 `Ctrl+V` 貼上剪貼簿裡的圖片。焦點在輸入欄位時，貼上維持一般行為。
+Click **Import** and choose **Image** or **Text**. Importing **replaces the whole canvas** and can be undone. While the panel is open the button reads **Cancel**; click it again to close the panel.
 
-### 匯出
+- **Image** (up to 25 MB): placed whole and centered on the current canvas, keeping its colors and the grid size, then converted with the current style. An opaque photo fills every cell, so with color it mostly becomes large areas of solid characters.
+- **Text** (up to 2 MB): paste existing ASCII art, or open a `.txt` or `.ans` file. The canvas becomes the size of the text (longest line × number of lines, at least 8 × 4; anything beyond 200 × 100 is cut off, with a message), and the text is drawn in the current pen color, each character in its own cell. If you import braille or block characters and export in the Braille or Blocks style, you get the original text back. Full-width characters (CJK, full-width symbols, emoji) take two cells; ANSI color codes are ignored, so colors are not restored.
+- You can also **drag an image or a text file onto the canvas**, or press `Ctrl+V` to paste an image from the clipboard. While a text field has the focus, pasting works as usual.
 
-點「匯出」（展開時按鈕變成「取消」），先選格式，再按「複製」或「下載」：
+### Export
 
-| 格式   | 複製                                                              | 下載             |
-| ------ | ----------------------------------------------------------------- | ---------------- |
-| 純文字 | 可直接貼到聊天室或社群；受「空白替代」與 ``` 區塊影響，會檢查字數 | `text-draw.txt`  |
-| HTML   | 帶顏色的 `<pre>` 原始碼                                           | `text-draw.html` |
-| ANSI   | 帶色彩跳脫序列的文字，適合終端機                                  | `text-draw.ans`  |
-| 圖片   | PNG 放進剪貼簿                                                    | `text-draw.png`  |
+Click **Export** (the button reads **Cancel** while it is open), choose a format, then **Copy** or **Download**:
 
-**空白替代**：聊天軟體常會吃掉空白，可選「標準」（U+0020）、「不斷行」（U+00A0）或「點字」（U+2800）空白來代替畫面上的空白格；行尾的空白會被修剪，行首與中間的保留，所以縮排不會被吃掉。點旁邊的 ⓘ 有各選項的說明。
+| Format     | Copy                                                                                                                         | Download         |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| Plain text | Ready to paste into a chat or social post; affected by the space substitute and the ``` block, and checked against the limit | `text-draw.txt`  |
+| HTML       | Source of a colored `<pre>`                                                                                                  | `text-draw.html` |
+| ANSI       | Text with color escape sequences, good for terminals                                                                         | `text-draw.ans`  |
+| Image      | A PNG on the clipboard                                                                                                       | `text-draw.png`  |
 
-**圖片（PNG）**：背景透明，裁到有字元的範圍外加一格留白，2 倍解析度；畫法與螢幕上看到的完全一致。墨色依目前主題決定（亮色主題為深色墨、暗色主題為淺色墨），彩色筆跡維持原色，所以暗色主題匯出的圖貼到白底平台會看不清楚。
+**Space substitute**: chat apps often swallow spaces, so you can choose **Standard** (U+0020), **No-break** (U+00A0) or **Braille** (U+2800) spaces for the blank cells. Trailing spaces on a line are trimmed while leading and inner ones are kept, so indentation survives. The ⓘ next to it explains each option.
 
-### 手機與小螢幕
+**Image (PNG)**: transparent background, cropped to the characters plus one cell of margin, at 2× resolution, drawn exactly as you see it on screen. The ink color follows the current theme (dark ink on the light theme, light ink on the dark theme) while colored strokes keep their color, so an image exported on the dark theme can be hard to read on a white background.
 
-螢幕高度不到 700 px（例如手機橫放）時，工具列會縮成底部面板：點把手或往上滑展開，點畫布、按 `Esc` 或往下滑收合。
+### Interface language
 
-### 瀏覽器支援與已知限制
+The interface is available in **English, Traditional Chinese and Japanese**. On the first visit it follows your browser's language (any Chinese shows Traditional Chinese, any other language shows English). The language menu at the right of the header switches it by hand, and your choice is remembered in the browser. You can also add `?lang=ja`, `?lang=zh-TW` or `?lang=en` to the address; that takes priority over the remembered choice.
 
-- 主要在 Chromium 系瀏覽器測試。複製圖片需要 HTTPS 與支援 `ClipboardItem` 的瀏覽器；不支援或被拒絕時會改為下載。
-- 點字、方塊與空白替代字元在不同平台、不同字型下的寬度不同，貼到聊天軟體後版面可能與畫布有落差（行首縮排、空白寬度、整體比例）。想完全照畫面分享請用「圖片」，或在目標平台實測後選最合適的空白替代。
-- 圓點樣式最淡的一級（`·`）與自訂字元中的 `·` 會被換成 `.`。
+### Phones and small screens
 
-## 本機開發
+When the screen is less than 700 px tall (a phone on its side, for example) the toolbar becomes a bottom sheet: tap the handle or swipe up to open it, tap the canvas, press `Esc` or swipe down to close it.
 
-需要 Node ≥ 22 與 [pnpm](https://pnpm.io/)。
+### Browser support and known limits
+
+- Mainly tested in Chromium-based browsers. Copying an image needs HTTPS and a browser with `ClipboardItem`; if it is not supported or is refused, the image is downloaded instead.
+- Braille, block and space characters have different widths on different platforms and in different fonts, so a pasted result may not line up with the canvas (indentation, the width of spaces, the overall proportions). To share exactly what you see, use **Image**, or test on the target platform and pick the space substitute that works best.
+- The lightest dot of the Dots style (`·`) and any `·` in Custom characters are replaced by `.`.
+
+## Development
+
+Needs Node ≥ 22 and [pnpm](https://pnpm.io/).
 
 ```bash
 pnpm install
-pnpm exec playwright install chromium   # 只有跑瀏覽器測試才需要
-pnpm dev            # 開發伺服器（Vite）
-pnpm build          # 型別檢查 + 打包到 dist/
-pnpm preview        # 預覽打包結果
-pnpm test           # 全部測試
-pnpm test:unit      # 單元測試（Node）
-pnpm test:browser   # 瀏覽器測試（Vitest browser mode + Playwright Chromium）
+pnpm exec playwright install chromium   # only needed for the browser tests
+pnpm dev            # development server (Vite)
+pnpm build          # type check + bundle into dist/
+pnpm preview        # preview the bundle
+pnpm test           # all tests
+pnpm test:unit      # unit tests (Node)
+pnpm test:browser   # browser tests (Vitest browser mode + Playwright Chromium)
 pnpm lint           # ESLint
 pnpm format         # Prettier
 pnpm typecheck      # tsc --noEmit
 ```
 
-若瀏覽器測試因缺少系統函式庫而無法啟動（WSL 常見），執行 `sudo ./node_modules/.bin/playwright install-deps chromium`。
+If the browser tests cannot start because system libraries are missing (common on WSL), run `sudo ./node_modules/.bin/playwright install-deps chromium`.
 
-專案結構、轉換流程與測試說明見 [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)。
+See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for the project structure, the conversion pipeline, translations and tests.
 
-## 授權
+## License
 
-[MIT License](LICENSE)，Copyright (c) 2026 laughtree。
+[MIT License](LICENSE), Copyright (c) 2026 laughtree.
 
-### 字型
+### Fonts
 
-介面與畫布使用以下字型（透過 [`@fontsource`](https://fontsource.org/) 隨網站一併打包），皆為 [SIL Open Font License 1.1](https://openfontlicense.org/)：
+The interface and canvas use these fonts (bundled with the site through [`@fontsource`](https://fontsource.org/)), all under the [SIL Open Font License 1.1](https://openfontlicense.org/):
 
 - [IBM Plex Mono / IBM Plex Sans](https://github.com/IBM/plex)
-- [Noto Sans TC](https://github.com/notofonts/noto-cjk)
+- [Noto Sans TC / Noto Sans JP](https://github.com/notofonts/noto-cjk)
